@@ -1,0 +1,166 @@
+{
+  "$schema": "../../schemas/structure.json",
+  "initialState": "settings",
+  "views": {
+    "settings": {
+      "component": {
+        "type": "tabs",
+        "props": {
+          "name": "emailLogTab",
+          "defaultValue": "emails"
+        },
+        "children": [
+          {
+            "type": "tab",
+            "props": {
+              "value": "emails",
+              "label": "{{messages.tabs.emails}}"
+            },
+            "children": [
+              {
+                "type": "entries",
+                "props": {
+                  "name": "emailLogEmails",
+                  "entry": "emailLogEmails",
+                  "label": "{{messages.emails.label}}",
+                  "description": "{{messages.emails.description}}",
+                  "surface": "inline",
+                  "search": true,
+                  "filters": true,
+                  "pagination": {
+                    "pageSize": 10,
+                    "pageSizeOptions": [10, 20, 50]
+                  },
+                  "sorting": {
+                    "default": {
+                      "key": "sentAt",
+                      "direction": "desc"
+                    }
+                  },
+                  "columns": [
+                    {
+                      "key": "sentAtLabel",
+                      "label": "{{messages.columns.time}}"
+                    },
+                    {
+                      "key": "statusLabel",
+                      "label": "{{messages.columns.status}}"
+                    },
+                    {
+                      "key": "toPreview",
+                      "label": "{{messages.columns.to}}"
+                    },
+                    {
+                      "key": "subject",
+                      "label": "{{messages.columns.subject}}"
+                    },
+                    {
+                      "key": "attachmentsCount",
+                      "label": "{{messages.columns.attachments}}"
+                    }
+                  ],
+                  "bulkActions": [
+                    {
+                      "action": "resendSelected",
+                      "label": "{{messages.emails.resend}}",
+                      "variant": "outline"
+                    }
+                  ],
+                  "editDrawer": {
+                    "side": "right",
+                    "size": "lg",
+                    "description": "{{messages.emails.drawerDescription}}"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "type": "tab",
+            "props": {
+              "value": "settings",
+              "label": "{{messages.tabs.settings}}"
+            },
+            "children": [
+              {
+                "type": "field",
+                "props": {
+                  "label": "{{messages.capture.label}}",
+                  "description": "{{messages.capture.description}}",
+                  "value": "email-log-capture"
+                },
+                "enable": {
+                  "setting": "enabled",
+                  "label": "{{messages.capture.enabled}}"
+                },
+                "children": [
+                  {
+                    "type": "switch",
+                    "props": {
+                      "name": "logBody",
+                      "label": "{{messages.capture.logBody}}"
+                    }
+                  },
+                  {
+                    "type": "switch",
+                    "props": {
+                      "name": "redactRecipients",
+                      "label": "{{messages.capture.redactRecipients}}"
+                    }
+                  },
+                  {
+                    "type": "number-input",
+                    "props": {
+                      "name": "retentionDays",
+                      "label": "{{messages.capture.retentionDays}}",
+                      "min": 1,
+                      "max": 365
+                    }
+                  },
+                  {
+                    "type": "button",
+                    "props": {
+                      "label": "{{messages.capture.sendTestEmail}}",
+                      "variant": "outline"
+                    },
+                    "events": {
+                      "click": {
+                        "event": "emailLog.sendTestEmail"
+                      }
+                    }
+                  },
+                  {
+                    "type": "preview",
+                    "props": {
+                      "name": "emailTestSend",
+                      "text": "{{messages.capture.testEmailResult}}"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "states": [
+    {
+      "name": "settings",
+      "view": "settings",
+      "transitions": [
+        {
+          "event": "emailLog.sendTestEmail",
+          "target": "settings",
+          "effects": [
+            {
+              "type": "action",
+              "action": "sendTestEmail",
+              "target": "emailTestSend"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "$schema": "../../schemas/meta.json",
+  "name": "onumia/application-passwords",
+  "category": "security",
+  "tags": ["application-passwords", "security", "audit"],
+  "label": "Application Passwords",
+  "description": "Site-wide audit and revocation controls for WordPress Application Passwords.",
+  "version": "0.1.0"
+}

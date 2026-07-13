@@ -1,0 +1,9 @@
+{
+  "$schema": "../../schemas/meta.json",
+  "name": "onumia/post-revisions",
+  "category": "content",
+  "tags": ["revisions", "content", "cleanup"],
+  "label": "Post Revisions",
+  "description": "Per-post-type revision retention rules with scheduled pruning.",
+  "version": "0.1.0"
+}

@@ -1,0 +1,24 @@
+{
+  "tabs": {
+    "logins": "Logins",
+    "settings": "Settings"
+  },
+  "logins": {
+    "label": "Login activity",
+    "description": "Successful and failed login attempts recorded for audit review.",
+    "drawerDescription": "Review the complete login event payload."
+  },
+  "logging": {
+    "label": "Logging",
+    "description": "Capture login events and prune old audit rows.",
+    "enabled": "Enable",
+    "retentionDays": "Retention days"
+  },
+  "columns": {
+    "time": "Time",
+    "user": "User",
+    "result": "Result",
+    "ipHash": "IP hash",
+    "userAgent": "User agent"
+  }
+}

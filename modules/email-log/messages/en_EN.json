@@ -1,0 +1,29 @@
+{
+  "tabs": {
+    "emails": "Emails",
+    "settings": "Settings"
+  },
+  "emails": {
+    "label": "Email history",
+    "description": "Sent and failed WordPress mail payloads recorded for delivery audit.",
+    "drawerDescription": "Review recipients, headers, body content, attachments, and delivery errors.",
+    "resend": "Resend"
+  },
+  "capture": {
+    "label": "Capture",
+    "description": "Capture WordPress mail payloads and prune old email rows.",
+    "enabled": "Enable",
+    "logBody": "Log body",
+    "redactRecipients": "Redact recipients",
+    "retentionDays": "Retention days",
+    "sendTestEmail": "Send test email",
+    "testEmailResult": "Last test email result"
+  },
+  "columns": {
+    "time": "Time",
+    "status": "Status",
+    "to": "To",
+    "subject": "Subject",
+    "attachments": "Attachments"
+  }
+}

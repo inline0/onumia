@@ -1,0 +1,168 @@
+{
+  "$schema": "../../schemas/structure.json",
+  "initialState": "settings",
+  "views": {
+    "settings": {
+      "component": {
+        "type": "tabs",
+        "props": {
+          "name": "activityLogTab",
+          "defaultValue": "events"
+        },
+        "children": [
+          {
+            "type": "tab",
+            "props": {
+              "value": "events",
+              "label": "{{messages.tabs.events}}"
+            },
+            "children": [
+              {
+                "type": "entries",
+                "props": {
+                  "name": "activityLogEvents",
+                  "entry": "activityLogEvents",
+                  "label": "{{messages.events.label}}",
+                  "description": "{{messages.events.description}}",
+                  "surface": "inline",
+                  "search": true,
+                  "filters": true,
+                  "pagination": {
+                    "pageSize": 10,
+                    "pageSizeOptions": [10, 20, 50]
+                  },
+                  "sorting": {
+                    "default": {
+                      "key": "occurredAt",
+                      "direction": "desc"
+                    }
+                  },
+                  "columns": [
+                    {
+                      "key": "occurredAtLabel",
+                      "label": "{{messages.columns.time}}"
+                    },
+                    {
+                      "key": "groupLabel",
+                      "label": "{{messages.columns.group}}"
+                    },
+                    {
+                      "key": "eventLabel",
+                      "label": "{{messages.columns.event}}"
+                    },
+                    {
+                      "key": "actor",
+                      "label": "{{messages.columns.actor}}"
+                    },
+                    {
+                      "key": "target",
+                      "label": "{{messages.columns.target}}"
+                    },
+                    {
+                      "key": "summary",
+                      "label": "{{messages.columns.summary}}"
+                    }
+                  ],
+                  "editDrawer": {
+                    "side": "right",
+                    "size": "lg",
+                    "description": "{{messages.events.drawerDescription}}"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "type": "tab",
+            "props": {
+              "value": "settings",
+              "label": "{{messages.tabs.settings}}"
+            },
+            "children": [
+              {
+                "type": "field",
+                "props": {
+                  "label": "{{messages.tracking.label}}",
+                  "description": "{{messages.tracking.description}}",
+                  "value": "activity-log-tracking"
+                },
+                "enable": {
+                  "setting": "enabled",
+                  "label": "{{messages.tracking.enabled}}"
+                },
+                "children": [
+                  {
+                    "type": "checkbox-group",
+                    "props": {
+                      "name": "trackedGroups",
+                      "label": "{{messages.tracking.trackedGroups}}",
+                      "options": [
+                        {
+                          "value": "auth",
+                          "label": "{{messages.groups.auth}}"
+                        },
+                        {
+                          "value": "posts",
+                          "label": "{{messages.groups.posts}}"
+                        },
+                        {
+                          "value": "users",
+                          "label": "{{messages.groups.users}}"
+                        },
+                        {
+                          "value": "plugins",
+                          "label": "{{messages.groups.plugins}}"
+                        },
+                        {
+                          "value": "themes",
+                          "label": "{{messages.groups.themes}}"
+                        },
+                        {
+                          "value": "options",
+                          "label": "{{messages.groups.options}}"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "type": "number-input",
+                    "props": {
+                      "name": "retentionDays",
+                      "label": "{{messages.tracking.retentionDays}}",
+                      "min": 1,
+                      "max": 365
+                    }
+                  },
+                  {
+                    "type": "repeater",
+                    "props": {
+                      "name": "trackedOptions",
+                      "label": "{{messages.tracking.trackedOptions}}",
+                      "itemLabel": "{{messages.tracking.trackedOption}}"
+                    },
+                    "children": [
+                      {
+                        "type": "text-input",
+                        "props": {
+                          "name": "value",
+                          "label": "{{messages.tracking.trackedOption}}"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "states": [
+    {
+      "name": "settings",
+      "view": "settings",
+      "transitions": []
+    }
+  ]
+}

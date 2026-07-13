@@ -1,0 +1,264 @@
+{
+  "$schema": "../../schemas/structure.json",
+  "data": {
+    "scheduledEvents": {
+      "source": "module.scheduledEvents"
+    }
+  },
+  "initialState": "settings",
+  "views": {
+    "settings": {
+      "component": {
+        "type": "tabs",
+        "props": {
+          "name": "cronEventsTab",
+          "defaultValue": "scheduled"
+        },
+        "children": [
+          {
+            "type": "tab",
+            "props": {
+              "value": "scheduled",
+              "label": "{{messages.tabs.scheduled}}"
+            },
+            "children": [
+              {
+                "type": "table",
+                "props": {
+                  "name": "cronEventsScheduled",
+                  "label": "{{messages.scheduled.label}}",
+                  "description": "{{messages.scheduled.description}}",
+                  "surface": "inline",
+                  "data": {
+                    "ref": "data.scheduledEvents.items"
+                  },
+                  "search": true,
+                  "pagination": {
+                    "pageSize": 10,
+                    "pageSizeOptions": [10, 20, 50]
+                  },
+                  "sorting": {
+                    "default": {
+                      "key": "nextRun",
+                      "direction": "asc"
+                    }
+                  },
+                  "columns": [
+                    {
+                      "key": "hook",
+                      "label": "{{messages.columns.hook}}"
+                    },
+                    {
+                      "key": "nextRunLabel",
+                      "label": "{{messages.columns.nextRun}}"
+                    },
+                    {
+                      "key": "recurrenceLabel",
+                      "label": "{{messages.columns.recurrence}}"
+                    },
+                    {
+                      "key": "argsPreview",
+                      "label": "{{messages.columns.args}}"
+                    }
+                  ],
+                  "rowActions": [
+                    {
+                      "event": "cronEvents.runScheduled",
+                      "label": "{{messages.scheduled.runNow}}",
+                      "variant": "outline"
+                    },
+                    {
+                      "event": "cronEvents.unscheduleScheduled",
+                      "label": "{{messages.scheduled.unschedule}}",
+                      "variant": "destructive",
+                      "confirm": "{{messages.scheduled.unscheduleConfirm}}",
+                      "enabledWhen": {
+                        "op": "settingEnabled",
+                        "value": {
+                          "ref": "item.unscheduleAllowed"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "type": "tab",
+            "props": {
+              "value": "run-log",
+              "label": "{{messages.tabs.runLog}}"
+            },
+            "children": [
+              {
+                "type": "entries",
+                "props": {
+                  "name": "cronEventsRuns",
+                  "entry": "runLog",
+                  "label": "{{messages.runLog.label}}",
+                  "description": "{{messages.runLog.description}}",
+                  "surface": "inline",
+                  "search": true,
+                  "filters": true,
+                  "pagination": {
+                    "pageSize": 10,
+                    "pageSizeOptions": [10, 20, 50]
+                  },
+                  "sorting": {
+                    "default": {
+                      "key": "startedAt",
+                      "direction": "desc"
+                    }
+                  },
+                  "columns": [
+                    {
+                      "key": "startedAtLabel",
+                      "label": "{{messages.columns.started}}"
+                    },
+                    {
+                      "key": "hook",
+                      "label": "{{messages.columns.hook}}"
+                    },
+                    {
+                      "key": "statusLabel",
+                      "label": "{{messages.columns.status}}"
+                    },
+                    {
+                      "key": "durationLabel",
+                      "label": "{{messages.columns.duration}}"
+                    },
+                    {
+                      "key": "errorPreview",
+                      "label": "{{messages.columns.error}}"
+                    }
+                  ],
+                  "editDrawer": {
+                    "side": "right",
+                    "size": "md",
+                    "description": "{{messages.runLog.drawerDescription}}"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "type": "tab",
+            "props": {
+              "value": "settings",
+              "label": "{{messages.tabs.settings}}"
+            },
+            "children": [
+              {
+                "type": "field",
+                "props": {
+                  "label": "{{messages.settings.tracking.label}}",
+                  "description": "{{messages.settings.tracking.description}}",
+                  "value": "cron-events-tracking"
+                },
+                "enable": {
+                  "setting": "enabled",
+                  "label": "{{messages.settings.tracking.enabled}}"
+                },
+                "children": [
+                  {
+                    "type": "number-input",
+                    "props": {
+                      "name": "stuckThresholdSeconds",
+                      "label": "{{messages.settings.tracking.stuckThresholdSeconds}}",
+                      "min": 1,
+                      "max": 3600
+                    }
+                  },
+                  {
+                    "type": "number-input",
+                    "props": {
+                      "name": "retentionDays",
+                      "label": "{{messages.settings.tracking.retentionDays}}",
+                      "min": 1,
+                      "max": 365
+                    }
+                  },
+                  {
+                    "type": "switch",
+                    "props": {
+                      "name": "allowUnschedule",
+                      "label": "{{messages.settings.tracking.allowUnschedule}}"
+                    }
+                  },
+                  {
+                    "type": "repeater",
+                    "props": {
+                      "name": "unscheduleAllowlist",
+                      "label": "{{messages.settings.tracking.unscheduleAllowlist}}",
+                      "itemLabel": "{{item.value}}",
+                      "addLabel": "{{messages.settings.tracking.addHookPattern}}"
+                    },
+                    "children": [
+                      {
+                        "type": "text-input",
+                        "props": {
+                          "name": "value",
+                          "label": "{{messages.settings.tracking.hookPattern}}"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "states": [
+    {
+      "name": "settings",
+      "view": "settings",
+      "transitions": [
+        {
+          "event": "cronEvents.runScheduled",
+          "target": "settings",
+          "effects": [
+            {
+              "type": "action",
+              "action": "runNow",
+              "target": "cronRun",
+              "payload": {
+                "hook": {
+                  "ref": "event.row.hook"
+                },
+                "args": {
+                  "ref": "event.row.args"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "event": "cronEvents.unscheduleScheduled",
+          "target": "settings",
+          "effects": [
+            {
+              "type": "action",
+              "action": "unscheduleEvent",
+              "target": "cronUnschedule",
+              "payload": {
+                "hook": {
+                  "ref": "event.row.hook"
+                },
+                "timestamp": {
+                  "ref": "event.row.nextRun"
+                },
+                "args": {
+                  "ref": "event.row.args"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

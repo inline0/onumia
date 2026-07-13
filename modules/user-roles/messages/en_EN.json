@@ -1,0 +1,20 @@
+{
+  "title": "User roles",
+  "description": "Create custom roles and manage capability overrides for registered roles.",
+  "roles": {
+    "label": "Roles",
+    "description": "WP-registered roles merged with Onumia custom roles and overrides.",
+    "new": "New role"
+  },
+  "columns": {
+    "label": "Role",
+    "slug": "Slug",
+    "origin": "Origin",
+    "users": "Users",
+    "capabilities": "Capabilities"
+  },
+  "drawer": {
+    "createDescription": "Create a Onumia-owned WordPress role.",
+    "editDescription": "Adjust the role label and capability map."
+  }
+}

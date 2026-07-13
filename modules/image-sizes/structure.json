@@ -1,0 +1,278 @@
+{
+  "$schema": "../../schemas/structure.json",
+  "initialState": "settings",
+  "views": {
+    "settings": {
+      "component": {
+        "type": "tabs",
+        "props": {
+          "name": "imageSizesTab",
+          "defaultValue": "sizes"
+        },
+        "children": [
+          {
+            "type": "tab",
+            "props": {
+              "value": "sizes",
+              "label": "{{messages.tabs.sizes}}"
+            },
+            "children": [
+              {
+                "type": "entries",
+                "props": {
+                  "name": "imageSizesEntries",
+                  "entry": "sizes",
+                  "label": "{{messages.sizes.label}}",
+                  "description": "{{messages.sizes.description}}",
+                  "newLabel": "{{messages.sizes.new}}",
+                  "surface": "inline",
+                  "search": true,
+                  "filters": true,
+                  "delete": {
+                    "label": "{{messages.sizes.deleteLabel}}",
+                    "confirmTitle": "{{messages.sizes.deleteTitle}}",
+                    "confirmDescription": "{{messages.sizes.deleteDescription}}",
+                    "confirmLabel": "{{messages.sizes.deleteConfirm}}"
+                  },
+                  "pagination": {
+                    "pageSize": 10,
+                    "pageSizeOptions": [10, 20, 50]
+                  },
+                  "sorting": {
+                    "default": {
+                      "key": "name",
+                      "direction": "asc"
+                    }
+                  },
+                  "columns": [
+                    {
+                      "key": "name",
+                      "label": "{{messages.columns.name}}"
+                    },
+                    {
+                      "key": "width",
+                      "label": "{{messages.columns.width}}"
+                    },
+                    {
+                      "key": "height",
+                      "label": "{{messages.columns.height}}"
+                    },
+                    {
+                      "key": "cropModeLabel",
+                      "label": "{{messages.columns.cropMode}}"
+                    },
+                    {
+                      "key": "originLabel",
+                      "label": "{{messages.columns.origin}}"
+                    }
+                  ],
+                  "createDrawer": {
+                    "side": "right",
+                    "size": "md",
+                    "description": "{{messages.sizes.drawerCreateDescription}}"
+                  },
+                  "editDrawer": {
+                    "side": "right",
+                    "size": "md",
+                    "description": "{{messages.sizes.drawerEditDescription}}"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "type": "tab",
+            "props": {
+              "value": "regenerate",
+              "label": "{{messages.tabs.regenerate}}"
+            },
+            "children": [
+              {
+                "type": "field",
+                "props": {
+                  "label": "{{messages.regenerate.label}}",
+                  "description": "{{messages.regenerate.description}}",
+                  "value": "image-sizes-regenerate"
+                },
+                "children": [
+                  {
+                    "type": "select",
+                    "props": {
+                      "name": "regenerate.sizeNames",
+                      "label": "{{messages.regenerate.sizes}}",
+                      "multiple": true,
+                      "optionsSource": {
+                        "source": "module.sizeOptions"
+                      }
+                    }
+                  },
+                  {
+                    "type": "select",
+                    "props": {
+                      "name": "regenerate.postTypes",
+                      "label": "{{messages.regenerate.postTypes}}",
+                      "multiple": true,
+                      "optionsSource": {
+                        "source": "wp.post.types"
+                      }
+                    }
+                  },
+                  {
+                    "type": "switch",
+                    "props": {
+                      "name": "regenerate.skipExisting",
+                      "label": "{{messages.regenerate.skipExisting}}"
+                    }
+                  },
+                  {
+                    "type": "number-input",
+                    "props": {
+                      "name": "regenerate.batchSize",
+                      "label": "{{messages.regenerate.batchSize}}",
+                      "min": 1,
+                      "max": 100
+                    }
+                  },
+                  {
+                    "type": "button",
+                    "props": {
+                      "label": "{{messages.regenerate.start}}",
+                      "variant": "outline"
+                    },
+                    "events": {
+                      "click": {
+                        "event": "imageSizes.startRegeneration"
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "type": "field",
+                "props": {
+                  "label": "{{messages.regenerate.statusLabel}}",
+                  "description": "{{messages.regenerate.statusDescription}}",
+                  "value": "image-sizes-status"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "props": {
+                      "label": "{{messages.regenerate.status}}",
+                      "value": "{{settings.regenerate.job.status}}"
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "props": {
+                      "label": "{{messages.regenerate.processed}}",
+                      "value": "{{settings.regenerate.job.processed}}"
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "props": {
+                      "label": "{{messages.regenerate.errors}}",
+                      "value": "{{settings.regenerate.job.errors}}"
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "props": {
+                      "label": "{{messages.regenerate.started}}",
+                      "value": "{{settings.regenerate.job.startedLabel}}"
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "props": {
+                      "label": "{{messages.regenerate.finished}}",
+                      "value": "{{settings.regenerate.job.finishedLabel}}"
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "tab",
+            "props": {
+              "value": "log",
+              "label": "{{messages.tabs.log}}"
+            },
+            "children": [
+              {
+                "type": "entries",
+                "props": {
+                  "name": "imageSizesRegenLog",
+                  "entry": "regenLog",
+                  "label": "{{messages.log.label}}",
+                  "description": "{{messages.log.description}}",
+                  "surface": "inline",
+                  "search": true,
+                  "filters": true,
+                  "pagination": {
+                    "pageSize": 10,
+                    "pageSizeOptions": [10, 20, 50]
+                  },
+                  "sorting": {
+                    "default": {
+                      "key": "startedAt",
+                      "direction": "desc"
+                    }
+                  },
+                  "columns": [
+                    {
+                      "key": "startedAtLabel",
+                      "label": "{{messages.columns.started}}"
+                    },
+                    {
+                      "key": "attachmentId",
+                      "label": "{{messages.columns.attachment}}"
+                    },
+                    {
+                      "key": "sizeName",
+                      "label": "{{messages.columns.size}}"
+                    },
+                    {
+                      "key": "statusLabel",
+                      "label": "{{messages.columns.status}}"
+                    },
+                    {
+                      "key": "errorPreview",
+                      "label": "{{messages.columns.error}}"
+                    }
+                  ],
+                  "editDrawer": {
+                    "side": "right",
+                    "size": "md",
+                    "description": "{{messages.log.drawerDescription}}"
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "states": [
+    {
+      "name": "settings",
+      "view": "settings",
+      "transitions": [
+        {
+          "event": "imageSizes.startRegeneration",
+          "target": "settings",
+          "effects": [
+            {
+              "type": "action",
+              "action": "startRegeneration",
+              "target": "imageSizesRegeneration"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "title": "Disable comments",
+  "description": "Disable or moderate comments by post type, visitor role, route, or post age.",
+  "enable": "Enable",
+  "rules": {
+    "label": "Rules",
+    "description": "First matching rule controls the comment policy.",
+    "new": "New rule",
+    "createDescription": "Create a rule that controls comments.",
+    "editDescription": "Adjust the match condition and comment policy."
+  },
+  "columns": {
+    "label": "Rule",
+    "enabled": "Enabled",
+    "matchType": "Match",
+    "pattern": "Pattern",
+    "policy": "Policy"
+  }
+}

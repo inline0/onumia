@@ -1,0 +1,33 @@
+{
+    "schemaVersion": 1,
+    "target": "onumia",
+    "product": "onumia",
+    "flavor": "free",
+    "plugin": {
+        "name": "Onumia",
+        "slug": "onumia",
+        "entryFile": "onumia.php",
+        "basename": "onumia/onumia.php",
+        "topLevelDirectory": "onumia",
+        "runtimeIdentity": "onumia",
+        "updateProduct": "onumia",
+        "versionFile": "version.php"
+    },
+    "data": {
+        "replacement": "preserve",
+        "deactivation": "preserve",
+        "uninstall": "remove-owned-data",
+        "preservedOptions": [
+            "onumia_chat_schema_version",
+            "onumia_module_secrets",
+            "onumia_module_site_settings",
+            "onumia_module_table_schema_checksum"
+        ],
+        "uninstallDeletesOptions": [
+            "onumia_chat_schema_version",
+            "onumia_module_secrets",
+            "onumia_module_site_settings",
+            "onumia_module_table_schema_checksum"
+        ]
+    }
+}

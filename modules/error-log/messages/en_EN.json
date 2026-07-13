@@ -1,0 +1,36 @@
+{
+  "tabs": {
+    "errors": "Errors",
+    "settings": "Settings"
+  },
+  "errors": {
+    "label": "Errors",
+    "description": "Read-only SQLite log grouped by severity, location, and message fingerprint.",
+    "drawerDescription": "Inspect the full error message, stack trace, request URL, and repeat counts."
+  },
+  "capture": {
+    "label": "Capture",
+    "description": "Runtime capture settings for PHP errors and WordPress deprecated notices.",
+    "enabled": "Enable",
+    "severityThreshold": "Severity threshold",
+    "captureDeprecated": "Capture deprecated notices",
+    "retentionDays": "Retention days",
+    "ignoredPatterns": "Ignored patterns",
+    "ignoredPatternItem": "Regex pattern",
+    "triggerTestError": "Trigger test warning",
+    "triggerTestErrorHelp": "Writes one intentional warning to confirm that error capture and table refresh are working.",
+    "testErrorResult": "Last test warning result"
+  },
+  "severities": {
+    "notice": "Notice",
+    "warning": "Warning",
+    "error": "Error"
+  },
+  "columns": {
+    "lastSeen": "Last seen",
+    "severity": "Severity",
+    "message": "Message",
+    "location": "Location",
+    "count": "Count"
+  }
+}

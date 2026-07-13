@@ -1,0 +1,350 @@
+{
+  "$schema": "../../schemas/structure.json",
+  "initialState": "settings",
+  "views": {
+    "settings": {
+      "component": {
+        "type": "tabs",
+        "props": {
+          "name": "databaseOptimizerTab",
+          "defaultValue": "run-now"
+        },
+        "children": [
+          {
+            "type": "tab",
+            "props": {
+              "value": "run-now",
+              "label": "{{messages.tabs.runNow}}"
+            },
+            "children": [
+              {
+                "type": "field",
+                "props": {
+                  "label": "{{messages.manual.label}}",
+                  "description": "{{messages.manual.description}}",
+                  "value": "database-optimizer-manual"
+                },
+                "children": [
+                  {
+                    "type": "button",
+                    "props": {
+                      "label": "{{messages.manual.runNow}}",
+                      "variant": "outline"
+                    },
+                    "events": {
+                      "click": {
+                        "event": "databaseOptimizer.runNow"
+                      }
+                    }
+                  },
+                  {
+                    "type": "preview",
+                    "props": {
+                      "name": "databaseOptimizerRun",
+                      "text": "{{messages.manual.status}}"
+                    }
+                  }
+                ]
+              },
+              {
+                "type": "entries",
+                "props": {
+                  "name": "databaseOptimizerSummary",
+                  "entry": "runSummary",
+                  "label": "{{messages.summary.label}}",
+                  "description": "{{messages.summary.description}}",
+                  "surface": "inline",
+                  "search": false,
+                  "filters": false,
+                  "pagination": {
+                    "pageSize": 10,
+                    "pageSizeOptions": [10, 20]
+                  },
+                  "sorting": {
+                    "default": {
+                      "key": "startedAt",
+                      "direction": "desc"
+                    }
+                  },
+                  "columns": [
+                    {
+                      "key": "taskLabel",
+                      "label": "{{messages.columns.task}}"
+                    },
+                    {
+                      "key": "statusLabel",
+                      "label": "{{messages.columns.status}}"
+                    },
+                    {
+                      "key": "itemsProcessed",
+                      "label": "{{messages.columns.processed}}"
+                    },
+                    {
+                      "key": "itemsRemoved",
+                      "label": "{{messages.columns.removed}}"
+                    },
+                    {
+                      "key": "durationLabel",
+                      "label": "{{messages.columns.duration}}"
+                    },
+                    {
+                      "key": "error",
+                      "label": "{{messages.columns.error}}"
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "type": "tab",
+            "props": {
+              "value": "run-log",
+              "label": "{{messages.tabs.runLog}}"
+            },
+            "children": [
+              {
+                "type": "entries",
+                "props": {
+                  "name": "databaseOptimizerRuns",
+                  "entry": "runs",
+                  "label": "{{messages.log.label}}",
+                  "description": "{{messages.log.description}}",
+                  "surface": "inline",
+                  "search": true,
+                  "filters": true,
+                  "pagination": {
+                    "pageSize": 10,
+                    "pageSizeOptions": [10, 20, 50]
+                  },
+                  "sorting": {
+                    "default": {
+                      "key": "startedAt",
+                      "direction": "desc"
+                    }
+                  },
+                  "columns": [
+                    {
+                      "key": "startedLabel",
+                      "label": "{{messages.columns.started}}"
+                    },
+                    {
+                      "key": "runId",
+                      "label": "{{messages.columns.run}}"
+                    },
+                    {
+                      "key": "taskLabel",
+                      "label": "{{messages.columns.task}}"
+                    },
+                    {
+                      "key": "statusLabel",
+                      "label": "{{messages.columns.status}}"
+                    },
+                    {
+                      "key": "itemsRemoved",
+                      "label": "{{messages.columns.removed}}"
+                    }
+                  ],
+                  "editDrawer": {
+                    "side": "right",
+                    "size": "md",
+                    "description": "{{messages.log.drawerDescription}}"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "type": "tab",
+            "props": {
+              "value": "settings",
+              "label": "{{messages.tabs.settings}}"
+            },
+            "children": [
+              {
+                "type": "field",
+                "props": {
+                  "label": "{{messages.settings.schedule.label}}",
+                  "description": "{{messages.settings.schedule.description}}",
+                  "value": "database-optimizer-schedule"
+                },
+                "enable": {
+                  "setting": "schedule.enabled",
+                  "label": "{{messages.settings.schedule.enabled}}"
+                },
+                "children": [
+                  {
+                    "type": "select",
+                    "props": {
+                      "name": "schedule.frequency",
+                      "label": "{{messages.settings.schedule.frequency}}",
+                      "options": [
+                        {
+                          "value": "daily",
+                          "label": "{{messages.frequency.daily}}"
+                        },
+                        {
+                          "value": "weekly",
+                          "label": "{{messages.frequency.weekly}}"
+                        },
+                        {
+                          "value": "monthly",
+                          "label": "{{messages.frequency.monthly}}"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "type": "time-field",
+                    "props": {
+                      "name": "schedule.timeOfDay",
+                      "label": "{{messages.settings.schedule.timeOfDay}}"
+                    }
+                  }
+                ]
+              },
+              {
+                "type": "field",
+                "props": {
+                  "label": "{{messages.settings.tasks.label}}",
+                  "description": "{{messages.settings.tasks.description}}",
+                  "value": "database-optimizer-tasks"
+                },
+                "children": [
+                  {
+                    "type": "switch",
+                    "props": {
+                      "name": "tasks.optimizeTables",
+                      "label": "{{messages.settings.tasks.optimizeTables}}"
+                    }
+                  },
+                  {
+                    "type": "switch",
+                    "props": {
+                      "name": "tasks.expiredTransients",
+                      "label": "{{messages.settings.tasks.expiredTransients}}"
+                    }
+                  },
+                  {
+                    "type": "switch",
+                    "props": {
+                      "name": "tasks.orphanPostMeta",
+                      "label": "{{messages.settings.tasks.orphanPostMeta}}"
+                    }
+                  },
+                  {
+                    "type": "switch",
+                    "props": {
+                      "name": "tasks.orphanUserMeta",
+                      "label": "{{messages.settings.tasks.orphanUserMeta}}"
+                    }
+                  },
+                  {
+                    "type": "switch",
+                    "props": {
+                      "name": "tasks.orphanTermMeta",
+                      "label": "{{messages.settings.tasks.orphanTermMeta}}"
+                    }
+                  },
+                  {
+                    "type": "switch",
+                    "props": {
+                      "name": "tasks.spamComments",
+                      "label": "{{messages.settings.tasks.spamComments}}"
+                    }
+                  },
+                  {
+                    "type": "switch",
+                    "props": {
+                      "name": "tasks.trashComments",
+                      "label": "{{messages.settings.tasks.trashComments}}"
+                    }
+                  },
+                  {
+                    "type": "switch",
+                    "props": {
+                      "name": "tasks.trashPosts",
+                      "label": "{{messages.settings.tasks.trashPosts}}"
+                    }
+                  },
+                  {
+                    "type": "switch",
+                    "props": {
+                      "name": "tasks.autodraftPosts",
+                      "label": "{{messages.settings.tasks.autodraftPosts}}"
+                    }
+                  }
+                ]
+              },
+              {
+                "type": "field",
+                "props": {
+                  "label": "{{messages.settings.thresholds.label}}",
+                  "description": "{{messages.settings.thresholds.description}}",
+                  "value": "database-optimizer-thresholds"
+                },
+                "children": [
+                  {
+                    "type": "number-input",
+                    "props": {
+                      "name": "thresholds.spamCommentsDays",
+                      "label": "{{messages.settings.thresholds.spamCommentsDays}}",
+                      "min": 1,
+                      "max": 365
+                    }
+                  },
+                  {
+                    "type": "number-input",
+                    "props": {
+                      "name": "thresholds.trashCommentsDays",
+                      "label": "{{messages.settings.thresholds.trashCommentsDays}}",
+                      "min": 1,
+                      "max": 365
+                    }
+                  },
+                  {
+                    "type": "number-input",
+                    "props": {
+                      "name": "thresholds.trashPostsDays",
+                      "label": "{{messages.settings.thresholds.trashPostsDays}}",
+                      "min": 1,
+                      "max": 365
+                    }
+                  },
+                  {
+                    "type": "number-input",
+                    "props": {
+                      "name": "thresholds.autodraftPostsDays",
+                      "label": "{{messages.settings.thresholds.autodraftPostsDays}}",
+                      "min": 1,
+                      "max": 365
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "states": [
+    {
+      "name": "settings",
+      "view": "settings",
+      "transitions": [
+        {
+          "event": "databaseOptimizer.runNow",
+          "target": "settings",
+          "effects": [
+            {
+              "type": "action",
+              "action": "runNow",
+              "target": "databaseOptimizerRun"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

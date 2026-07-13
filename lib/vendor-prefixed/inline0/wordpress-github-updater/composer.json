@@ -1,0 +1,15 @@
+{
+    "name": "inline0\/wordpress-github-updater",
+    "description": "Reusable signed GitHub Releases updater for WordPress plugins.",
+    "type": "library",
+    "license": "GPL-2.0-or-later",
+    "require": {
+        "php": "^8.2",
+        "yahnis-elsts\/plugin-update-checker": "^5.7"
+    },
+    "autoload": {
+        "psr-4": {
+            "Onumia\\Lib\\Inline0\\WordPressGitHubUpdater\\": "src\/"
+        }
+    }
+}

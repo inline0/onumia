@@ -1,0 +1,37 @@
+{
+  "tabs": {
+    "pending": "Pending",
+    "settings": "Settings"
+  },
+  "pending": {
+    "label": "Pending users",
+    "description": "Registrations held by Onumia until an admin approves or rejects them.",
+    "empty": "No pending users.",
+    "approve": "Approve",
+    "approveSelected": "Approve selected",
+    "reject": "Reject",
+    "rejectSelected": "Reject selected",
+    "rejectTitle": "Reject selected users?",
+    "rejectDescription": "Selected registrations will be marked rejected or deleted depending on the rejection setting.",
+    "rejectConfirm": "Reject",
+    "drawerDescription": "Inspect the pending registration before deciding."
+  },
+  "approval": {
+    "label": "Approval",
+    "description": "Registration approval policy and notification behavior.",
+    "enabled": "Enable",
+    "defaultRole": "Default role on approval",
+    "autoDomains": "Auto-approve email domains",
+    "autoDomain": "Domain",
+    "notifyApproval": "Notify user on approval",
+    "notifyRejection": "Notify user on rejection",
+    "deleteOnRejection": "Delete user on rejection",
+    "notifyAdmin": "Notify admin of new pending registration"
+  },
+  "columns": {
+    "username": "Username",
+    "email": "Email",
+    "registered": "Registered",
+    "requestedRole": "Requested role"
+  }
+}

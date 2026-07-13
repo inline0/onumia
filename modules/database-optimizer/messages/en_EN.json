@@ -1,0 +1,67 @@
+{
+  "tabs": {
+    "runNow": "Run now",
+    "runLog": "Run log",
+    "settings": "Settings"
+  },
+  "manual": {
+    "label": "Manual run",
+    "description": "Run every enabled cleanup task immediately.",
+    "runNow": "Run optimization now",
+    "status": "Last manual run result"
+  },
+  "summary": {
+    "label": "Last run summary",
+    "description": "Per-task results from the latest optimizer run."
+  },
+  "log": {
+    "label": "Run log",
+    "description": "Historical optimizer task results stored in the module runtime table.",
+    "drawerDescription": "Inspect the task result captured during this optimizer run."
+  },
+  "settings": {
+    "schedule": {
+      "label": "Schedule",
+      "description": "Configure automatic optimizer runs.",
+      "enabled": "Enable scheduled runs",
+      "frequency": "Frequency",
+      "timeOfDay": "Time of day"
+    },
+    "tasks": {
+      "label": "Tasks",
+      "description": "Choose the cleanup tasks that are allowed to run.",
+      "optimizeTables": "Optimize myisam tables",
+      "expiredTransients": "Expired transients",
+      "orphanPostMeta": "Orphan post meta",
+      "orphanUserMeta": "Orphan user meta",
+      "orphanTermMeta": "Orphan term meta",
+      "spamComments": "Spam comments",
+      "trashComments": "Trash comments",
+      "trashPosts": "Trash posts",
+      "autodraftPosts": "Auto-draft posts"
+    },
+    "thresholds": {
+      "label": "Age thresholds",
+      "description": "Only remove aged comments and posts beyond these limits.",
+      "spamCommentsDays": "Spam comments older than days",
+      "trashCommentsDays": "Trash comments older than days",
+      "trashPostsDays": "Trash posts older than days",
+      "autodraftPostsDays": "Auto-drafts older than days"
+    }
+  },
+  "frequency": {
+    "daily": "Daily",
+    "weekly": "Weekly",
+    "monthly": "Monthly"
+  },
+  "columns": {
+    "run": "Run",
+    "started": "Started",
+    "task": "Task",
+    "status": "Status",
+    "processed": "Processed",
+    "removed": "Removed",
+    "duration": "Duration",
+    "error": "Error"
+  }
+}

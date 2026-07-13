@@ -1,0 +1,9 @@
+{
+  "$schema": "../../schemas/meta.json",
+  "name": "onumia/login-activity",
+  "category": "security",
+  "tags": ["login", "audit", "security"],
+  "label": "Login Activity",
+  "description": "Records successful and failed login attempts in a module-owned SQLite table for audit review.",
+  "version": "0.1.0"
+}

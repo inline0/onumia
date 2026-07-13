@@ -1,0 +1,9 @@
+{
+  "$schema": "../../schemas/meta.json",
+  "name": "onumia/user-roles",
+  "category": "users",
+  "tags": ["users", "roles", "capabilities"],
+  "label": "User Roles",
+  "description": "Creates custom roles and manages role capabilities.",
+  "version": "0.1.0"
+}

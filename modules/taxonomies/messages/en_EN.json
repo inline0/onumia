@@ -1,0 +1,21 @@
+{
+  "title": "Taxonomies",
+  "description": "Manage WordPress taxonomies from one computed table.",
+  "table": {
+    "label": "Taxonomies",
+    "description": "Built-in, external, overridden, and Onumia-owned taxonomies.",
+    "new": "New taxonomy"
+  },
+  "columns": {
+    "label": "Label",
+    "slug": "Slug",
+    "origin": "Origin",
+    "hierarchical": "Hierarchical",
+    "objectTypes": "Object types",
+    "public": "Public"
+  },
+  "drawer": {
+    "createDescription": "Register a new Onumia-owned custom taxonomy.",
+    "editDescription": "Adjust labels and safely mutable taxonomy arguments."
+  }
+}

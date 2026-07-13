@@ -1,0 +1,303 @@
+{
+  "$schema": "../../schemas/structure.json",
+  "initialState": "settings",
+  "views": {
+    "settings": {
+      "component": {
+        "type": "tabs",
+        "props": {
+          "name": "inactiveUsersTab",
+          "defaultValue": "inactive"
+        },
+        "children": [
+          {
+            "type": "tab",
+            "props": {
+              "value": "inactive",
+              "label": "{{messages.tabs.inactive}}"
+            },
+            "children": [
+              {
+                "type": "entries",
+                "props": {
+                  "name": "inactiveUsersEntries",
+                  "entry": "inactiveUsers",
+                  "label": "{{messages.inactive.label}}",
+                  "description": "{{messages.inactive.description}}",
+                  "emptyMessage": "{{messages.inactive.empty}}",
+                  "surface": "inline",
+                  "search": true,
+                  "filters": true,
+                  "pagination": {
+                    "pageSize": 10,
+                    "pageSizeOptions": [10, 20, 50]
+                  },
+                  "sorting": {
+                    "default": {
+                      "key": "daysInactive",
+                      "direction": "desc"
+                    }
+                  },
+                  "columns": [
+                    {
+                      "key": "userLogin",
+                      "label": "{{messages.columns.user}}"
+                    },
+                    {
+                      "key": "roleLabel",
+                      "label": "{{messages.columns.role}}"
+                    },
+                    {
+                      "key": "lastActivityLabel",
+                      "label": "{{messages.columns.lastActivity}}"
+                    },
+                    {
+                      "key": "daysInactive",
+                      "label": "{{messages.columns.daysInactive}}"
+                    },
+                    {
+                      "key": "statusLabel",
+                      "label": "{{messages.columns.status}}"
+                    }
+                  ],
+                  "rowActions": [
+                    {
+                      "action": "exemptUsers",
+                      "label": "{{messages.inactive.exempt}}",
+                      "variant": "outline"
+                    }
+                  ],
+                  "editDrawer": {
+                    "side": "right",
+                    "size": "md",
+                    "description": "{{messages.inactive.drawerDescription}}"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "type": "tab",
+            "props": {
+              "value": "audit",
+              "label": "{{messages.tabs.audit}}"
+            },
+            "children": [
+              {
+                "type": "entries",
+                "props": {
+                  "name": "inactiveUserActionsEntries",
+                  "entry": "inactiveUserActions",
+                  "label": "{{messages.audit.label}}",
+                  "description": "{{messages.audit.description}}",
+                  "surface": "inline",
+                  "search": true,
+                  "filters": true,
+                  "pagination": {
+                    "pageSize": 10,
+                    "pageSizeOptions": [10, 20, 50]
+                  },
+                  "sorting": {
+                    "default": {
+                      "key": "occurredAt",
+                      "direction": "desc"
+                    }
+                  },
+                  "columns": [
+                    {
+                      "key": "occurredAtLabel",
+                      "label": "{{messages.columns.time}}"
+                    },
+                    {
+                      "key": "userLogin",
+                      "label": "{{messages.columns.user}}"
+                    },
+                    {
+                      "key": "actionLabel",
+                      "label": "{{messages.columns.action}}"
+                    },
+                    {
+                      "key": "reason",
+                      "label": "{{messages.columns.reason}}"
+                    },
+                    {
+                      "key": "previousRoleLabel",
+                      "label": "{{messages.columns.previousRole}}"
+                    }
+                  ],
+                  "editDrawer": {
+                    "side": "right",
+                    "size": "lg",
+                    "description": "{{messages.audit.drawerDescription}}"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "type": "tab",
+            "props": {
+              "value": "settings",
+              "label": "{{messages.tabs.settings}}"
+            },
+            "children": [
+              {
+                "type": "field",
+                "props": {
+                  "label": "{{messages.policy.label}}",
+                  "description": "{{messages.policy.description}}",
+                  "value": "inactive-users-policy"
+                },
+                "enable": {
+                  "setting": "enabled",
+                  "label": "{{messages.policy.enabled}}"
+                },
+                "children": [
+                  {
+                    "type": "number-input",
+                    "props": {
+                      "name": "thresholdDays",
+                      "label": "{{messages.policy.thresholdDays}}",
+                      "min": 1,
+                      "max": 3650
+                    }
+                  },
+                  {
+                    "type": "select",
+                    "props": {
+                      "name": "action",
+                      "label": "{{messages.policy.action}}",
+                      "options": [
+                        {
+                          "value": "none",
+                          "label": "{{messages.actions.none}}"
+                        },
+                        {
+                          "value": "disable",
+                          "label": "{{messages.actions.disable}}"
+                        },
+                        {
+                          "value": "delete",
+                          "label": "{{messages.actions.delete}}"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "type": "number-input",
+                    "props": {
+                      "name": "gracePeriodDays",
+                      "label": "{{messages.policy.gracePeriodDays}}",
+                      "min": 0,
+                      "max": 365
+                    },
+                    "visibleWhen": {
+                      "op": "equals",
+                      "left": {
+                        "ref": "settings.action"
+                      },
+                      "right": "delete"
+                    }
+                  },
+                  {
+                    "type": "user-select",
+                    "props": {
+                      "name": "reassignContentTo",
+                      "label": "{{messages.policy.reassignContentTo}}",
+                      "valueType": "integer",
+                      "optionsSource": {
+                        "source": "wp.users"
+                      }
+                    },
+                    "visibleWhen": {
+                      "op": "equals",
+                      "left": {
+                        "ref": "settings.action"
+                      },
+                      "right": "delete"
+                    }
+                  },
+                  {
+                    "type": "button",
+                    "props": {
+                      "label": "{{messages.policy.runScanNow}}",
+                      "variant": "outline"
+                    },
+                    "events": {
+                      "click": {
+                        "event": "inactiveUsers.runScan"
+                      }
+                    }
+                  },
+                  {
+                    "type": "preview",
+                    "props": {
+                      "name": "inactiveUsersScan",
+                      "text": "{{messages.policy.scanResult}}"
+                    }
+                  }
+                ]
+              },
+              {
+                "type": "field",
+                "props": {
+                  "label": "{{messages.exclusions.label}}",
+                  "description": "{{messages.exclusions.description}}",
+                  "value": "inactive-users-exclusions"
+                },
+                "children": [
+                  {
+                    "type": "checkbox-group",
+                    "props": {
+                      "name": "excludeRoles",
+                      "label": "{{messages.exclusions.excludeRoles}}",
+                      "optionsSource": {
+                        "source": "wp.user.roles"
+                      }
+                    }
+                  },
+                  {
+                    "type": "repeater",
+                    "props": {
+                      "name": "exemptUserLogins",
+                      "label": "{{messages.exclusions.exemptLogins}}",
+                      "itemLabel": "{{messages.exclusions.exemptLogin}}"
+                    },
+                    "children": [
+                      {
+                        "type": "text-input",
+                        "props": {
+                          "name": "value",
+                          "label": "{{messages.exclusions.exemptLogin}}"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "states": [
+    {
+      "name": "settings",
+      "view": "settings",
+      "transitions": [
+        {
+          "event": "inactiveUsers.runScan",
+          "target": "settings",
+          "effects": [
+            {
+              "type": "action",
+              "action": "scanInactiveUsers",
+              "target": "inactiveUsersScan"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

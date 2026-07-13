@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://onumia.local/schemas/messages.json",
+  "title": "Onumia Messages",
+  "description": "Schema for a Onumia module messages file.",
+  "type": "object",
+  "additionalProperties": {
+    "oneOf": [
+      {
+        "type": "string"
+      },
+      {
+        "$ref": "#"
+      }
+    ]
+  }
+}

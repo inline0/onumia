@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://onumia.local/schemas/app.json",
+  "title": "Onumia App",
+  "description": "Schema for a Pro app.json file. App JSON uses the same declarative renderer model as structure.json and is validated by the same structure validator in this first contract pass.",
+  "type": "object",
+  "required": ["initialState", "views", "states"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "access": {
+      "type": "object",
+      "properties": {
+        "roles": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "userIds": {
+          "type": "array",
+          "items": { "type": "integer", "minimum": 1 },
+          "uniqueItems": true
+        },
+        "capabilities": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "initialState": { "type": "string", "minLength": 1 },
+    "params": { "type": "object" },
+    "forms": { "type": "object" },
+    "data": { "type": "object" },
+    "computed": { "type": "object" },
+    "collections": { "type": "object" },
+    "components": { "type": "object" },
+    "views": {
+      "type": "object",
+      "minProperties": 1
+    },
+    "states": {
+      "type": "array",
+      "minItems": 1
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://onumia.local/schemas/component.json",
+  "title": "Onumia Component",
+  "description": "Schema for a reusable component.json group.",
+  "allOf": [
+    {
+      "$ref": "structure.json#/$defs/componentDefinition"
+    },
+    {
+      "required": ["name", "label", "component"]
+    }
+  ]
+}

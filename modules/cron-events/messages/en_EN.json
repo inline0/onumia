@@ -1,0 +1,42 @@
+{
+  "tabs": {
+    "scheduled": "Scheduled",
+    "runLog": "Run log",
+    "settings": "Settings"
+  },
+  "scheduled": {
+    "label": "Scheduled events",
+    "description": "Live WP-Cron events currently registered on this site.",
+    "runNow": "Run now",
+    "unschedule": "Unschedule",
+    "unscheduleConfirm": "Unschedule this cron event? Only allowlisted hooks can be removed."
+  },
+  "runLog": {
+    "label": "Run log",
+    "description": "Recorded cron runs with duration, status, and captured errors.",
+    "drawerDescription": "Review the complete cron run record."
+  },
+  "settings": {
+    "tracking": {
+      "label": "Tracking",
+      "description": "Record cron runs, prune old rows, and guard risky unschedule actions.",
+      "enabled": "Enable",
+      "stuckThresholdSeconds": "Stuck threshold seconds",
+      "retentionDays": "Retention days",
+      "allowUnschedule": "Allow unschedule actions",
+      "unscheduleAllowlist": "Unschedule allowlist",
+      "addHookPattern": "Add hook pattern",
+      "hookPattern": "Hook pattern"
+    }
+  },
+  "columns": {
+    "hook": "Hook",
+    "nextRun": "Next run",
+    "recurrence": "Recurrence",
+    "args": "Args",
+    "started": "Started",
+    "status": "Status",
+    "duration": "Duration",
+    "error": "Error"
+  }
+}

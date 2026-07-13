@@ -1,0 +1,20 @@
+{
+    "name": "inline0/onumia",
+    "description": "Onumia modular WordPress control layer.",
+    "type": "wordpress-plugin",
+    "license": "AGPL-3.0-or-later",
+    "require": {
+        "php": "^8.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "Onumia\\": "src/"
+        },
+        "exclude-from-classmap": [
+            "/src/Pro/modules/software-licensing/"
+        ]
+    },
+    "config": {
+        "optimize-autoloader": true
+    }
+}

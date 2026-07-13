@@ -1,0 +1,9 @@
+{
+  "$schema": "../../schemas/meta.json",
+  "name": "onumia/taxonomies",
+  "category": "content",
+  "tags": ["taxonomies", "terms", "content"],
+  "label": "Taxonomies",
+  "description": "Lets operators edit existing taxonomies and register new ones.",
+  "version": "0.1.0"
+}

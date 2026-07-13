@@ -1,0 +1,9 @@
+{
+  "$schema": "../../schemas/meta.json",
+  "name": "onumia/email-log",
+  "category": "communication",
+  "tags": ["email", "mail", "audit"],
+  "label": "Email Log",
+  "description": "Captures WordPress mail payloads, failures, and resendable delivery history.",
+  "version": "0.1.0"
+}

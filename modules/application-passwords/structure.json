@@ -1,0 +1,184 @@
+{
+  "$schema": "../../schemas/structure.json",
+  "initialState": "settings",
+  "views": {
+    "settings": {
+      "component": {
+        "type": "tabs",
+        "props": {
+          "name": "applicationPasswordsTab",
+          "defaultValue": "passwords"
+        },
+        "children": [
+          {
+            "type": "tab",
+            "props": {
+              "value": "passwords",
+              "label": "{{messages.tabs.passwords}}"
+            },
+            "children": [
+              {
+                "type": "entries",
+                "props": {
+                  "name": "applicationPasswordsEntries",
+                  "entry": "passwords",
+                  "label": "{{messages.passwords.label}}",
+                  "description": "{{messages.passwords.description}}",
+                  "emptyMessage": "{{messages.passwords.empty}}",
+                  "surface": "inline",
+                  "search": true,
+                  "filters": true,
+                  "pagination": {
+                    "pageSize": 10,
+                    "pageSizeOptions": [10, 20, 50]
+                  },
+                  "sorting": {
+                    "default": {
+                      "key": "userLogin",
+                      "direction": "asc"
+                    }
+                  },
+                  "columns": [
+                    {
+                      "key": "userLogin",
+                      "label": "{{messages.columns.user}}"
+                    },
+                    {
+                      "key": "name",
+                      "label": "{{messages.columns.app}}"
+                    },
+                    {
+                      "key": "createdLabel",
+                      "label": "{{messages.columns.created}}"
+                    },
+                    {
+                      "key": "lastUsedLabel",
+                      "label": "{{messages.columns.lastUsed}}"
+                    },
+                    {
+                      "key": "lastIp",
+                      "label": "{{messages.columns.lastIp}}"
+                    }
+                  ],
+                  "rowActions": [
+                    {
+                      "action": "revokePasswords",
+                      "label": "{{messages.passwords.revoke}}",
+                      "variant": "destructive"
+                    }
+                  ],
+                  "editDrawer": {
+                    "side": "right",
+                    "size": "md",
+                    "description": "{{messages.passwords.drawerDescription}}"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "type": "tab",
+            "props": {
+              "value": "usage",
+              "label": "{{messages.tabs.usage}}"
+            },
+            "children": [
+              {
+                "type": "entries",
+                "props": {
+                  "name": "applicationPasswordUsageEntries",
+                  "entry": "usage",
+                  "label": "{{messages.usage.label}}",
+                  "description": "{{messages.usage.description}}",
+                  "surface": "inline",
+                  "search": true,
+                  "filters": true,
+                  "pagination": {
+                    "pageSize": 10,
+                    "pageSizeOptions": [10, 20, 50]
+                  },
+                  "sorting": {
+                    "default": {
+                      "key": "occurredAt",
+                      "direction": "desc"
+                    }
+                  },
+                  "columns": [
+                    {
+                      "key": "occurredAtLabel",
+                      "label": "{{messages.columns.time}}"
+                    },
+                    {
+                      "key": "userLogin",
+                      "label": "{{messages.columns.user}}"
+                    },
+                    {
+                      "key": "appName",
+                      "label": "{{messages.columns.app}}"
+                    },
+                    {
+                      "key": "resultLabel",
+                      "label": "{{messages.columns.result}}"
+                    },
+                    {
+                      "key": "endpoint",
+                      "label": "{{messages.columns.endpoint}}"
+                    },
+                    {
+                      "key": "ipDisplay",
+                      "label": "{{messages.columns.ipHash}}"
+                    }
+                  ],
+                  "editDrawer": {
+                    "side": "right",
+                    "size": "lg",
+                    "description": "{{messages.usage.drawerDescription}}"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "type": "tab",
+            "props": {
+              "value": "settings",
+              "label": "{{messages.tabs.settings}}"
+            },
+            "children": [
+              {
+                "type": "field",
+                "props": {
+                  "label": "{{messages.logging.label}}",
+                  "description": "{{messages.logging.description}}",
+                  "value": "application-passwords-logging"
+                },
+                "enable": {
+                  "setting": "enabled",
+                  "label": "{{messages.logging.enabled}}"
+                },
+                "children": [
+                  {
+                    "type": "number-input",
+                    "props": {
+                      "name": "retentionDays",
+                      "label": "{{messages.logging.retentionDays}}",
+                      "min": 1,
+                      "max": 365
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "states": [
+    {
+      "name": "settings",
+      "view": "settings",
+      "transitions": []
+    }
+  ]
+}

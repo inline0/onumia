@@ -1,0 +1,84 @@
+{
+  "$schema": "../../schemas/structure.json",
+  "initialState": "settings",
+  "views": {
+    "settings": {
+      "component": {
+        "type": "field",
+        "props": {
+          "label": "{{messages.title}}",
+          "description": "{{messages.description}}",
+          "value": "taxonomies"
+        },
+        "children": [
+          {
+            "type": "entries",
+            "props": {
+              "name": "taxonomiesEntries",
+              "entry": "taxonomies",
+              "label": "{{messages.table.label}}",
+              "description": "{{messages.table.description}}",
+              "newLabel": "{{messages.table.new}}",
+              "surface": "inline",
+              "search": true,
+              "filters": true,
+              "pagination": {
+                "pageSize": 10,
+                "pageSizeOptions": [10, 20, 50]
+              },
+              "sorting": {
+                "default": {
+                  "key": "label",
+                  "direction": "asc"
+                }
+              },
+              "columns": [
+                {
+                  "key": "label",
+                  "label": "{{messages.columns.label}}"
+                },
+                {
+                  "key": "slug",
+                  "label": "{{messages.columns.slug}}"
+                },
+                {
+                  "key": "originLabel",
+                  "label": "{{messages.columns.origin}}"
+                },
+                {
+                  "key": "hierarchicalLabel",
+                  "label": "{{messages.columns.hierarchical}}"
+                },
+                {
+                  "key": "objectTypesLabel",
+                  "label": "{{messages.columns.objectTypes}}"
+                },
+                {
+                  "key": "publicLabel",
+                  "label": "{{messages.columns.public}}"
+                }
+              ],
+              "createDrawer": {
+                "side": "right",
+                "size": "lg",
+                "description": "{{messages.drawer.createDescription}}"
+              },
+              "editDrawer": {
+                "side": "right",
+                "size": "lg",
+                "description": "{{messages.drawer.editDescription}}"
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  "states": [
+    {
+      "name": "settings",
+      "view": "settings",
+      "transitions": []
+    }
+  ]
+}
