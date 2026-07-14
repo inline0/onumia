@@ -1,7 +1,6 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Onumia\Lib\Pitmaster\Encoding;
 
 /**
@@ -29,17 +28,15 @@ final class VarInt
     public static function decodePackSize(BinaryReader $reader, int $initialBits, int $shift = 4): int
     {
         $size = $initialBits;
-        $byte = 0x80; // Force entry into loop if caller sets MSB
-
+        $byte = 0x80;
+        // Force entry into loop if caller sets MSB
         while ($byte & 0x80) {
             $byte = $reader->readByte();
-            $size |= ($byte & 0x7F) << $shift;
+            $size |= ($byte & 0x7f) << $shift;
             $shift += 7;
         }
-
         return $size;
     }
-
     /**
      * Decode an OFS_DELTA negative offset.
      *
@@ -51,16 +48,13 @@ final class VarInt
     public static function decodeOfsOffset(BinaryReader $reader): int
     {
         $byte = $reader->readByte();
-        $offset = $byte & 0x7F;
-
+        $offset = $byte & 0x7f;
         while ($byte & 0x80) {
             $byte = $reader->readByte();
-            $offset = (($offset + 1) << 7) | ($byte & 0x7F);
+            $offset = $offset + 1 << 7 | $byte & 0x7f;
         }
-
         return $offset;
     }
-
     /**
      * Encode a size as Git pack varint bytes.
      *
@@ -68,18 +62,15 @@ final class VarInt
      */
     public static function encodePackSize(int $type, int $size): string
     {
-        $byte = ($type << 4) | ($size & 0x0F);
+        $byte = $type << 4 | $size & 0xf;
         $size >>= 4;
         $result = '';
-
         while ($size > 0) {
             $result .= chr($byte | 0x80);
-            $byte = $size & 0x7F;
+            $byte = $size & 0x7f;
             $size >>= 7;
         }
-
         $result .= chr($byte);
-
         return $result;
     }
 }

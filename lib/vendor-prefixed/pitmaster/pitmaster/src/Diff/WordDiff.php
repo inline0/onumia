@@ -1,7 +1,6 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Onumia\Lib\Pitmaster\Diff;
 
 /**
@@ -22,23 +21,16 @@ final class WordDiff
         if ($old === $new) {
             return $old;
         }
-
         $oldWords = self::tokenize($old);
         $newWords = self::tokenize($new);
-
         // Use LCS to find common subsequence
         $lcs = self::lcs($oldWords, $newWords);
-
         $result = '';
         $oi = 0;
         $ni = 0;
         $li = 0;
-
         while ($oi < count($oldWords) || $ni < count($newWords)) {
-            if (
-                $li < count($lcs) && $oi < count($oldWords) && $ni < count($newWords)
-                && $oldWords[$oi] === $lcs[$li] && $newWords[$ni] === $lcs[$li]
-            ) {
+            if ($li < count($lcs) && $oi < count($oldWords) && $ni < count($newWords) && $oldWords[$oi] === $lcs[$li] && $newWords[$ni] === $lcs[$li]) {
                 // Common word
                 $result .= $oldWords[$oi];
                 $oi++;
@@ -62,10 +54,8 @@ final class WordDiff
                 break;
             }
         }
-
         return rtrim($result, "\n");
     }
-
     /**
      * Split text into word tokens (preserving whitespace as separate tokens).
      *
@@ -73,11 +63,9 @@ final class WordDiff
      */
     private static function tokenize(string $text): array
     {
-        $tokens = preg_split('/(\s+)/', $text, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
-
-        return $tokens !== false ? $tokens : [$text];
+        $tokens = preg_split('/(\s+)/', $text, -1, \PREG_SPLIT_DELIM_CAPTURE | \PREG_SPLIT_NO_EMPTY);
+        return $tokens !== \false ? $tokens : [$text];
     }
-
     /**
      * Find longest common subsequence of two word arrays.
      *
@@ -90,7 +78,6 @@ final class WordDiff
         $m = count($a);
         $n = count($b);
         $dp = array_fill(0, $m + 1, array_fill(0, $n + 1, 0));
-
         for ($i = 1; $i <= $m; $i++) {
             for ($j = 1; $j <= $n; $j++) {
                 if ($a[$i - 1] === $b[$j - 1]) {
@@ -100,12 +87,10 @@ final class WordDiff
                 }
             }
         }
-
         // Backtrace
         $result = [];
         $i = $m;
         $j = $n;
-
         while ($i > 0 && $j > 0) {
             if ($a[$i - 1] === $b[$j - 1]) {
                 array_unshift($result, $a[$i - 1]);
@@ -117,7 +102,6 @@ final class WordDiff
                 $j--;
             }
         }
-
         return $result;
     }
 }

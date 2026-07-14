@@ -1,14 +1,14 @@
-<?php declare(strict_types=1);
+<?php
 
+declare (strict_types=1);
 namespace Onumia\Lib\PhpParser\Builder;
 
-use PhpParser;
+use Onumia\Lib\PhpParser;
 use Onumia\Lib\PhpParser\BuilderHelpers;
-
-abstract class Declaration implements Onumia\Lib\PhpParser\Builder {
+abstract class Declaration implements Onumia\Lib\PhpParser\Builder
+{
     /** @var array<string, mixed> */
     protected array $attributes = [];
-
     /**
      * Adds a statement.
      *
@@ -17,7 +17,6 @@ abstract class Declaration implements Onumia\Lib\PhpParser\Builder {
      * @return $this The builder instance (for fluid interface)
      */
     abstract public function addStmt($stmt);
-
     /**
      * Adds multiple statements.
      *
@@ -25,14 +24,13 @@ abstract class Declaration implements Onumia\Lib\PhpParser\Builder {
      *
      * @return $this The builder instance (for fluid interface)
      */
-    public function addStmts(array $stmts) {
+    public function addStmts(array $stmts)
+    {
         foreach ($stmts as $stmt) {
             $this->addStmt($stmt);
         }
-
         return $this;
     }
-
     /**
      * Sets doc comment for the declaration.
      *
@@ -40,11 +38,9 @@ abstract class Declaration implements Onumia\Lib\PhpParser\Builder {
      *
      * @return $this The builder instance (for fluid interface)
      */
-    public function setDocComment($docComment) {
-        $this->attributes['comments'] = [
-            BuilderHelpers::normalizeDocComment($docComment)
-        ];
-
+    public function setDocComment($docComment)
+    {
+        $this->attributes['comments'] = [BuilderHelpers::normalizeDocComment($docComment)];
         return $this;
     }
 }

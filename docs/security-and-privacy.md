@@ -35,7 +35,7 @@ Optional SQLite module data files live under `wp-content/uploads/onumia/data/`. 
 
 ## Secrets and AI keys
 
-Module secrets such as Stripe credentials are stored in WordPress options or supplied as PHP constants, never in the theme settings file, so committing your theme never commits credentials. The dashboard reports whether a secret is present without displaying it.
+Module secrets such as Stripe credentials are stored in WordPress options or supplied as PHP constants, never in the theme settings file, so committing your theme never commits credentials. Production services can use `ONUMIA_MODULE_SITE_SECRETS_FILE` to keep them in an owner-only file outside the web root and out of database backups. Once configured, the external file is authoritative and Onumia refuses an invalid file instead of falling back to stale database values. Doctor output reports only presence, source, and short fingerprints.
 
 AI provider keys follow a different path because the browser needs them: keys placed in the plugin directory's `.env` file are delivered to `manage_options` users in the dashboard, where provider calls are made directly from the administrator's browser. App surfaces that use a lower capability do not receive these raw keys. The practical rule is that anyone you make an administrator can use, and read, the configured AI keys. Chat conversations, including the file edits an agent made, are stored in your database; prompts and file contents are sent to the AI provider you select, under that provider's data terms.
 

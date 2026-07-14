@@ -362,7 +362,7 @@ final class Filters {
 	}
 
 	/**
-	 * Filters the GitHub token used for private Onumia Free releases.
+	 * Filters the optional GitHub token used for custom authenticated mirrors or higher API limits.
 	 *
 	 * @api
 	 * @since 0.1.0

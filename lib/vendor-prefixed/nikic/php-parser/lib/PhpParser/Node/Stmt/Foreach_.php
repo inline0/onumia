@@ -1,10 +1,11 @@
-<?php declare(strict_types=1);
+<?php
 
+declare (strict_types=1);
 namespace Onumia\Lib\PhpParser\Node\Stmt;
 
 use Onumia\Lib\PhpParser\Node;
-
-class Foreach_ extends Node\Stmt {
+class Foreach_ extends Node\Stmt
+{
     /** @var Node\Expr Expression to iterate */
     public Node\Expr $expr;
     /** @var null|Node\Expr Variable to assign key to */
@@ -15,7 +16,6 @@ class Foreach_ extends Node\Stmt {
     public Node\Expr $valueVar;
     /** @var Node\Stmt[] Statements */
     public array $stmts;
-
     /**
      * Constructs a foreach node.
      *
@@ -31,20 +31,21 @@ class Foreach_ extends Node\Stmt {
      *             'stmts'  => array(): Statements
      * @param array<string, mixed> $attributes Additional attributes
      */
-    public function __construct(Node\Expr $expr, Node\Expr $valueVar, array $subNodes = [], array $attributes = []) {
+    public function __construct(Node\Expr $expr, Node\Expr $valueVar, array $subNodes = [], array $attributes = [])
+    {
         $this->attributes = $attributes;
         $this->expr = $expr;
         $this->keyVar = $subNodes['keyVar'] ?? null;
-        $this->byRef = $subNodes['byRef'] ?? false;
+        $this->byRef = $subNodes['byRef'] ?? \false;
         $this->valueVar = $valueVar;
         $this->stmts = $subNodes['stmts'] ?? [];
     }
-
-    public function getSubNodeNames(): array {
+    public function getSubNodeNames(): array
+    {
         return ['expr', 'keyVar', 'byRef', 'valueVar', 'stmts'];
     }
-
-    public function getType(): string {
+    public function getType(): string
+    {
         return 'Stmt_Foreach';
     }
 }

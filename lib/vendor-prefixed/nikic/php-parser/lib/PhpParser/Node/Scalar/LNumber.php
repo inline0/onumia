@@ -1,15 +1,16 @@
-<?php declare(strict_types=1);
+<?php
 
+declare (strict_types=1);
 namespace Onumia\Lib\PhpParser\Node\Scalar;
 
 require __DIR__ . '/Int_.php';
-
-if (false) {
+if (\false) {
     /**
      * For classmap-authoritative support.
      *
      * @deprecated use \Onumia\Lib\PhpParser\Node\Scalar\Int_ instead.
      */
-    class LNumber extends Int_ {
+    class LNumber extends Int_
+    {
     }
 }

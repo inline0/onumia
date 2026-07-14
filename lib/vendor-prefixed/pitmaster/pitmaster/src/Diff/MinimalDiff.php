@@ -1,7 +1,6 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Onumia\Lib\Pitmaster\Diff;
 
 /**
@@ -18,10 +17,6 @@ final class MinimalDiff
      */
     public static function diff(string $old, string $new, int $context = 3): array
     {
-        return MyersDiff::diffLines(
-            MyersDiff::normalizeLines($old),
-            MyersDiff::normalizeLines($new),
-            $context,
-        );
+        return MyersDiff::diffLines(MyersDiff::normalizeLines($old), MyersDiff::normalizeLines($new), $context);
     }
 }

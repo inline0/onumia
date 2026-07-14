@@ -1,7 +1,6 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Onumia\Lib\Pitmaster\Diff;
 
 /**
@@ -22,15 +21,9 @@ final class PatienceDiff
         if ($old === $new) {
             return [];
         }
-
-        $ops = self::diffOps(
-            MyersDiff::normalizeLines($old),
-            MyersDiff::normalizeLines($new),
-        );
-
+        $ops = self::diffOps(MyersDiff::normalizeLines($old), MyersDiff::normalizeLines($new));
         return MyersDiff::opsToHunks($ops, $context);
     }
-
     /**
      * Find lines that appear exactly once.
      *
@@ -41,23 +34,18 @@ final class PatienceDiff
     {
         $counts = [];
         $indices = [];
-
         foreach ($lines as $i => $line) {
             $counts[$line] = ($counts[$line] ?? 0) + 1;
             $indices[$line] = $i;
         }
-
         $unique = [];
-
         foreach ($counts as $line => $count) {
             if ($count === 1) {
                 $unique[$line] = $indices[$line];
             }
         }
-
         return $unique;
     }
-
     /**
      * Find longest increasing subsequence by 'new' index.
      *
@@ -69,11 +57,9 @@ final class PatienceDiff
         if ($items === []) {
             return [];
         }
-
         $n = count($items);
         $dp = array_fill(0, $n, 1);
         $prev = array_fill(0, $n, -1);
-
         for ($i = 1; $i < $n; $i++) {
             for ($j = 0; $j < $i; $j++) {
                 if ($items[$j]['new'] < $items[$i]['new'] && $dp[$j] + 1 > $dp[$i]) {
@@ -82,23 +68,18 @@ final class PatienceDiff
                 }
             }
         }
-
         // Find the end of the LIS
         $maxLen = max($dp);
-        $maxIdx = array_search($maxLen, $dp, true);
-
+        $maxIdx = array_search($maxLen, $dp, \true);
         // Reconstruct
         $result = [];
         $idx = $maxIdx;
-
         while ($idx !== -1) {
             array_unshift($result, $items[$idx]);
             $idx = $prev[$idx];
         }
-
         return $result;
     }
-
     /**
      * @param array<int, string> $oldLines
      * @param array<int, string> $newLines
@@ -107,50 +88,28 @@ final class PatienceDiff
     private static function diffOps(array $oldLines, array $newLines): array
     {
         if ($oldLines === $newLines) {
-            return array_map(
-                static fn (string $line): array => ['type' => 'equal', 'line' => $line],
-                $oldLines,
-            );
+            return array_map(static fn(string $line): array => ['type' => 'equal', 'line' => $line], $oldLines);
         }
-
         if ($oldLines === [] || $newLines === []) {
             return MyersDiff::opsFromLines($oldLines, $newLines);
         }
-
         $anchors = self::anchors($oldLines, $newLines);
-
         if ($anchors === []) {
             return MyersDiff::opsFromLines($oldLines, $newLines);
         }
-
         $ops = [];
         $oldStart = 0;
         $newStart = 0;
-
         foreach ($anchors as $anchor) {
             $oldIndex = $anchor['old'];
             $newIndex = $anchor['new'];
-            $ops = array_merge(
-                $ops,
-                self::diffOps(
-                    array_slice($oldLines, $oldStart, $oldIndex - $oldStart),
-                    array_slice($newLines, $newStart, $newIndex - $newStart),
-                ),
-            );
+            $ops = array_merge($ops, self::diffOps(array_slice($oldLines, $oldStart, $oldIndex - $oldStart), array_slice($newLines, $newStart, $newIndex - $newStart)));
             $ops[] = ['type' => 'equal', 'line' => $anchor['line']];
             $oldStart = $oldIndex + 1;
             $newStart = $newIndex + 1;
         }
-
-        return array_merge(
-            $ops,
-            self::diffOps(
-                array_slice($oldLines, $oldStart),
-                array_slice($newLines, $newStart),
-            ),
-        );
+        return array_merge($ops, self::diffOps(array_slice($oldLines, $oldStart), array_slice($newLines, $newStart)));
     }
-
     /**
      * @param array<int, string> $oldLines
      * @param array<int, string> $newLines
@@ -161,15 +120,12 @@ final class PatienceDiff
         $uniqueOld = self::findUnique($oldLines);
         $uniqueNew = self::findUnique($newLines);
         $commonUnique = [];
-
         foreach ($uniqueOld as $line => $oldIdx) {
             if (isset($uniqueNew[$line])) {
                 $commonUnique[] = ['old' => $oldIdx, 'new' => $uniqueNew[$line], 'line' => $line];
             }
         }
-
-        usort($commonUnique, fn ($a, $b) => $a['old'] <=> $b['old']);
-
+        usort($commonUnique, fn($a, $b) => $a['old'] <=> $b['old']);
         return self::longestIncreasingSubsequence($commonUnique);
     }
 }

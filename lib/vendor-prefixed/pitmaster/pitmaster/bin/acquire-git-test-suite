@@ -1,7 +1,7 @@
 #!/usr/bin/env php
-<?php
-
-declare(strict_types=1);
+<?php 
+declare (strict_types=1);
+namespace Onumia\Lib;
 
 /**
  * Extract test repos from git's test suite using the shim approach.
@@ -10,32 +10,25 @@ declare(strict_types=1);
  * repo-creating commands, build a setup.sh, run it with the shim,
  * capture if it produces a valid repo.
  */
-
-$root = dirname(__DIR__);
+$root = \dirname(__DIR__);
 $gitTestDir = $root . '/fixtures/upstream/git/t';
-$shimPath = realpath($root . '/bin/git-test-shim.sh');
+$shimPath = \realpath($root . '/bin/git-test-shim.sh');
 $upstreamDir = $root . '/scenarios/upstream/git-test-suite';
-
-if (!is_dir($gitTestDir)) {
-    fwrite(STDERR, "Vendored git test suite not found at {$gitTestDir}\n");
+if (!\is_dir($gitTestDir)) {
+    \fwrite(\STDERR, "Vendored git test suite not found at {$gitTestDir}\n");
     exit(1);
 }
-
-if (!is_dir($upstreamDir)) {
-    mkdir($upstreamDir, 0777, true);
+if (!\is_dir($upstreamDir)) {
+    \mkdir($upstreamDir, 0777, \true);
 }
-
-$scripts = glob($gitTestDir . '/t[0-9]*.sh');
-sort($scripts);
-
+$scripts = \glob($gitTestDir . '/t[0-9]*.sh');
+\sort($scripts);
 $imported = 0;
 $skipped = 0;
 $failed = 0;
 $existing = 0;
-
 // Skip only scripts that truly need external infrastructure
-$skipWords = ['lib-httpd', 'start_httpd', 'git-svn', 'git-p4', 'lib-cvs',
-    'lib-gitweb', 'GIT_VALGRIND', 'test_external', 'lib-git-daemon'];
+$skipWords = ['lib-httpd', 'start_httpd', 'git-svn', 'git-p4', 'lib-cvs', 'lib-gitweb', 'GIT_VALGRIND', 'test_external', 'lib-git-daemon'];
 $normalizeNestedRepo = <<<'BASH'
 if ! git rev-parse HEAD >/dev/null 2>&1; then
     for subdir in */; do
@@ -48,184 +41,118 @@ if ! git rev-parse HEAD >/dev/null 2>&1; then
 fi
 BASH;
 $normalizeNestedRepo .= "\n";
-
 foreach ($scripts as $scriptPath) {
-    $basename = basename($scriptPath, '.sh');
+    $basename = \basename($scriptPath, '.sh');
     $scenarioDir = $upstreamDir . '/' . $basename;
-
-    if (is_dir($scenarioDir)) {
+    if (\is_dir($scenarioDir)) {
         $existing++;
         continue;
     }
-
-    $content = @file_get_contents($scriptPath);
-
-    if ($content === false) {
+    $content = @\file_get_contents($scriptPath);
+    if ($content === \false) {
         continue;
     }
-
-    $skip = false;
-
+    $skip = \false;
     foreach ($skipWords as $w) {
-        if (stripos($content, $w) !== false) {
-            $skip = true;
+        if (\stripos($content, $w) !== \false) {
+            $skip = \true;
             break;
         }
     }
-
     if ($skip) {
         $skipped++;
         continue;
     }
-
     // Extract test bodies, scanning until we find commits
     $bodies = extractTestBodies($content);
     $commands = [];
-    $hasCommit = false;
-
+    $hasCommit = \false;
     // First pass: find the first body that contains a commit
     $firstCommitBody = -1;
-
     foreach ($bodies as $i => $body) {
-        if (str_contains($body, 'commit') || str_contains($body, 'test_commit')
-            || str_contains($body, 'test_merge')
-        ) {
+        if (\str_contains($body, 'commit') || \str_contains($body, 'test_commit') || \str_contains($body, 'test_merge')) {
             $firstCommitBody = $i;
             break;
         }
     }
-
     // Extract commands from bodies up to and including the first few with commits
     $commitBodiesFound = 0;
-    $maxBodies = min(count($bodies), max($firstCommitBody + 5, 15));
-
+    $maxBodies = \min(\count($bodies), \max($firstCommitBody + 5, 15));
     for ($bi = 0; $bi < $maxBodies; $bi++) {
         $body = $bodies[$bi];
-
-        foreach (explode("\n", $body) as $line) {
-            $cmd = filterCommand(trim($line));
-
+        foreach (\explode("\n", $body) as $line) {
+            $cmd = filterCommand(\trim($line));
             if ($cmd !== null) {
                 $commands[] = $cmd;
-
-                if (str_contains($cmd, 'commit') || str_contains($cmd, 'test_commit')
-                    || str_contains($cmd, 'test_merge')
-                ) {
-                    $hasCommit = true;
+                if (\str_contains($cmd, 'commit') || \str_contains($cmd, 'test_commit') || \str_contains($cmd, 'test_merge')) {
+                    $hasCommit = \true;
                     $commitBodiesFound++;
                 }
             }
         }
-
         // Stop after we've captured enough commit-creating bodies
         if ($hasCommit && $commitBodiesFound >= 3 && $bi > $firstCommitBody + 2) {
             break;
         }
     }
-
     // Must have at least one commit-creating command
-    $hasCommit = false;
-
+    $hasCommit = \false;
     foreach ($commands as $cmd) {
-        if (str_contains($cmd, 'commit') || str_contains($cmd, 'test_commit') || str_contains($cmd, 'test_merge')) {
-            $hasCommit = true;
+        if (\str_contains($cmd, 'commit') || \str_contains($cmd, 'test_commit') || \str_contains($cmd, 'test_merge')) {
+            $hasCommit = \true;
             break;
         }
     }
-
-    if (!$hasCommit || count($commands) < 2) {
+    if (!$hasCommit || \count($commands) < 2) {
         $skipped++;
         continue;
     }
-
     // Cap at 80 commands to prevent huge scripts
-    $commands = array_slice($commands, 0, 80);
-
+    $commands = \array_slice($commands, 0, 80);
     // Build setup.sh
-    $setup = "#!/bin/bash\n\n"
-        . "git init . >/dev/null 2>&1\n"
-        . "git config user.email \"test@test.com\"\n"
-        . "git config user.name \"Test\"\n"
-        . "git config protocol.file.allow always 2>/dev/null || true\n\n"
-        . "source " . escapeshellarg($shimPath) . "\n\n"
-        . implode("\n", $commands) . "\n\n"
-        . $normalizeNestedRepo . "\n"
-        . "true\n";
-
+    $setup = "#!/bin/bash\n\n" . "git init . >/dev/null 2>&1\n" . "git config user.email \"test@test.com\"\n" . "git config user.name \"Test\"\n" . "git config protocol.file.allow always 2>/dev/null || true\n\n" . "source " . \escapeshellarg($shimPath) . "\n\n" . \implode("\n", $commands) . "\n\n" . $normalizeNestedRepo . "\n" . "true\n";
     // Test it
-    $tmpDir = $root . '/.pitmaster/workspaces/git-suite-' . bin2hex(random_bytes(4));
-    mkdir($tmpDir, 0777, true);
-    file_put_contents($tmpDir . '/setup.sh', $setup);
-
+    $tmpDir = $root . '/.pitmaster/workspaces/git-suite-' . \bin2hex(\random_bytes(4));
+    \mkdir($tmpDir, 0777, \true);
+    \file_put_contents($tmpDir . '/setup.sh', $setup);
     // Run setup
-    shell_exec(sprintf(
-        'cd %s && perl -e "alarm 20; exec @ARGV" bash setup.sh >/dev/null 2>&1',
-        escapeshellarg($tmpDir),
-    ));
-
+    \shell_exec(\sprintf('cd %s && perl -e "alarm 20; exec @ARGV" bash setup.sh >/dev/null 2>&1', \escapeshellarg($tmpDir)));
     // Check for valid repo — root first, then subdirs
-    $valid = false;
-    $result = shell_exec(sprintf('cd %s && git rev-parse HEAD 2>/dev/null', escapeshellarg($tmpDir)));
-
-    if ($result !== null && strlen(trim($result)) === 40) {
-        $valid = true;
+    $valid = \false;
+    $result = \shell_exec(\sprintf('cd %s && git rev-parse HEAD 2>/dev/null', \escapeshellarg($tmpDir)));
+    if ($result !== null && \strlen(\trim($result)) === 40) {
+        $valid = \true;
     } else {
-        foreach (@scandir($tmpDir) ?: [] as $sub) {
-            if ($sub === '.' || $sub === '..' || !is_dir($tmpDir . '/' . $sub)) {
+        foreach (@\scandir($tmpDir) ?: [] as $sub) {
+            if ($sub === '.' || $sub === '..' || !\is_dir($tmpDir . '/' . $sub)) {
                 continue;
             }
-
-            $subResult = shell_exec(sprintf(
-                'cd %s && git rev-parse HEAD 2>/dev/null',
-                escapeshellarg($tmpDir . '/' . $sub),
-            ));
-
-            if ($subResult !== null && strlen(trim($subResult)) === 40) {
+            $subResult = \shell_exec(\sprintf('cd %s && git rev-parse HEAD 2>/dev/null', \escapeshellarg($tmpDir . '/' . $sub)));
+            if ($subResult !== null && \strlen(\trim($subResult)) === 40) {
                 // Move subdir repo to root for oracle capture
-                shell_exec(sprintf(
-                    'rm -rf %s/.git && cp -r %s/%s/.git %s/.git 2>/dev/null',
-                    escapeshellarg($tmpDir),
-                    escapeshellarg($tmpDir),
-                    escapeshellarg($sub),
-                    escapeshellarg($tmpDir),
-                ));
-                $valid = true;
+                \shell_exec(\sprintf('rm -rf %s/.git && cp -r %s/%s/.git %s/.git 2>/dev/null', \escapeshellarg($tmpDir), \escapeshellarg($tmpDir), \escapeshellarg($sub), \escapeshellarg($tmpDir)));
+                $valid = \true;
                 break;
             }
         }
     }
-
-    exec('rm -rf ' . escapeshellarg($tmpDir));
-
+    \exec('rm -rf ' . \escapeshellarg($tmpDir));
     if (!$valid) {
         $failed++;
         continue;
     }
-
     // Save
-    mkdir($scenarioDir, 0777, true);
-    file_put_contents($scenarioDir . '/setup.sh', $setup);
-    chmod($scenarioDir . '/setup.sh', 0755);
-
-    file_put_contents($scenarioDir . '/scenario.json', json_encode([
-        'name' => 'upstream/git-test-suite/' . $basename,
-        'category' => 'upstream',
-        'description' => "git t/: {$basename}",
-        'operations' => [],
-        'oracle_commands' => [],
-        'expectations' => ['exact_match' => [], 'fsck_clean' => false],
-    ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . "\n");
-
+    \mkdir($scenarioDir, 0777, \true);
+    \file_put_contents($scenarioDir . '/setup.sh', $setup);
+    \chmod($scenarioDir . '/setup.sh', 0755);
+    \file_put_contents($scenarioDir . '/scenario.json', \json_encode(['name' => 'upstream/git-test-suite/' . $basename, 'category' => 'upstream', 'description' => "git t/: {$basename}", 'operations' => [], 'oracle_commands' => [], 'expectations' => ['exact_match' => [], 'fsck_clean' => \false]], \JSON_PRETTY_PRINT | \JSON_UNESCAPED_SLASHES) . "\n");
     $imported++;
-
     if ($imported % 25 === 0) {
-        fwrite(STDOUT, "  ... {$imported} imported ({$basename})\n");
+        \fwrite(\STDOUT, "  ... {$imported} imported ({$basename})\n");
     }
 }
-
-fwrite(STDOUT, "Done: {$imported} new, {$existing} existed, {$skipped} skipped, {$failed} no valid repo\n");
-fwrite(STDOUT, "Total: " . count(glob($upstreamDir . '/*/scenario.json')) . " git-test-suite scenarios\n");
-
+\fwrite(\STDOUT, "Done: {$imported} new, {$existing} existed, {$skipped} skipped, {$failed} no valid repo\n");
+\fwrite(\STDOUT, "Total: " . \count(\glob($upstreamDir . '/*/scenario.json')) . " git-test-suite scenarios\n");
 /**
  * Extract all test_expect_success/test_expect_failure body contents.
  *
@@ -236,110 +163,89 @@ fwrite(STDOUT, "Total: " . count(glob($upstreamDir . '/*/scenario.json')) . " gi
 function extractTestBodies(string $content): array
 {
     $bodies = [];
-    $lines = explode("\n", $content);
-    $inBody = false;
+    $lines = \explode("\n", $content);
+    $inBody = \false;
     $currentBody = '';
-    $sq = "\x27"; // single quote character
-
-    for ($i = 0; $i < count($lines); $i++) {
+    $sq = "'";
+    // single quote character
+    for ($i = 0; $i < \count($lines); $i++) {
         $line = $lines[$i];
-
         if (!$inBody) {
-            if (preg_match('/test_expect_(success|failure)\s/', $line)) {
-                $trimmed = rtrim($line);
-
-                if (strlen($trimmed) > 0 && $trimmed[strlen($trimmed) - 1] === $sq) {
-                    $before = substr($trimmed, 0, -1);
-
-                    if (strrpos($before, $sq) !== false) {
-                        $inBody = true;
+            if (\preg_match('/test_expect_(success|failure)\s/', $line)) {
+                $trimmed = \rtrim($line);
+                if (\strlen($trimmed) > 0 && $trimmed[\strlen($trimmed) - 1] === $sq) {
+                    $before = \substr($trimmed, 0, -1);
+                    if (\strrpos($before, $sq) !== \false) {
+                        $inBody = \true;
                         $currentBody = '';
                         continue;
                     }
                 }
             }
-
             continue;
         }
-
-        if (trim($line) === $sq) {
+        if (\trim($line) === $sq) {
             $bodies[] = $currentBody;
-            $inBody = false;
+            $inBody = \false;
             $currentBody = '';
             continue;
         }
-
         $currentBody .= $line . "\n";
     }
-
     return $bodies;
 }
-
 /**
  * Filter a line to only keep repo-creating commands.
  */
 function filterCommand(string $line): ?string
 {
     // Strip trailing &&
-    $line = preg_replace('/\s*&&\s*$/', '', $line);
-    $line = trim($line);
-
+    $line = \preg_replace('/\s*&&\s*$/', '', $line);
+    $line = \trim($line);
     if ($line === '' || $line === 'true' || $line === 'false' || $line[0] === '#') {
         return null;
     }
-
     // Test framework helpers that create content
-    if (preg_match('/^(test_commit|test_merge|test_tick|test_commit_bulk|test_create_repo)\b/', $line)) {
+    if (\preg_match('/^(test_commit|test_merge|test_tick|test_commit_bulk|test_create_repo)\b/', $line)) {
         return $line . ' 2>/dev/null || true';
     }
-
     // Git commands that modify repo state
-    if (preg_match('/^git\s+(init|add|commit|tag|branch|checkout|merge|mv|rm|config|update-index|update-ref|symbolic-ref|notes|stash|rebase|cherry-pick|revert|switch|restore|reset|gc|pack-refs|submodule|worktree|hash-object|mktree|read-tree|write-tree|commit-tree|mktag)\b/', $line)) {
+    if (\preg_match('/^git\s+(init|add|commit|tag|branch|checkout|merge|mv|rm|config|update-index|update-ref|symbolic-ref|notes|stash|rebase|cherry-pick|revert|switch|restore|reset|gc|pack-refs|submodule|worktree|hash-object|mktree|read-tree|write-tree|commit-tree|mktag)\b/', $line)) {
         return $line . ' 2>/dev/null || true';
     }
-
     // File creation/modification
-    if (preg_match('/^(echo|printf|cat)\b.*>/', $line)) {
+    if (\preg_match('/^(echo|printf|cat)\b.*>/', $line)) {
         return $line . ' 2>/dev/null || true';
     }
-
-    if (preg_match('/^(mkdir|touch|ln|cp|mv)\b/', $line)) {
+    if (\preg_match('/^(mkdir|touch|ln|cp|mv)\b/', $line)) {
         return $line . ' 2>/dev/null || true';
     }
-
-    if (preg_match('/^test_write_lines\b/', $line)) {
+    if (\preg_match('/^test_write_lines\b/', $line)) {
         return $line . ' 2>/dev/null || true';
     }
-
     // Variable assignments that might be needed
-    if (preg_match('/^[A-Z_]+=\$\(git /', $line)) {
+    if (\preg_match('/^[A-Z_]+=\$\(git /', $line)) {
         return $line . ' 2>/dev/null || true';
     }
-
     // cd commands (needed for tests that work in subdirs)
-    if (preg_match('/^cd\s/', $line)) {
+    if (\preg_match('/^cd\s/', $line)) {
         return $line . ' 2>/dev/null || true';
     }
-
     // Subshell openers/closers
     if ($line === '(' || $line === ')') {
         return $line;
     }
-
     // chmod for executable files
-    if (preg_match('/^chmod\b/', $line)) {
+    if (\preg_match('/^chmod\b/', $line)) {
         return $line . ' 2>/dev/null || true';
     }
-
     // rm for cleanup
-    if (preg_match('/^rm\s/', $line)) {
+    if (\preg_match('/^rm\s/', $line)) {
         return $line . ' 2>/dev/null || true';
     }
-
     // sed for file modification
-    if (preg_match('/^sed\b/', $line)) {
+    if (\preg_match('/^sed\b/', $line)) {
         return $line . ' 2>/dev/null || true';
     }
-
     return null;
 }

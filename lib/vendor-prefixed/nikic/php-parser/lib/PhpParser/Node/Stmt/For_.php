@@ -1,10 +1,11 @@
-<?php declare(strict_types=1);
+<?php
 
+declare (strict_types=1);
 namespace Onumia\Lib\PhpParser\Node\Stmt;
 
 use Onumia\Lib\PhpParser\Node;
-
-class For_ extends Node\Stmt {
+class For_ extends Node\Stmt
+{
     /** @var Node\Expr[] Init expressions */
     public array $init;
     /** @var Node\Expr[] Loop conditions */
@@ -13,7 +14,6 @@ class For_ extends Node\Stmt {
     public array $loop;
     /** @var Node\Stmt[] Statements */
     public array $stmts;
-
     /**
      * Constructs a for loop node.
      *
@@ -29,19 +29,20 @@ class For_ extends Node\Stmt {
      *             'stmts' => array(): Statements
      * @param array<string, mixed> $attributes Additional attributes
      */
-    public function __construct(array $subNodes = [], array $attributes = []) {
+    public function __construct(array $subNodes = [], array $attributes = [])
+    {
         $this->attributes = $attributes;
         $this->init = $subNodes['init'] ?? [];
         $this->cond = $subNodes['cond'] ?? [];
         $this->loop = $subNodes['loop'] ?? [];
         $this->stmts = $subNodes['stmts'] ?? [];
     }
-
-    public function getSubNodeNames(): array {
+    public function getSubNodeNames(): array
+    {
         return ['init', 'cond', 'loop', 'stmts'];
     }
-
-    public function getType(): string {
+    public function getType(): string
+    {
         return 'Stmt_For';
     }
 }

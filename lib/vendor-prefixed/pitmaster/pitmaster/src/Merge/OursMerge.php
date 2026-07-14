@@ -1,7 +1,6 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Onumia\Lib\Pitmaster\Merge;
 
 /**
@@ -14,6 +13,6 @@ final class OursMerge
      */
     public static function merge(string $base, string $ours, string $theirs): array
     {
-        return ['content' => $ours, 'clean' => true, 'conflicts' => 0];
+        return ['content' => $ours, 'clean' => \true, 'conflicts' => 0];
     }
 }

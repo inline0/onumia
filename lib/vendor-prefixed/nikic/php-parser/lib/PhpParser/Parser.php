@@ -1,8 +1,10 @@
-<?php declare(strict_types=1);
+<?php
 
+declare (strict_types=1);
 namespace Onumia\Lib\PhpParser;
 
-interface Parser {
+interface Parser
+{
     /**
      * Parses PHP code into a node tree.
      *
@@ -14,7 +16,6 @@ interface Parser {
      *                          the parser was unable to recover from an error).
      */
     public function parse(string $code, ?ErrorHandler $errorHandler = null): ?array;
-
     /**
      * Return tokens for the last parse.
      *

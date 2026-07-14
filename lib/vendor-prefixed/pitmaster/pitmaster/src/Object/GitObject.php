@@ -1,7 +1,6 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Onumia\Lib\Pitmaster\Object;
 
 /**
@@ -11,13 +10,9 @@ namespace Onumia\Lib\Pitmaster\Object;
  */
 abstract readonly class GitObject
 {
-    public function __construct(
-        public ObjectType $type,
-        public string $content,
-        public ObjectId $id,
-    ) {
+    public function __construct(public ObjectType $type, public string $content, public ObjectId $id)
+    {
     }
-
     public function size(): int
     {
         return strlen($this->content);

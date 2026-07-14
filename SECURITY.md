@@ -48,9 +48,10 @@ Ed25519 signature against the public key bundled with Onumia, then verifies the
 package checksum. Missing assets, invalid signatures, substituted packages, and
 checksum mismatches stop the update without replacing the installed plugin.
 
-Private-repository access can use `ONUMIA_GITHUB_UPDATER_TOKEN`. The token is a
-download credential, not a signing key, and is not stored in WordPress. Public
-releases require no token.
+The canonical public release requires no token. `ONUMIA_GITHUB_UPDATER_TOKEN`
+is optional for a custom private mirror or additional GitHub API rate-limit
+headroom. It is a download credential, not a signing key, and is not stored in
+WordPress.
 
 ## Pro Licensed Updates
 
@@ -67,6 +68,13 @@ plugin basename, package target, and package version before WordPress receives
 the archive. Revoked or expired licenses, activation limits, wrong products,
 replayed URLs, service outages, and invalid packages fail closed and leave the
 current version installed.
+
+Before a private Pro release becomes eligible, the licensing server requires a
+unique package, `SHA256SUMS`, and `SHA256SUMS.sig` from that exact GitHub
+release. It verifies the detached Ed25519 signature with the bundled release
+key, compares the package with the signed checksum, and validates the embedded
+product and version. A failed import does not replace the last known-good
+release record.
 
 ## Installation Limits
 

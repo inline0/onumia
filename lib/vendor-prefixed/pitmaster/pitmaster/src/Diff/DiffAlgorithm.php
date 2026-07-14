@@ -1,7 +1,6 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Onumia\Lib\Pitmaster\Diff;
 
 final class DiffAlgorithm
@@ -9,12 +8,8 @@ final class DiffAlgorithm
     /**
      * @return array<int, Hunk>
      */
-    public static function diff(
-        string $old,
-        string $new,
-        string $algorithm = 'myers',
-        int $context = 3,
-    ): array {
+    public static function diff(string $old, string $new, string $algorithm = 'myers', int $context = 3): array
+    {
         return match ($algorithm) {
             'myers', 'default' => MyersDiff::diff($old, $new, $context),
             'minimal' => MinimalDiff::diff($old, $new, $context),

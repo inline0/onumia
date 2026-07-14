@@ -1,7 +1,6 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Onumia\Lib\Pitmaster\Object;
 
 /**
@@ -14,79 +13,62 @@ final readonly class ObjectId
     public string $hex;
     public string $binary;
     public string $algo;
-
     private function __construct(string $hex, string $binary, string $algo = 'sha1')
     {
         $this->hex = $hex;
         $this->binary = $binary;
         $this->algo = $algo;
     }
-
     /**
      * Create from hex string (40 chars for SHA-1, 64 chars for SHA-256).
      */
     public static function fromHex(string $hex): self
     {
         $hex = strtolower($hex);
-
         if (!self::looksLikeHex($hex)) {
             throw new \InvalidArgumentException("Invalid hex string for ObjectId: {$hex}");
         }
-
         $algo = strlen($hex) === 64 ? 'sha256' : 'sha1';
         $binary = hex2bin($hex);
-
-        if ($binary === false) {
+        if ($binary === \false) {
             throw new \InvalidArgumentException("Invalid hex string for ObjectId: {$hex}");
         }
-
         return new self($hex, $binary, $algo);
     }
-
     /**
      * Create from raw binary hash (20 bytes for SHA-1, 32 bytes for SHA-256).
      */
     public static function fromBinary(string $binary): self
     {
         $length = strlen($binary);
-
         if ($length !== 20 && $length !== 32) {
             throw new \InvalidArgumentException("Invalid binary hash length for ObjectId: {$length}");
         }
-
         $algo = $length === 32 ? 'sha256' : 'sha1';
-
         return new self(bin2hex($binary), $binary, $algo);
     }
-
     public static function looksLikeHex(string $value): bool
     {
         $length = strlen($value);
-
         return ($length === 40 || $length === 64) && ctype_xdigit($value);
     }
-
     public static function hexLength(string $algo = 'sha1'): int
     {
         return $algo === 'sha256' ? 64 : 40;
     }
-
     public static function hashBytesForAlgo(string $algo = 'sha1'): int
     {
         return $algo === 'sha256' ? 32 : 20;
     }
-
     /**
      * Compute the object ID by hashing header + content.
      */
     public static function compute(ObjectType $type, string $content, string $algo = 'sha1'): self
     {
-        $header = $type->value . ' ' . strlen($content) . "\0";
+        $header = $type->value . ' ' . strlen($content) . "\x00";
         $hex = hash($algo, $header . $content);
-
         return new self($hex, hex2bin($hex), $algo);
     }
-
     /**
      * The first two hex characters (used for loose object directory).
      */
@@ -94,7 +76,6 @@ final readonly class ObjectId
     {
         return substr($this->hex, 0, 2);
     }
-
     /**
      * The remaining hex characters after the prefix.
      */
@@ -102,7 +83,6 @@ final readonly class ObjectId
     {
         return substr($this->hex, 2);
     }
-
     /**
      * Hash length in bytes (20 for SHA-1, 32 for SHA-256).
      */
@@ -110,7 +90,6 @@ final readonly class ObjectId
     {
         return $this->algo === 'sha256' ? 32 : 20;
     }
-
     /**
      * Whether this is a SHA-256 hash.
      */
@@ -118,27 +97,22 @@ final readonly class ObjectId
     {
         return $this->algo === 'sha256';
     }
-
     /**
      * Create a zero/null ObjectId (all zeros).
      */
     public static function zero(string $algo = 'sha1'): self
     {
         $len = $algo === 'sha256' ? 64 : 40;
-
         return self::fromHex(str_repeat('0', $len));
     }
-
     public function isZero(): bool
     {
         return $this->hex === str_repeat('0', strlen($this->hex));
     }
-
     public function equals(self $other): bool
     {
         return $this->hex === $other->hex;
     }
-
     public function __toString(): string
     {
         return $this->hex;

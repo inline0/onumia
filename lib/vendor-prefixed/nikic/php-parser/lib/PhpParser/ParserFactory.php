@@ -1,17 +1,19 @@
-<?php declare(strict_types=1);
+<?php
 
+declare (strict_types=1);
 namespace Onumia\Lib\PhpParser;
 
 use Onumia\Lib\PhpParser\Parser\Php7;
 use Onumia\Lib\PhpParser\Parser\Php8;
-
-class ParserFactory {
+class ParserFactory
+{
     /**
      * Create a parser targeting the given version on a best-effort basis. The parser will generally
      * accept code for the newest supported version, but will try to accommodate code that becomes
      * invalid in newer versions or changes in interpretation.
      */
-    public function createForVersion(PhpVersion $version): Parser {
+    public function createForVersion(PhpVersion $version): Parser
+    {
         if ($version->isHostVersion()) {
             $lexer = new Lexer();
         } else {
@@ -22,21 +24,21 @@ class ParserFactory {
         }
         return new Php7($lexer, $version);
     }
-
     /**
      * Create a parser targeting the newest version supported by this library. Code for older
      * versions will be accepted if there have been no relevant backwards-compatibility breaks in
      * PHP.
      */
-    public function createForNewestSupportedVersion(): Parser {
+    public function createForNewestSupportedVersion(): Parser
+    {
         return $this->createForVersion(PhpVersion::getNewestSupported());
     }
-
     /**
      * Create a parser targeting the host PHP version, that is the PHP version we're currently
      * running on. This parser will not use any token emulation.
      */
-    public function createForHostVersion(): Parser {
+    public function createForHostVersion(): Parser
+    {
         return $this->createForVersion(PhpVersion::getHostVersion());
     }
 }

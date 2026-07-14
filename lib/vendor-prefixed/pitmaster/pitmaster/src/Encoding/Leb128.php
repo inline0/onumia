@@ -1,7 +1,6 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Onumia\Lib\Pitmaster\Encoding;
 
 /**
@@ -19,34 +18,27 @@ final class Leb128
     {
         $result = 0;
         $shift = 0;
-
         do {
             $byte = $reader->readByte();
-            $result |= ($byte & 0x7F) << $shift;
+            $result |= ($byte & 0x7f) << $shift;
             $shift += 7;
         } while ($byte & 0x80);
-
         return $result;
     }
-
     /**
      * Encode an unsigned integer as LEB128 bytes.
      */
     public static function encodeUnsigned(int $value): string
     {
         $result = '';
-
         do {
-            $byte = $value & 0x7F;
+            $byte = $value & 0x7f;
             $value >>= 7;
-
             if ($value > 0) {
                 $byte |= 0x80;
             }
-
             $result .= chr($byte);
         } while ($value > 0);
-
         return $result;
     }
 }

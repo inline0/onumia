@@ -1,11 +1,9 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Onumia\Lib\Pitmaster\Exceptions;
 
 use RuntimeException;
-
 final class ObjectNotFoundException extends RuntimeException
 {
     public static function forHash(string $hash): self

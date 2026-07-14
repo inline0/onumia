@@ -1,7 +1,6 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Onumia\Lib\Pitmaster\Pack;
 
 use Onumia\Lib\Pitmaster\Encoding\BinaryReader;
@@ -11,7 +10,6 @@ use Onumia\Lib\Pitmaster\Object\GitObject;
 use Onumia\Lib\Pitmaster\Object\ObjectId;
 use Onumia\Lib\Pitmaster\Object\ObjectType;
 use Onumia\Lib\Pitmaster\Storage\ObjectSerializer;
-
 /**
  * Single .pack file reader.
  *
@@ -29,17 +27,13 @@ final class PackFile
 {
     private const MAGIC = 'PACK';
     private const SUPPORTED_VERSION = 2;
-
     private BinaryReader $reader;
     private int $objectCount;
     private PackIndex $index;
     private int $hashBytes = 20;
-
-    private function __construct(
-        private readonly string $path,
-    ) {
+    private function __construct(private readonly string $path)
+    {
     }
-
     public static function open(string $packPath, string $indexPath): self
     {
         $pack = new self($packPath);
@@ -47,20 +41,16 @@ final class PackFile
         $pack->index = PackIndex::open($indexPath);
         $pack->hashBytes = $pack->index->hashBytes();
         $pack->parseHeader();
-
         return $pack;
     }
-
     public function objectCount(): int
     {
         return $this->objectCount;
     }
-
     public function index(): PackIndex
     {
         return $this->index;
     }
-
     /**
      * Check if this pack contains an object.
      */
@@ -68,21 +58,17 @@ final class PackFile
     {
         return $this->index->findOffset($hex) !== null;
     }
-
     /**
      * Read an object from this pack by hash.
      */
     public function read(string $hex): ?GitObject
     {
         $offset = $this->index->findOffset($hex);
-
         if ($offset === null) {
             return null;
         }
-
         return $this->readAtOffset($offset, $hex);
     }
-
     /**
      * Read an object at a specific pack offset, resolving delta chains.
      */
@@ -91,15 +77,10 @@ final class PackFile
         $resolved = $this->resolveAtOffset($offset, 0);
         $type = $resolved['type'];
         $content = $resolved['content'];
-
         $algo = $this->hashBytes === 32 ? 'sha256' : 'sha1';
-        $id = $expectedHash !== null
-            ? ObjectId::fromHex($expectedHash)
-            : ObjectId::compute($type, $content, $algo);
-
+        $id = $expectedHash !== null ? ObjectId::fromHex($expectedHash) : ObjectId::compute($type, $content, $algo);
         return ObjectSerializer::parseTyped($type, $content, $id);
     }
-
     /**
      * Resolve an object at offset, following delta chains.
      *
@@ -107,86 +88,56 @@ final class PackFile
      */
     private function resolveAtOffset(int $offset, int $depth): array
     {
-        $maxDepth = defined('PITMASTER_MAX_DELTA_CHAIN')
-            ? (int) constant('PITMASTER_MAX_DELTA_CHAIN')
-            : 50;
-
+        $maxDepth = defined('PITMASTER_MAX_DELTA_CHAIN') ? (int) constant('PITMASTER_MAX_DELTA_CHAIN') : 50;
         if ($depth > $maxDepth) {
             throw PackParseException::deltaChainTooDeep($depth, $maxDepth);
         }
-
         $entry = $this->readEntryHeader($offset);
-
         if (!$entry->isDelta()) {
             $type = $entry->objectType();
             $content = $this->readCompressedData($entry->dataOffset, $entry->uncompressedSize);
-
             return ['type' => $type, 'content' => $content];
         }
-
         if ($entry->isOfsDelta()) {
             $baseOffset = $entry->entryOffset - $entry->baseOffset;
             $base = $this->resolveAtOffset($baseOffset, $depth + 1);
         } else {
             // REF_DELTA: look up the base by hash
             $basePackOffset = $this->index->findOffset($entry->baseHash);
-
             if ($basePackOffset === null) {
-                throw PackParseException::invalidDeltaBase(
-                    "ref-delta base {$entry->baseHash} not found in pack"
-                );
+                throw PackParseException::invalidDeltaBase("ref-delta base {$entry->baseHash} not found in pack");
             }
-
             $base = $this->resolveAtOffset($basePackOffset, $depth + 1);
         }
-
         $delta = $this->readCompressedData($entry->dataOffset, $entry->uncompressedSize);
         $content = DeltaApplier::apply($base['content'], $delta);
-
         return ['type' => $base['type'], 'content' => $content];
     }
-
     /**
      * Read and parse a pack entry header at the given offset.
      */
     private function readEntryHeader(int $offset): PackEntry
     {
         $this->reader->seek($offset);
-
         $byte = $this->reader->readByte();
-        $packType = ($byte >> 4) & 0x07;
-        $size = $byte & 0x0F;
+        $packType = $byte >> 4 & 0x7;
+        $size = $byte & 0xf;
         $shift = 4;
-
         while ($byte & 0x80) {
             $byte = $this->reader->readByte();
-            $size |= ($byte & 0x7F) << $shift;
+            $size |= ($byte & 0x7f) << $shift;
             $shift += 7;
         }
-
         $baseOffset = null;
         $baseHash = null;
-
         if ($packType === PackEntry::TYPE_OFS_DELTA) {
             $baseOffset = VarInt::decodeOfsOffset($this->reader);
         } elseif ($packType === PackEntry::TYPE_REF_DELTA) {
-            $baseHash = $this->hashBytes === 32
-                ? $this->reader->readHash32()
-                : $this->reader->readHash20();
+            $baseHash = $this->hashBytes === 32 ? $this->reader->readHash32() : $this->reader->readHash20();
         }
-
         $dataOffset = $this->reader->position();
-
-        return new PackEntry(
-            packType: $packType,
-            uncompressedSize: $size,
-            dataOffset: $dataOffset,
-            entryOffset: $offset,
-            baseOffset: $baseOffset,
-            baseHash: $baseHash,
-        );
+        return new PackEntry(packType: $packType, uncompressedSize: $size, dataOffset: $dataOffset, entryOffset: $offset, baseOffset: $baseOffset, baseHash: $baseHash);
     }
-
     /**
      * Read zlib-compressed data at offset and decompress to expected size.
      *
@@ -198,60 +149,43 @@ final class PackFile
     {
         $this->reader->seek($offset);
         $remaining = $this->reader->remainingData();
-
         // Try raw deflate first (most common in pack files)
-        $context = @inflate_init(ZLIB_ENCODING_RAW);
-
-        if ($context === false) {
+        $context = @inflate_init(\ZLIB_ENCODING_RAW);
+        if ($context === \false) {
             throw PackParseException::truncated($this->path, "inflate_init failed at offset {$offset}");
         }
-
-        $decompressed = @inflate_add($context, $remaining, ZLIB_FINISH);
-
-        if ($decompressed !== false && strlen($decompressed) === $uncompressedSize) {
+        $decompressed = @inflate_add($context, $remaining, \ZLIB_FINISH);
+        if ($decompressed !== \false && strlen($decompressed) === $uncompressedSize) {
             return $decompressed;
         }
-
         // Fall back to zlib_decode with various strategies
         $decompressed = @zlib_decode($remaining, $uncompressedSize);
-
-        if ($decompressed !== false && strlen($decompressed) === $uncompressedSize) {
+        if ($decompressed !== \false && strlen($decompressed) === $uncompressedSize) {
             return $decompressed;
         }
-
         // Try without size limit
         $decompressed = @zlib_decode($remaining);
-
-        if ($decompressed !== false) {
+        if ($decompressed !== \false) {
             if (strlen($decompressed) >= $uncompressedSize) {
                 return substr($decompressed, 0, $uncompressedSize);
             }
-
             return $decompressed;
         }
-
         throw PackParseException::truncated($this->path, "zlib decompression failed at offset {$offset}");
     }
-
     private function parseHeader(): void
     {
         $this->reader->seek(0);
-
         $magic = $this->reader->read(4);
-
         if ($magic !== self::MAGIC) {
             throw PackParseException::invalidMagic($this->path);
         }
-
         $version = $this->reader->readUint32();
-
         if ($version !== self::SUPPORTED_VERSION) {
             throw PackParseException::unsupportedVersion($version, $this->path);
         }
-
         $this->objectCount = $this->reader->readUint32();
     }
-
     /**
      * List all object hashes in this pack.
      *

@@ -1,11 +1,9 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Onumia\Lib\Pitmaster\Pack;
 
 use Onumia\Lib\Pitmaster\Encoding\BinaryReader;
-
 /**
  * Multi-pack-index (MIDX) reader.
  *
@@ -19,129 +17,104 @@ use Onumia\Lib\Pitmaster\Encoding\BinaryReader;
 final class MultiPackIndex
 {
     private const MAGIC = "MIDX";
-
     /** @var array<int, string> Pack file names */
     private array $packNames = [];
-
     /** @var array<int, int> Fanout table */
     private array $fanout = [];
-
     /** @var array<int, string> Object hashes (sorted) */
     private array $oids = [];
-
     /** @var array<int, array{pack: int, offset: int}> */
     private array $offsets = [];
-
     private int $objectCount = 0;
     private int $hashBytes = 20;
-
     public static function open(string $path): ?self
     {
         if (!is_file($path)) {
             return null;
         }
-
         $reader = BinaryReader::fromFile($path);
-
         return self::parse($reader);
     }
-
     public static function parse(BinaryReader $reader): self
     {
         $midx = new self();
-
         $magic = $reader->read(4);
-
         if ($magic !== self::MAGIC) {
             return $midx;
         }
-
         $version = $reader->readByte();
-        $hashVersion = $reader->readByte(); // 1 = SHA-1, 2 = SHA-256
+        $hashVersion = $reader->readByte();
+        // 1 = SHA-1, 2 = SHA-256
         $midx->hashBytes = $hashVersion === 2 ? 32 : 20;
         $chunkCount = $reader->readByte();
-        $_ = $reader->readByte(); // base MIDX count
+        $_ = $reader->readByte();
+        // base MIDX count
         $packCount = $reader->readUint32();
-
         // Read chunk lookup table
         $chunks = [];
-
         for ($i = 0; $i <= $chunkCount; $i++) {
             $chunkId = $reader->readUint32();
             $chunkOffset = $reader->readUint64();
-
             if ($chunkId === 0) {
                 break;
             }
-
             $chunks[] = ['id' => $chunkId, 'offset' => $chunkOffset];
         }
-
         // Parse each chunk based on ID
         foreach ($chunks as $chunk) {
             $reader->seek($chunk['offset']);
-
             switch ($chunk['id']) {
-                case 0x504E414D: // PNAM - Pack names
+                case 0x504e414d:
+                    // PNAM - Pack names
                     $midx->packNames = self::readPackNames($reader, $packCount);
                     break;
-
-                case 0x4F494446: // OIDF - OID fanout
+                case 0x4f494446:
+                    // OIDF - OID fanout
                     for ($i = 0; $i < 256; $i++) {
                         $midx->fanout[$i] = $reader->readUint32();
                     }
                     $midx->objectCount = $midx->fanout[255];
                     break;
-
-                case 0x4F49444C: // OIDL - OID lookup
+                case 0x4f49444c:
+                    // OIDL - OID lookup
                     for ($i = 0; $i < $midx->objectCount; $i++) {
-                        $midx->oids[$i] = $midx->hashBytes === 32
-                            ? $reader->readHash32()
-                            : $reader->readHash20();
+                        $midx->oids[$i] = $midx->hashBytes === 32 ? $reader->readHash32() : $reader->readHash20();
                     }
                     break;
-
-                case 0x4F4F4646: // OOFF - Object offsets
+                case 0x4f4f4646:
+                    // OOFF - Object offsets
                     for ($i = 0; $i < $midx->objectCount; $i++) {
                         $packIdx = $reader->readUint32();
                         $offset = $reader->readUint32();
                         $midx->offsets[$i] = ['pack' => $packIdx, 'offset' => $offset];
                     }
                     break;
-
-                case 0x4C4F4646: // LOFF - Object large offsets
+                case 0x4c4f4646:
+                    // LOFF - Object large offsets
                     $chunkEnd = $midx->chunkEndOffset($chunks, $chunk['id'], $reader->length());
                     $entries = (int) (($chunkEnd - $reader->position()) / 8);
                     $largeOffsets = [];
-
                     for ($i = 0; $i < $entries; $i++) {
                         $largeOffsets[$i] = $reader->readUint64();
                     }
-
                     foreach ($midx->offsets as $index => $offsetInfo) {
                         if (($offsetInfo['offset'] & 0x80000000) === 0) {
                             continue;
                         }
-
-                        $largeIndex = $offsetInfo['offset'] & 0x7FFFFFFF;
-
+                        $largeIndex = $offsetInfo['offset'] & 0x7fffffff;
                         if (isset($largeOffsets[$largeIndex])) {
                             $midx->offsets[$index]['offset'] = $largeOffsets[$largeIndex];
                         }
                     }
-
                     break;
             }
         }
-
         return $midx;
     }
-
     public function objectCount(): int
     {
         return $this->objectCount;
     }
-
     /**
      * @return array<int, string>
      */
@@ -149,7 +122,6 @@ final class MultiPackIndex
     {
         return $this->packNames;
     }
-
     /**
      * Find which pack file contains an object and at what offset.
      *
@@ -158,41 +130,33 @@ final class MultiPackIndex
     public function findObject(string $hex): ?array
     {
         $firstByte = (int) hexdec(substr($hex, 0, 2));
-        $lo = $firstByte > 0 ? ($this->fanout[$firstByte - 1] ?? 0) : 0;
+        $lo = $firstByte > 0 ? $this->fanout[$firstByte - 1] ?? 0 : 0;
         $hi = ($this->fanout[$firstByte] ?? 0) - 1;
-
         while ($lo <= $hi) {
             $mid = (int) (($lo + $hi) / 2);
             $cmp = strcmp($hex, $this->oids[$mid] ?? '');
-
             if ($cmp === 0) {
                 return $this->offsets[$mid] ?? null;
             }
-
             if ($cmp < 0) {
                 $hi = $mid - 1;
             } else {
                 $lo = $mid + 1;
             }
         }
-
         return null;
     }
-
     /**
      * @return array<int, string>
      */
     private static function readPackNames(BinaryReader $reader, int $count): array
     {
         $names = [];
-
         for ($i = 0; $i < $count; $i++) {
             $names[] = $reader->readNullTerminated();
         }
-
         return $names;
     }
-
     /**
      * @param array<int, array{id: int, offset: int}> $chunks
      */
@@ -202,10 +166,8 @@ final class MultiPackIndex
             if ($chunk['id'] !== $chunkId) {
                 continue;
             }
-
-            return $chunks[$index + 1]['offset'] ?? ($fileLength - ($this->hashBytes * 2));
+            return $chunks[$index + 1]['offset'] ?? $fileLength - $this->hashBytes * 2;
         }
-
-        return $fileLength - ($this->hashBytes * 2);
+        return $fileLength - $this->hashBytes * 2;
     }
 }

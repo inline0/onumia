@@ -1,12 +1,10 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Onumia\Lib\Pitmaster\Pack;
 
 use Onumia\Lib\Pitmaster\Exceptions\PackParseException;
 use Onumia\Lib\Pitmaster\Encoding\BinaryReader;
-
 /**
  * Applies delta instructions (copy/insert) against a base object.
  *
@@ -31,40 +29,31 @@ final class DeltaApplier
     public static function apply(string $base, string $delta): string
     {
         $reader = new BinaryReader($delta);
-
         // Delta header: source size and target size (both as size-encoding varints).
         $sourceSize = self::readDeltaSize($reader);
         $targetSize = self::readDeltaSize($reader);
-
         if ($sourceSize !== strlen($base)) {
-            throw PackParseException::invalidDeltaBase(
-                "source size mismatch: delta says {$sourceSize}, base is " . strlen($base)
-            );
+            throw PackParseException::invalidDeltaBase("source size mismatch: delta says {$sourceSize}, base is " . strlen($base));
         }
-
         $result = '';
-
         while (!$reader->isEof()) {
             $opcode = $reader->readByte();
-
             if ($opcode & 0x80) {
                 // Copy instruction
                 $offset = 0;
                 $size = 0;
-
-                if ($opcode & 0x01) {
+                if ($opcode & 0x1) {
                     $offset = $reader->readByte();
                 }
-                if ($opcode & 0x02) {
+                if ($opcode & 0x2) {
                     $offset |= $reader->readByte() << 8;
                 }
-                if ($opcode & 0x04) {
+                if ($opcode & 0x4) {
                     $offset |= $reader->readByte() << 16;
                 }
-                if ($opcode & 0x08) {
+                if ($opcode & 0x8) {
                     $offset |= $reader->readByte() << 24;
                 }
-
                 if ($opcode & 0x10) {
                     $size = $reader->readByte();
                 }
@@ -74,11 +63,9 @@ final class DeltaApplier
                 if ($opcode & 0x40) {
                     $size |= $reader->readByte() << 16;
                 }
-
                 if ($size === 0) {
                     $size = 0x10000;
                 }
-
                 $result .= substr($base, $offset, $size);
             } elseif ($opcode > 0) {
                 // Insert instruction: opcode is the byte count
@@ -88,16 +75,11 @@ final class DeltaApplier
                 throw PackParseException::invalidDeltaBase('zero-length insert opcode');
             }
         }
-
         if (strlen($result) !== $targetSize) {
-            throw PackParseException::invalidDeltaBase(
-                "target size mismatch: expected {$targetSize}, got " . strlen($result)
-            );
+            throw PackParseException::invalidDeltaBase("target size mismatch: expected {$targetSize}, got " . strlen($result));
         }
-
         return $result;
     }
-
     /**
      * Read a delta header size (variable-length, 7 bits per byte, MSB continue).
      */
@@ -105,13 +87,11 @@ final class DeltaApplier
     {
         $size = 0;
         $shift = 0;
-
         do {
             $byte = $reader->readByte();
-            $size |= ($byte & 0x7F) << $shift;
+            $size |= ($byte & 0x7f) << $shift;
             $shift += 7;
         } while ($byte & 0x80);
-
         return $size;
     }
 }

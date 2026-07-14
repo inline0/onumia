@@ -1,41 +1,21 @@
 #!/usr/bin/env php
-<?php
+<?php 
+declare (strict_types=1);
+namespace Onumia\Lib;
 
-declare(strict_types=1);
-
-$root = dirname(__DIR__);
+$root = \dirname(__DIR__);
 $output = $root . '/bench/reports/baseline.json';
-
-if (!is_dir(dirname($output))) {
-    mkdir(dirname($output), 0777, true);
+if (!\is_dir(\dirname($output))) {
+    \mkdir(\dirname($output), 0777, \true);
 }
-
-fwrite(STDOUT, "Capturing canonical benchmark baseline to {$output}\n\n");
-putenv('PITMASTER_BENCH_PROGRESS=1');
-
-$command = sprintf(
-    '%s %s --suite=%s --format=%s --output=%s',
-    escapeshellarg(PHP_BINARY),
-    escapeshellarg($root . '/bin/bench'),
-    escapeshellarg('all'),
-    escapeshellarg('table'),
-    escapeshellarg($output),
-);
-
-passthru($command, $exitCode);
-
+\fwrite(\STDOUT, "Capturing canonical benchmark baseline to {$output}\n\n");
+\putenv('PITMASTER_BENCH_PROGRESS=1');
+$command = \sprintf('%s %s --suite=%s --format=%s --output=%s', \escapeshellarg(\PHP_BINARY), \escapeshellarg($root . '/bin/bench'), \escapeshellarg('all'), \escapeshellarg('table'), \escapeshellarg($output));
+\passthru($command, $exitCode);
 if ($exitCode !== 0) {
     exit($exitCode);
 }
-
-fwrite(STDOUT, "\nBaseline written. Slowest cases:\n\n");
-
-$summaryCommand = sprintf(
-    '%s %s %s',
-    escapeshellarg(PHP_BINARY),
-    escapeshellarg($root . '/bin/bench-summary'),
-    escapeshellarg($output),
-);
-
-passthru($summaryCommand, $summaryExitCode);
+\fwrite(\STDOUT, "\nBaseline written. Slowest cases:\n\n");
+$summaryCommand = \sprintf('%s %s %s', \escapeshellarg(\PHP_BINARY), \escapeshellarg($root . '/bin/bench-summary'), \escapeshellarg($output));
+\passthru($summaryCommand, $summaryExitCode);
 exit($summaryExitCode);

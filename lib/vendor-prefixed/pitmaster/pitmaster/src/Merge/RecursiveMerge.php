@@ -1,12 +1,10 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Onumia\Lib\Pitmaster\Merge;
 
 use Onumia\Lib\Pitmaster\Object\Commit;
 use Onumia\Lib\Pitmaster\Object\ObjectId;
-
 /**
  * Recursive merge strategy.
  *
@@ -18,19 +16,13 @@ final class RecursiveMerge
     public function __construct()
     {
     }
-
     /**
      * Merge two commits using recursive strategy.
      *
      * @return array{content: string, clean: bool, conflicts: int}
      */
-    public function mergeContent(
-        string $base,
-        string $ours,
-        string $theirs,
-        string $oursLabel = 'HEAD',
-        string $theirsLabel = 'incoming',
-    ): array {
+    public function mergeContent(string $base, string $ours, string $theirs, string $oursLabel = 'HEAD', string $theirsLabel = 'incoming'): array
+    {
         // Recursive strategy delegates to three-way merge.
         // The "recursive" part is handling multiple merge bases at the tree level,
         // which is coordinated by Repository::merge().

@@ -1,47 +1,35 @@
 #!/usr/bin/env php
-<?php
+<?php 
+declare (strict_types=1);
+namespace Onumia\Lib;
 
-declare(strict_types=1);
-
-require dirname(__DIR__) . '/vendor/autoload.php';
-
-use Pitmaster\Tests\Oracle\ActualCapture;
-use Pitmaster\Tests\Oracle\ScenarioRepository;
-
-$arguments = array_slice($argv, 1);
+require \dirname(__DIR__) . '/vendor/autoload.php';
+use Onumia\Lib\Pitmaster\Tests\Oracle\ActualCapture;
+use Onumia\Lib\Pitmaster\Tests\Oracle\ScenarioRepository;
+$arguments = \array_slice($argv, 1);
 $scenarioName = null;
-
 foreach ($arguments as $argument) {
     if ($scenarioName === null) {
         $scenarioName = $argument;
         continue;
     }
-
-    fwrite(STDERR, "Usage: bin/actual <scenario>\n");
+    \fwrite(\STDERR, "Usage: bin/actual <scenario>\n");
     exit(1);
 }
-
 if ($scenarioName === null) {
-    fwrite(STDERR, "Usage: bin/actual <scenario>\n");
+    \fwrite(\STDERR, "Usage: bin/actual <scenario>\n");
     exit(1);
 }
-
-$repo = new ScenarioRepository(dirname(__DIR__));
+$repo = new ScenarioRepository(\dirname(__DIR__));
 $scenario = $repo->get($scenarioName);
-
-fwrite(STDOUT, "Running Pitmaster for {$scenarioName}...\n");
-
+\fwrite(\STDOUT, "Running Pitmaster for {$scenarioName}...\n");
 $capture = new ActualCapture();
 $result = $capture->capture($scenario);
-
 if (!$result['success']) {
-    fwrite(STDERR, "Actual capture failed:\n");
-
+    \fwrite(\STDERR, "Actual capture failed:\n");
     foreach ($result['errors'] as $error) {
-        fwrite(STDERR, "  {$error}\n");
+        \fwrite(\STDERR, "  {$error}\n");
     }
-
     exit(1);
 }
-
-fwrite(STDOUT, "Actual captured for {$scenarioName}\n");
+\fwrite(\STDOUT, "Actual captured for {$scenarioName}\n");

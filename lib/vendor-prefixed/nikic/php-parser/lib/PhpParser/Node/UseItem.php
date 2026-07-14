@@ -1,12 +1,13 @@
-<?php declare(strict_types=1);
+<?php
 
+declare (strict_types=1);
 namespace Onumia\Lib\PhpParser\Node;
 
 use Onumia\Lib\PhpParser\Node;
 use Onumia\Lib\PhpParser\NodeAbstract;
 use Onumia\Lib\PhpParser\Node\Stmt\Use_;
-
-class UseItem extends NodeAbstract {
+class UseItem extends NodeAbstract
+{
     /**
      * @var Use_::TYPE_* One of the Stmt\Use_::TYPE_* constants. Will only differ from TYPE_UNKNOWN for mixed group uses
      */
@@ -15,7 +16,6 @@ class UseItem extends NodeAbstract {
     public Name $name;
     /** @var Identifier|null Alias */
     public ?Identifier $alias;
-
     /**
      * Constructs an alias (use) item node.
      *
@@ -24,32 +24,31 @@ class UseItem extends NodeAbstract {
      * @param Use_::TYPE_* $type Type of the use element (for mixed group use only)
      * @param array<string, mixed> $attributes Additional attributes
      */
-    public function __construct(Node\Name $name, $alias = null, int $type = Use_::TYPE_UNKNOWN, array $attributes = []) {
+    public function __construct(Node\Name $name, $alias = null, int $type = Use_::TYPE_UNKNOWN, array $attributes = [])
+    {
         $this->attributes = $attributes;
         $this->type = $type;
         $this->name = $name;
         $this->alias = \is_string($alias) ? new Identifier($alias) : $alias;
     }
-
-    public function getSubNodeNames(): array {
+    public function getSubNodeNames(): array
+    {
         return ['type', 'name', 'alias'];
     }
-
     /**
      * Get alias. If not explicitly given this is the last component of the used name.
      */
-    public function getAlias(): Identifier {
+    public function getAlias(): Identifier
+    {
         if (null !== $this->alias) {
             return $this->alias;
         }
-
         return new Identifier($this->name->getLast());
     }
-
-    public function getType(): string {
+    public function getType(): string
+    {
         return 'UseItem';
     }
 }
-
 // @deprecated compatibility alias
 class_alias(UseItem::class, Stmt\UseUse::class);

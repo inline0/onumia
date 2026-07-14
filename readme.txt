@@ -36,6 +36,9 @@ while preserving settings and owned data.
 
 == Changelog ==
 
+= 0.1.1 - 2026-07-14 =
+* No public changes.
+
 = 0.1.0 - 2026-07-13 =
 * Prevent concurrent sandbox promotions from colliding
 * Clear scheduled Onumia jobs when the plugin is deactivated

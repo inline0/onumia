@@ -1,10 +1,10 @@
-<?php declare(strict_types=1);
+<?php
 
+declare (strict_types=1);
 namespace Onumia\Lib\PhpParser\NodeVisitor;
 
 use Onumia\Lib\PhpParser\Node;
 use Onumia\Lib\PhpParser\NodeVisitorAbstract;
-
 /**
  * Visitor that connects a child node to its parent node
  * as well as its sibling nodes.
@@ -16,29 +16,28 @@ use Onumia\Lib\PhpParser\NodeVisitorAbstract;
  *
  * With <code>$weakReferences=true</code> attribute names are prefixed by "weak_", e.g. "weak_parent".
  */
-final class NodeConnectingVisitor extends NodeVisitorAbstract {
+final class NodeConnectingVisitor extends NodeVisitorAbstract
+{
     /**
      * @var Node[]
      */
     private array $stack = [];
-
     /**
      * @var ?Node
      */
     private $previous;
-
     private bool $weakReferences;
-
-    public function __construct(bool $weakReferences = false) {
+    public function __construct(bool $weakReferences = \false)
+    {
         $this->weakReferences = $weakReferences;
     }
-
-    public function beforeTraverse(array $nodes) {
-        $this->stack    = [];
+    public function beforeTraverse(array $nodes)
+    {
+        $this->stack = [];
         $this->previous = null;
     }
-
-    public function enterNode(Node $node) {
+    public function enterNode(Node $node)
+    {
         if (!empty($this->stack)) {
             $parent = $this->stack[count($this->stack) - 1];
             if ($this->weakReferences) {
@@ -47,11 +46,8 @@ final class NodeConnectingVisitor extends NodeVisitorAbstract {
                 $node->setAttribute('parent', $parent);
             }
         }
-
         if ($this->previous !== null) {
-            if (
-                $this->weakReferences
-            ) {
+            if ($this->weakReferences) {
                 if ($this->previous->getAttribute('weak_parent') === $node->getAttribute('weak_parent')) {
                     $node->setAttribute('weak_previous', \WeakReference::create($this->previous));
                     $this->previous->setAttribute('weak_next', \WeakReference::create($node));
@@ -61,13 +57,11 @@ final class NodeConnectingVisitor extends NodeVisitorAbstract {
                 $this->previous->setAttribute('next', $node);
             }
         }
-
         $this->stack[] = $node;
     }
-
-    public function leaveNode(Node $node) {
+    public function leaveNode(Node $node)
+    {
         $this->previous = $node;
-
         array_pop($this->stack);
     }
 }

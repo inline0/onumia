@@ -1,15 +1,15 @@
-<?php declare(strict_types=1);
+<?php
 
+declare (strict_types=1);
 namespace Onumia\Lib\PhpParser\Node\Expr;
 
 use Onumia\Lib\PhpParser\Node\Expr;
-
-abstract class BinaryOp extends Expr {
+abstract class BinaryOp extends Expr
+{
     /** @var Expr The left hand side expression */
     public Expr $left;
     /** @var Expr The right hand side expression */
     public Expr $right;
-
     /**
      * Constructs a binary operator node.
      *
@@ -17,16 +17,16 @@ abstract class BinaryOp extends Expr {
      * @param Expr $right The right hand side expression
      * @param array<string, mixed> $attributes Additional attributes
      */
-    public function __construct(Expr $left, Expr $right, array $attributes = []) {
+    public function __construct(Expr $left, Expr $right, array $attributes = [])
+    {
         $this->attributes = $attributes;
         $this->left = $left;
         $this->right = $right;
     }
-
-    public function getSubNodeNames(): array {
+    public function getSubNodeNames(): array
+    {
         return ['left', 'right'];
     }
-
     /**
      * Get the operator sigil for this binary operation.
      *

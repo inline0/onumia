@@ -1,7 +1,7 @@
 #!/usr/bin/env php
-<?php
-
-declare(strict_types=1);
+<?php 
+declare (strict_types=1);
+namespace Onumia\Lib;
 
 /**
  * Generates SUPPORT_MATRIX.md from config/support-matrix.json.
@@ -9,33 +9,25 @@ declare(strict_types=1);
  * Reads the feature matrix definition and produces a human-readable
  * markdown document showing git feature coverage.
  */
-
-$root = dirname(__DIR__);
+$root = \dirname(__DIR__);
 $configPath = $root . '/config/support-matrix.json';
 $outputPath = $root . '/SUPPORT_MATRIX.md';
-
-if (!is_file($configPath)) {
-    fwrite(STDERR, "Missing config at {$configPath}\n");
+if (!\is_file($configPath)) {
+    \fwrite(\STDERR, "Missing config at {$configPath}\n");
     exit(1);
 }
-
-$config = json_decode((string) file_get_contents($configPath), true);
-
-if (!is_array($config)) {
-    fwrite(STDERR, "Invalid config.\n");
+$config = \json_decode((string) \file_get_contents($configPath), \true);
+if (!\is_array($config)) {
+    \fwrite(\STDERR, "Invalid config.\n");
     exit(1);
 }
-
 $categories = $config['categories'] ?? [];
-
 // Count totals
 $totals = ['full' => 0, 'partial' => 0, 'planned' => 0, 'deferred' => 0, 'out-of-scope' => 0];
 $totalFeatures = 0;
 $categoryStats = [];
-
 foreach ($categories as $category) {
     $catStats = ['full' => 0, 'partial' => 0, 'planned' => 0, 'deferred' => 0, 'out-of-scope' => 0, 'total' => 0];
-
     foreach ($category['features'] as $feature) {
         $status = $feature['status'];
         $totals[$status] = ($totals[$status] ?? 0) + 1;
@@ -43,47 +35,26 @@ foreach ($categories as $category) {
         $catStats['total']++;
         $totalFeatures++;
     }
-
     $categoryStats[$category['name']] = $catStats;
 }
-
 $implemented = $totals['full'] + $totals['partial'];
 $fullyDone = $totals['full'];
 $inScope = $totalFeatures - $totals['out-of-scope'];
-$fullPercent = $inScope > 0 ? round(($fullyDone / $inScope) * 100, 1) : 0;
-$supportedPercent = $inScope > 0 ? round(($implemented / $inScope) * 100, 1) : 0;
-
+$fullPercent = $inScope > 0 ? \round($fullyDone / $inScope * 100, 1) : 0;
+$supportedPercent = $inScope > 0 ? \round($implemented / $inScope * 100, 1) : 0;
 // Status icons
-$icons = [
-    'full' => '`DONE`',
-    'partial' => '`PART`',
-    'planned' => '`TODO`',
-    'deferred' => '`DEFER`',
-    'out-of-scope' => '`N/A`',
-];
-
+$icons = ['full' => '`DONE`', 'partial' => '`PART`', 'planned' => '`TODO`', 'deferred' => '`DEFER`', 'out-of-scope' => '`N/A`'];
 // Generate markdown
 $lines = [];
 $lines[] = '# Pitmaster Support Matrix';
 $lines[] = '';
-$lines[] = sprintf(
-    'Git feature coverage for Pitmaster. **%d/%d in-scope features fully implemented and oracle-verified within the declared parity scope (%s%%).**',
-    $fullyDone,
-    $inScope,
-    $fullPercent,
-);
-$lines[] = sprintf(
-    'Partial support exists for **%d/%d** additional in-scope features (%s%% supported to some degree).',
-    $totals['partial'],
-    $inScope,
-    $supportedPercent,
-);
+$lines[] = \sprintf('Git feature coverage for Pitmaster. **%d/%d in-scope features fully implemented and oracle-verified within the declared parity scope (%s%%).**', $fullyDone, $inScope, $fullPercent);
+$lines[] = \sprintf('Partial support exists for **%d/%d** additional in-scope features (%s%% supported to some degree).', $totals['partial'], $inScope, $supportedPercent);
 $lines[] = '';
 $lines[] = 'Every `DONE`/`PART` row is backed by concrete tests and oracle scenarios via `config/support-evidence.json`, validated by `bin/verify-support-evidence`.';
 $lines[] = '';
 $lines[] = 'Source of truth: `config/support-matrix.json` + `config/support-evidence.json`.';
 $lines[] = '';
-
 // Legend
 $lines[] = '## Legend';
 $lines[] = '';
@@ -97,110 +68,64 @@ $lines[] = '| `N/A` | Out of scope (violates pure-PHP or outside agent-IDE scope
 $lines[] = '| Scope `native` | Pitmaster directly authors or owns the behavior/format |';
 $lines[] = '| Scope `interop` | Pitmaster interoperates with Git-authored state or equivalent compatibility paths |';
 $lines[] = '';
-
 // Summary table
 $lines[] = '## Summary';
 $lines[] = '';
 $lines[] = '| Category | Done | Partial | Todo | Deferred | N/A | Total |';
 $lines[] = '|----------|------|---------|------|----------|-----|-------|';
-
 foreach ($categoryStats as $name => $stats) {
-    $lines[] = sprintf(
-        '| %s | %d | %d | %d | %d | %d | %d |',
-        $name,
-        $stats['full'],
-        $stats['partial'],
-        $stats['planned'],
-        $stats['deferred'],
-        $stats['out-of-scope'],
-        $stats['total'],
-    );
+    $lines[] = \sprintf('| %s | %d | %d | %d | %d | %d | %d |', $name, $stats['full'], $stats['partial'], $stats['planned'], $stats['deferred'], $stats['out-of-scope'], $stats['total']);
 }
-
-$lines[] = sprintf(
-    '| **Total** | **%d** | **%d** | **%d** | **%d** | **%d** | **%d** |',
-    $totals['full'],
-    $totals['partial'],
-    $totals['planned'],
-    $totals['deferred'],
-    $totals['out-of-scope'],
-    $totalFeatures,
-);
+$lines[] = \sprintf('| **Total** | **%d** | **%d** | **%d** | **%d** | **%d** | **%d** |', $totals['full'], $totals['partial'], $totals['planned'], $totals['deferred'], $totals['out-of-scope'], $totalFeatures);
 $lines[] = '';
-
 // Detailed tables per category
 $lines[] = '## Details';
 $lines[] = '';
-
 foreach ($categories as $category) {
     $stats = $categoryStats[$category['name']];
     $catScope = $stats['total'] - $stats['out-of-scope'];
-
-    $lines[] = sprintf('### %s', $category['name']);
-
+    $lines[] = \sprintf('### %s', $category['name']);
     if ($catScope > 0) {
-        $catFullPercent = round(($stats['full'] / $catScope) * 100, 1);
-        $lines[] = sprintf(
-            '*%d/%d fully done (%s%%), %d partial*',
-            $stats['full'],
-            $catScope,
-            $catFullPercent,
-            $stats['partial'],
-        );
+        $catFullPercent = \round($stats['full'] / $catScope * 100, 1);
+        $lines[] = \sprintf('*%d/%d fully done (%s%%), %d partial*', $stats['full'], $catScope, $catFullPercent, $stats['partial']);
     }
-
     $lines[] = '';
     $lines[] = '| Feature | Status | Scope | Class | Notes |';
     $lines[] = '|---------|--------|-------|-------|-------|';
-
     foreach ($category['features'] as $feature) {
         $statusIcon = $icons[$feature['status']] ?? $feature['status'];
         $scope = $feature['scope'] ?? 'native';
         $class = $feature['class'] !== '' ? '`' . $feature['class'] . '`' : '';
         $notes = $feature['notes'];
-        $lines[] = sprintf('| %s | %s | `%s` | %s | %s |', $feature['feature'], $statusIcon, $scope, $class, $notes);
+        $lines[] = \sprintf('| %s | %s | `%s` | %s | %s |', $feature['feature'], $statusIcon, $scope, $class, $notes);
     }
-
     $lines[] = '';
 }
-
 // Progress bar
 $lines[] = '## Progress';
 $lines[] = '';
 $barWidth = 40;
-$filledWidth = (int) round(($fullPercent / 100) * $barWidth);
+$filledWidth = (int) \round($fullPercent / 100 * $barWidth);
 $emptyWidth = $barWidth - $filledWidth;
-$bar = str_repeat('#', $filledWidth) . str_repeat('-', $emptyWidth);
+$bar = \str_repeat('#', $filledWidth) . \str_repeat('-', $emptyWidth);
 $lines[] = '```';
-$lines[] = sprintf('[%s] %s%% fully done', $bar, $fullPercent);
+$lines[] = \sprintf('[%s] %s%% fully done', $bar, $fullPercent);
 $lines[] = '';
-$lines[] = sprintf('Full:     %d features', $totals['full']);
-$lines[] = sprintf('Partial:  %d features', $totals['partial']);
-$lines[] = sprintf('Todo:     %d features', $totals['planned']);
-$lines[] = sprintf('Deferred: %d features', $totals['deferred']);
-$lines[] = sprintf('N/A:      %d features', $totals['out-of-scope']);
+$lines[] = \sprintf('Full:     %d features', $totals['full']);
+$lines[] = \sprintf('Partial:  %d features', $totals['partial']);
+$lines[] = \sprintf('Todo:     %d features', $totals['planned']);
+$lines[] = \sprintf('Deferred: %d features', $totals['deferred']);
+$lines[] = \sprintf('N/A:      %d features', $totals['out-of-scope']);
 $lines[] = '```';
 $lines[] = '';
-
-$content = implode("\n", $lines);
-file_put_contents($outputPath, $content);
-
-fwrite(STDOUT, sprintf(
-    "Generated SUPPORT_MATRIX.md: %d/%d in-scope features fully done (%s%%), %d partial (%s%% supported)\n",
-    $fullyDone,
-    $inScope,
-    $fullPercent,
-    $totals['partial'],
-    $supportedPercent,
-));
-
+$content = \implode("\n", $lines);
+\file_put_contents($outputPath, $content);
+\fwrite(\STDOUT, \sprintf("Generated SUPPORT_MATRIX.md: %d/%d in-scope features fully done (%s%%), %d partial (%s%% supported)\n", $fullyDone, $inScope, $fullPercent, $totals['partial'], $supportedPercent));
 // Also print summary to stdout
-fwrite(STDOUT, "\n");
-
+\fwrite(\STDOUT, "\n");
 foreach ($categoryStats as $name => $stats) {
     $catScope = $stats['total'] - $stats['out-of-scope'];
-    $catPercent = $catScope > 0 ? round(($stats['full'] / $catScope) * 100, 1) : 0;
-
-    $marker = ($stats['full'] === $catScope && $stats['partial'] === 0) ? 'DONE' : (($stats['full'] > 0 || $stats['partial'] > 0) ? 'WIP ' : '    ');
-    fwrite(STDOUT, sprintf("  %s  %-25s %d/%d full, %d partial (%s%% full)\n", $marker, $name, $stats['full'], $catScope, $stats['partial'], $catPercent));
+    $catPercent = $catScope > 0 ? \round($stats['full'] / $catScope * 100, 1) : 0;
+    $marker = $stats['full'] === $catScope && $stats['partial'] === 0 ? 'DONE' : ($stats['full'] > 0 || $stats['partial'] > 0 ? 'WIP ' : '    ');
+    \fwrite(\STDOUT, \sprintf("  %s  %-25s %d/%d full, %d partial (%s%% full)\n", $marker, $name, $stats['full'], $catScope, $stats['partial'], $catPercent));
 }

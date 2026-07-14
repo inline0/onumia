@@ -1,7 +1,6 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Onumia\Lib\Pitmaster\Diff;
 
 /**
@@ -17,16 +16,9 @@ final readonly class Hunk
      * @param array<int, string> $lines Lines with +/- / prefix
      * @param string|null $section Optional trailing section label for the hunk header
      */
-    public function __construct(
-        public int $oldStart,
-        public int $oldCount,
-        public int $newStart,
-        public int $newCount,
-        public array $lines,
-        public ?string $section = null,
-    ) {
+    public function __construct(public int $oldStart, public int $oldCount, public int $newStart, public int $newCount, public array $lines, public ?string $section = null)
+    {
     }
-
     /**
      * Format as unified diff hunk header.
      */
@@ -39,7 +31,6 @@ final readonly class Hunk
         $old = $this->oldCount === 1 ? "-{$this->oldStart}" : "-{$this->oldStart},{$this->oldCount}";
         $new = $this->newCount === 1 ? "+{$this->newStart}" : "+{$this->newStart},{$this->newCount}";
         $section = $this->section !== null && $this->section !== '' ? ' ' . $this->section : '';
-
         return "@@ {$old} {$new} @@{$section}";
     }
 }

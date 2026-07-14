@@ -1,7 +1,6 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Onumia\Lib\Pitmaster\Diff;
 
 /**
@@ -9,12 +8,11 @@ namespace Onumia\Lib\Pitmaster\Diff;
  */
 final class ColorDiff
 {
-    private const RED = "\033[31m";
-    private const GREEN = "\033[32m";
-    private const CYAN = "\033[36m";
-    private const BOLD = "\033[1m";
-    private const RESET = "\033[m";
-
+    private const RED = "\x1b[31m";
+    private const GREEN = "\x1b[32m";
+    private const CYAN = "\x1b[36m";
+    private const BOLD = "\x1b[1m";
+    private const RESET = "\x1b[m";
     /**
      * Colorize a unified diff output string.
      */
@@ -22,7 +20,6 @@ final class ColorDiff
     {
         $lines = explode("\n", $diff);
         $result = [];
-
         foreach ($lines as $line) {
             if (str_starts_with($line, 'index ') || str_starts_with($line, '+++') || str_starts_with($line, '---')) {
                 $result[] = self::BOLD . $line . self::RESET;
@@ -38,10 +35,8 @@ final class ColorDiff
                 $result[] = $line;
             }
         }
-
         return implode("\n", $result);
     }
-
     /**
      * Colorize DiffResult objects.
      *
@@ -50,11 +45,9 @@ final class ColorDiff
     public static function formatResults(array $results): string
     {
         $output = '';
-
         foreach ($results as $result) {
             $output .= self::colorize($result->format());
         }
-
         return $output;
     }
 }

@@ -1,11 +1,12 @@
-<?php declare(strict_types=1);
+<?php
 
+declare (strict_types=1);
 namespace Onumia\Lib\PhpParser\Node\Stmt;
 
 use Onumia\Lib\PhpParser\Modifiers;
 use Onumia\Lib\PhpParser\Node;
-
-class ClassConst extends Node\Stmt {
+class ClassConst extends Node\Stmt
+{
     /** @var int Modifiers */
     public int $flags;
     /** @var Node\Const_[] Constant declarations */
@@ -14,7 +15,6 @@ class ClassConst extends Node\Stmt {
     public array $attrGroups;
     /** @var Node\Identifier|Node\Name|Node\ComplexType|null Type declaration */
     public ?Node $type;
-
     /**
      * Constructs a class const list node.
      *
@@ -24,54 +24,48 @@ class ClassConst extends Node\Stmt {
      * @param list<Node\AttributeGroup> $attrGroups PHP attribute groups
      * @param null|Node\Identifier|Node\Name|Node\ComplexType $type Type declaration
      */
-    public function __construct(
-        array $consts,
-        int $flags = 0,
-        array $attributes = [],
-        array $attrGroups = [],
-        ?Node $type = null
-    ) {
+    public function __construct(array $consts, int $flags = 0, array $attributes = [], array $attrGroups = [], ?Node $type = null)
+    {
         $this->attributes = $attributes;
         $this->flags = $flags;
         $this->consts = $consts;
         $this->attrGroups = $attrGroups;
         $this->type = $type;
     }
-
-    public function getSubNodeNames(): array {
+    public function getSubNodeNames(): array
+    {
         return ['attrGroups', 'flags', 'type', 'consts'];
     }
-
     /**
      * Whether constant is explicitly or implicitly public.
      */
-    public function isPublic(): bool {
-        return ($this->flags & Modifiers::PUBLIC) !== 0
-            || ($this->flags & Modifiers::VISIBILITY_MASK) === 0;
+    public function isPublic(): bool
+    {
+        return ($this->flags & Modifiers::PUBLIC) !== 0 || ($this->flags & Modifiers::VISIBILITY_MASK) === 0;
     }
-
     /**
      * Whether constant is protected.
      */
-    public function isProtected(): bool {
+    public function isProtected(): bool
+    {
         return (bool) ($this->flags & Modifiers::PROTECTED);
     }
-
     /**
      * Whether constant is private.
      */
-    public function isPrivate(): bool {
+    public function isPrivate(): bool
+    {
         return (bool) ($this->flags & Modifiers::PRIVATE);
     }
-
     /**
      * Whether constant is final.
      */
-    public function isFinal(): bool {
+    public function isFinal(): bool
+    {
         return (bool) ($this->flags & Modifiers::FINAL);
     }
-
-    public function getType(): string {
+    public function getType(): string
+    {
         return 'Stmt_ClassConst';
     }
 }

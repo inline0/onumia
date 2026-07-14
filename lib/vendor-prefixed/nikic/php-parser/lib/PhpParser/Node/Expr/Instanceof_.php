@@ -1,17 +1,17 @@
-<?php declare(strict_types=1);
+<?php
 
+declare (strict_types=1);
 namespace Onumia\Lib\PhpParser\Node\Expr;
 
 use Onumia\Lib\PhpParser\Node;
 use Onumia\Lib\PhpParser\Node\Expr;
 use Onumia\Lib\PhpParser\Node\Name;
-
-class Instanceof_ extends Expr {
+class Instanceof_ extends Expr
+{
     /** @var Expr Expression */
     public Expr $expr;
     /** @var Name|Expr Class name */
     public Node $class;
-
     /**
      * Constructs an instanceof check node.
      *
@@ -19,17 +19,18 @@ class Instanceof_ extends Expr {
      * @param Name|Expr $class Class name
      * @param array<string, mixed> $attributes Additional attributes
      */
-    public function __construct(Expr $expr, Node $class, array $attributes = []) {
+    public function __construct(Expr $expr, Node $class, array $attributes = [])
+    {
         $this->attributes = $attributes;
         $this->expr = $expr;
         $this->class = $class;
     }
-
-    public function getSubNodeNames(): array {
+    public function getSubNodeNames(): array
+    {
         return ['expr', 'class'];
     }
-
-    public function getType(): string {
+    public function getType(): string
+    {
         return 'Expr_Instanceof';
     }
 }

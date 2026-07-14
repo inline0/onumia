@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Onumia
  * Description: Onumia modular WordPress control layer.
- * Version: 0.1.0
+ * Version: 0.1.1
  * Requires PHP: 8.2
  * License: AGPL-3.0-or-later
  * License URI: https://www.gnu.org/licenses/agpl-3.0.html

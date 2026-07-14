@@ -627,7 +627,7 @@ Returns the currently booted Onumia plugin instance when available.
 This accessor exists for integrations that load after the initial
 `onumia/runtime/loaded` action has already fired.
 
-**Source** [`src/Core/Plugin.php:175`](../src/Core/Plugin.php#L175)
+**Source** [`src/Core/Plugin.php:176`](../src/Core/Plugin.php#L176)
 
 ## Public Filters
 
@@ -1064,7 +1064,7 @@ add_filter( 'onumia/github_updater/asset_regex', function ( string $asset_regex 
 
 _Category: Updates · Since 0.1.0_
 
-Filters the GitHub token used for private Onumia Free releases.
+Filters the optional GitHub token used for custom authenticated mirrors or higher API limits.
 
 **Usage**
 

@@ -1,15 +1,17 @@
-<?php declare(strict_types=1);
+<?php
 
+declare (strict_types=1);
 namespace Onumia\Lib\PhpParser\Node\Scalar\MagicConst;
 
 use Onumia\Lib\PhpParser\Node\Scalar\MagicConst;
-
-class Line extends MagicConst {
-    public function getName(): string {
+class Line extends MagicConst
+{
+    public function getName(): string
+    {
         return '__LINE__';
     }
-
-    public function getType(): string {
+    public function getType(): string
+    {
         return 'Scalar_MagicConst_Line';
     }
 }

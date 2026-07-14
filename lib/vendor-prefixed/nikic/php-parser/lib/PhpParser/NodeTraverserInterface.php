@@ -1,20 +1,20 @@
-<?php declare(strict_types=1);
+<?php
 
+declare (strict_types=1);
 namespace Onumia\Lib\PhpParser;
 
-interface NodeTraverserInterface {
+interface NodeTraverserInterface
+{
     /**
      * Adds a visitor.
      *
      * @param NodeVisitor $visitor Visitor to add
      */
     public function addVisitor(NodeVisitor $visitor): void;
-
     /**
      * Removes an added visitor.
      */
     public function removeVisitor(NodeVisitor $visitor): void;
-
     /**
      * Traverses an array of nodes using the registered visitors.
      *

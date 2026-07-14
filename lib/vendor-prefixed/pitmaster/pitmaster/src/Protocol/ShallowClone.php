@@ -1,11 +1,9 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Onumia\Lib\Pitmaster\Protocol;
 
 use Onumia\Lib\Pitmaster\Object\ObjectId;
-
 /**
  * Shallow clone support.
  *
@@ -23,30 +21,22 @@ final class ShallowClone
     public static function readShallow(string $gitDir): array
     {
         $path = $gitDir . '/shallow';
-
         if (!is_file($path)) {
             return [];
         }
-
         $content = file_get_contents($path);
-
-        if ($content === false) {
+        if ($content === \false) {
             return [];
         }
-
         $commits = [];
-
         foreach (explode("\n", $content) as $line) {
             $line = trim($line);
-
             if (strlen($line) === 40 && ctype_xdigit($line)) {
                 $commits[] = ObjectId::fromHex($line);
             }
         }
-
         return $commits;
     }
-
     /**
      * Write the shallow file.
      *
@@ -56,18 +46,14 @@ final class ShallowClone
     {
         if ($commits === []) {
             $path = $gitDir . '/shallow';
-
             if (is_file($path)) {
                 unlink($path);
             }
-
             return;
         }
-
-        $lines = array_map(fn (ObjectId $id) => $id->hex, $commits);
+        $lines = array_map(fn(ObjectId $id) => $id->hex, $commits);
         file_put_contents($gitDir . '/shallow', implode("\n", $lines) . "\n");
     }
-
     /**
      * Check if a repository is shallow.
      */
@@ -75,7 +61,6 @@ final class ShallowClone
     {
         return is_file($gitDir . '/shallow');
     }
-
     /**
      * Build shallow fetch request lines (deepen).
      */
@@ -83,7 +68,6 @@ final class ShallowClone
     {
         return PktLine::encode("deepen {$depth}\n");
     }
-
     /**
      * Build shallow fetch request lines (deepen-since).
      */

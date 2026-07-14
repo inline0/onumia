@@ -1,16 +1,14 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Onumia\Lib\Pitmaster\Object;
 
-enum ObjectType: string
+enum ObjectType : string
 {
     case Blob = 'blob';
     case Tree = 'tree';
     case Commit = 'commit';
     case Tag = 'tag';
-
     /**
      * Pack file type integer to ObjectType.
      */
@@ -24,7 +22,6 @@ enum ObjectType: string
             default => throw new \InvalidArgumentException("Unknown pack object type: {$packType}"),
         };
     }
-
     /**
      * ObjectType to pack file type integer.
      */

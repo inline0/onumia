@@ -1,11 +1,9 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Onumia\Lib\Pitmaster\Ref;
 
 use Onumia\Lib\Pitmaster\Object\ObjectId;
-
 /**
  * Composite ref store: loose refs take priority over packed refs.
  *
@@ -17,7 +15,6 @@ final class RefDatabase implements RefStore
     private readonly PackedRefStore $packed;
     private readonly ?ReftableStore $reftable;
     private readonly string $commonDir;
-
     /**
      * @param string $gitDir Per-worktree git dir (HEAD, loose refs)
      * @param string|null $commonDir Common git dir for packed-refs and shared refs (null = same as gitDir)
@@ -26,81 +23,61 @@ final class RefDatabase implements RefStore
     {
         $commonDir = $commonDir ?? $gitDir;
         $this->commonDir = $commonDir;
-
         // HEAD and per-worktree refs from gitDir
         $this->loose = new LooseRefStore($gitDir, $commonDir);
         // packed-refs from common dir
         $this->packed = new PackedRefStore($commonDir);
         $this->reftable = ReftableStore::open($commonDir);
     }
-
     public function resolve(string $name): ?ObjectId
     {
         if ($name === 'HEAD') {
             $id = $this->loose->resolve('HEAD');
-
             if ($id !== null) {
                 return $id;
             }
-
             $head = $this->readHead();
-
             return $head !== null ? $this->resolve($head->target) : null;
         }
-
         // Loose takes priority
         $id = $this->loose->resolve($name);
-
         if ($id !== null) {
             return $id;
         }
-
         if ($this->reftable !== null) {
             $id = $this->reftable->resolve($name);
-
             if ($id !== null) {
                 return $id;
             }
         }
-
         return $this->packed->resolve($name);
     }
-
     public function exists(string $name): bool
     {
         if ($name === 'HEAD') {
             return $this->readHead() !== null;
         }
-
-        return $this->loose->exists($name)
-            || ($this->reftable?->exists($name) ?? false)
-            || $this->packed->exists($name);
+        return $this->loose->exists($name) || ($this->reftable?->exists($name) ?? \false) || $this->packed->exists($name);
     }
-
     /**
      * @return array<string, ObjectId>
      */
     public function list(): array
     {
         $shared = $this->reftable?->list() ?? $this->packed->list();
-
         return array_merge($shared, $this->loose->list());
     }
-
     /**
      * Read HEAD as a symbolic ref.
      */
     public function readHead(): ?SymbolicRef
     {
         $head = $this->loose->readHead();
-
         if ($this->isUsableHead($head)) {
             return $head;
         }
-
         return $this->reftable?->readHead();
     }
-
     /**
      * Resolve HEAD to an ObjectId (following symbolic ref chain).
      */
@@ -108,7 +85,6 @@ final class RefDatabase implements RefStore
     {
         return $this->resolve('HEAD');
     }
-
     /**
      * Write a ref.
      */
@@ -116,7 +92,6 @@ final class RefDatabase implements RefStore
     {
         $this->loose->update($name, $target);
     }
-
     /**
      * Write a symbolic ref.
      */
@@ -124,45 +99,37 @@ final class RefDatabase implements RefStore
     {
         $this->loose->updateSymbolic($name, $target);
     }
-
     /**
      * Delete a ref.
      */
     public function delete(string $name): void
     {
         $this->loose->delete($name);
-
         if ($this->packed->exists($name)) {
             $this->packed->remove($name);
             $this->packed->write();
         }
     }
-
     public function looseStore(): LooseRefStore
     {
         return $this->loose;
     }
-
     public function packedStore(): PackedRefStore
     {
         return $this->packed;
     }
-
     public function commonDir(): string
     {
         return $this->commonDir;
     }
-
     private function isUsableHead(?SymbolicRef $head): bool
     {
         if ($head === null) {
-            return false;
+            return \false;
         }
-
         if ($head->target === 'refs/heads/.invalid') {
-            return false;
+            return \false;
         }
-
-        return true;
+        return \true;
     }
 }

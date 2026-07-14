@@ -1,15 +1,15 @@
-<?php declare(strict_types=1);
+<?php
 
+declare (strict_types=1);
 namespace Onumia\Lib\PhpParser\Node\Stmt;
 
 use Onumia\Lib\PhpParser\Node;
-
-class Enum_ extends ClassLike {
+class Enum_ extends ClassLike
+{
     /** @var null|Node\Identifier Scalar Type */
     public ?Node $scalarType;
     /** @var Node\Name[] Names of implemented interfaces */
     public array $implements;
-
     /**
      * @param string|Node\Identifier|null $name Name
      * @param array{
@@ -24,21 +24,21 @@ class Enum_ extends ClassLike {
      *             'attrGroups'  => array() : PHP attribute groups
      * @param array<string, mixed> $attributes Additional attributes
      */
-    public function __construct($name, array $subNodes = [], array $attributes = []) {
+    public function __construct($name, array $subNodes = [], array $attributes = [])
+    {
         $this->name = \is_string($name) ? new Node\Identifier($name) : $name;
         $this->scalarType = $subNodes['scalarType'] ?? null;
         $this->implements = $subNodes['implements'] ?? [];
         $this->stmts = $subNodes['stmts'] ?? [];
         $this->attrGroups = $subNodes['attrGroups'] ?? [];
-
         parent::__construct($attributes);
     }
-
-    public function getSubNodeNames(): array {
+    public function getSubNodeNames(): array
+    {
         return ['attrGroups', 'name', 'scalarType', 'implements', 'stmts'];
     }
-
-    public function getType(): string {
+    public function getType(): string
+    {
         return 'Stmt_Enum';
     }
 }

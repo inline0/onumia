@@ -1,43 +1,44 @@
-<?php declare(strict_types=1);
+<?php
 
+declare (strict_types=1);
 namespace Onumia\Lib\PhpParser\ErrorHandler;
 
 use Onumia\Lib\PhpParser\Error;
 use Onumia\Lib\PhpParser\ErrorHandler;
-
 /**
  * Error handler that collects all errors into an array.
  *
  * This allows graceful handling of errors.
  */
-class Collecting implements ErrorHandler {
+class Collecting implements ErrorHandler
+{
     /** @var Error[] Collected errors */
     private array $errors = [];
-
-    public function handleError(Error $error): void {
+    public function handleError(Error $error): void
+    {
         $this->errors[] = $error;
     }
-
     /**
      * Get collected errors.
      *
      * @return Error[]
      */
-    public function getErrors(): array {
+    public function getErrors(): array
+    {
         return $this->errors;
     }
-
     /**
      * Check whether there are any errors.
      */
-    public function hasErrors(): bool {
+    public function hasErrors(): bool
+    {
         return !empty($this->errors);
     }
-
     /**
      * Reset/clear collected errors.
      */
-    public function clearErrors(): void {
+    public function clearErrors(): void
+    {
         $this->errors = [];
     }
 }

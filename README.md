@@ -1,8 +1,8 @@
 <p align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="./assets/logo-dark.svg">
-    <source media="(prefers-color-scheme: light)" srcset="./assets/logo-light.svg">
-    <img alt="Onumia" src="./assets/logo-light.svg" height="56">
+    <source media="(prefers-color-scheme: dark)" srcset="./assets/brand/logo-dark.svg">
+    <source media="(prefers-color-scheme: light)" srcset="./assets/brand/logo-light.svg">
+    <img alt="Onumia" src="./assets/brand/logo-light.svg" height="56">
   </picture>
 </p>
 
@@ -110,8 +110,10 @@ theme-level project state.
 By default, module settings are stored in the active theme stylesheet directory
 as `onumia.settings.json`. On multisite installs, sites sharing the same
 active theme directory also share this settings file. Per-site runtime state
-should live in options or module-owned tables; module secrets already use
-WordPress options instead of the theme settings file.
+should live in options or module-owned tables; module secrets use WordPress
+options or constants instead of the theme settings file. Production licensing
+services can point `ONUMIA_MODULE_SITE_SECRETS_FILE` at an owner-only file
+outside the web root so credentials also stay out of database backups.
 
 Some modules also maintain module-owned data tables for audit trails, queues,
 logs, and operational history. Examples include email logs, 404 hits, redirect
@@ -234,7 +236,8 @@ replacement, and data-retention behavior.
 
 Onumia Free uses signed GitHub Releases and WordPress's normal plugin update
 screen. Before installation it verifies the release's Ed25519-signed checksum
-manifest and the exact `onumia-vX.Y.Z.zip` selected by WordPress.
+manifest and the exact `onumia-vX.Y.Z.zip` selected by WordPress. The canonical
+public repository works without a GitHub token.
 
 Onumia Pro disables that Free channel. It presents the configured license to
 `onumia.app`, receives an expiring package URL, and verifies the checksum,

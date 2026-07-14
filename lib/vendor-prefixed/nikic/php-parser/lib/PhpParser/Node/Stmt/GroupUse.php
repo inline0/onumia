@@ -1,12 +1,13 @@
-<?php declare(strict_types=1);
+<?php
 
+declare (strict_types=1);
 namespace Onumia\Lib\PhpParser\Node\Stmt;
 
 use Onumia\Lib\PhpParser\Node\Name;
 use Onumia\Lib\PhpParser\Node\Stmt;
 use Onumia\Lib\PhpParser\Node\UseItem;
-
-class GroupUse extends Stmt {
+class GroupUse extends Stmt
+{
     /**
      * @var Use_::TYPE_* Type of group use
      */
@@ -15,7 +16,6 @@ class GroupUse extends Stmt {
     public Name $prefix;
     /** @var UseItem[] Uses */
     public array $uses;
-
     /**
      * Constructs a group use node.
      *
@@ -24,18 +24,19 @@ class GroupUse extends Stmt {
      * @param Use_::TYPE_* $type Type of group use
      * @param array<string, mixed> $attributes Additional attributes
      */
-    public function __construct(Name $prefix, array $uses, int $type = Use_::TYPE_NORMAL, array $attributes = []) {
+    public function __construct(Name $prefix, array $uses, int $type = Use_::TYPE_NORMAL, array $attributes = [])
+    {
         $this->attributes = $attributes;
         $this->type = $type;
         $this->prefix = $prefix;
         $this->uses = $uses;
     }
-
-    public function getSubNodeNames(): array {
+    public function getSubNodeNames(): array
+    {
         return ['type', 'prefix', 'uses'];
     }
-
-    public function getType(): string {
+    public function getType(): string
+    {
         return 'Stmt_GroupUse';
     }
 }

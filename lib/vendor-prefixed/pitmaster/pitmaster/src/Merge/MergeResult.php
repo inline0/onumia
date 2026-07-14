@@ -1,11 +1,9 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Onumia\Lib\Pitmaster\Merge;
 
 use Onumia\Lib\Pitmaster\Object\ObjectId;
-
 /**
  * Result of a merge operation.
  */
@@ -17,11 +15,7 @@ final readonly class MergeResult
      * @param array<int, string> $conflictPaths Files with conflicts
      * @param array<string, string> $mergedContents Path => merged content (with markers if conflicted)
      */
-    public function __construct(
-        public bool $clean,
-        public ?ObjectId $commitId = null,
-        public array $conflictPaths = [],
-        public array $mergedContents = [],
-    ) {
+    public function __construct(public bool $clean, public ?ObjectId $commitId = null, public array $conflictPaths = [], public array $mergedContents = [])
+    {
     }
 }

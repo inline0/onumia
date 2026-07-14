@@ -104,6 +104,7 @@ class ComposerStaticInit67ef2099a3e0d693a511e3bf2572d4fd
         'Onumia\\Modules\\ModuleEntryDefinition' => __DIR__ . '/../..' . '/src/Modules/ModuleEntryDefinition.php',
         'Onumia\\Modules\\ModuleEntryFieldDefinition' => __DIR__ . '/../..' . '/src/Modules/ModuleEntryFieldDefinition.php',
         'Onumia\\Modules\\ModuleEntrySectionDefinition' => __DIR__ . '/../..' . '/src/Modules/ModuleEntrySectionDefinition.php',
+        'Onumia\\Modules\\ModuleExternalSecretStore' => __DIR__ . '/../..' . '/src/Modules/ModuleExternalSecretStore.php',
         'Onumia\\Modules\\ModuleFileRepository' => __DIR__ . '/../..' . '/src/Modules/ModuleFileRepository.php',
         'Onumia\\Modules\\ModuleFileValidationException' => __DIR__ . '/../..' . '/src/Modules/ModuleFileValidationException.php',
         'Onumia\\Modules\\ModuleHistoryRepository' => __DIR__ . '/../..' . '/src/Modules/ModuleHistoryRepository.php',

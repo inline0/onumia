@@ -51,7 +51,7 @@ The settings file location is filterable for setups that want it elsewhere; see 
 
 ## Secrets stay out of the theme
 
-Some modules need credentials, such as API tokens for the Software Licensing module. Secrets are deliberately not stored in the theme settings file. They live in a WordPress option, or come from PHP constants when defined, so they never end up committed with a theme. The dashboard shows whether each declared secret is present without revealing its value.
+Some modules need credentials, such as API tokens for the Software Licensing module. Secrets are deliberately not stored in the theme settings file. They live in a WordPress option or come from PHP constants, so they never end up committed with a theme. Production services can define `ONUMIA_MODULE_SITE_SECRETS_FILE` and resolve every module secret from an owner-only, site-scoped file outside the web root; when configured, that file is authoritative and an invalid file fails closed. The dashboard shows whether each declared secret is present without revealing its value.
 
 ## Capabilities
 

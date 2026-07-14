@@ -23,7 +23,7 @@ final class AppPage {
 	private const SURFACE_STYLE_HANDLE    = 'onumia-app-surface-reset';
 	private const ENTRYPOINT              = 'src/apps/onumia/main.tsx';
 	private const ASSET_DIRECTORY         = 'assets/app';
-	private const BRAND_LOGO              = 'assets/brand/logo.svg';
+	private const BRAND_LOGO              = 'assets/brand/logo-dark.svg';
 	private const BRAND_LOGO_LIGHT        = 'assets/brand/logo-light.svg';
 	private const BRAND_ICON              = 'assets/brand/icon.svg';
 	private const BRAND_ICON_LIGHT        = 'assets/brand/icon-light.svg';

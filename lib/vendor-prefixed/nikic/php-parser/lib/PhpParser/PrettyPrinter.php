@@ -1,10 +1,11 @@
-<?php declare(strict_types=1);
+<?php
 
+declare (strict_types=1);
 namespace Onumia\Lib\PhpParser;
 
 use Onumia\Lib\PhpParser\Node\Expr;
-
-interface PrettyPrinter {
+interface PrettyPrinter
+{
     /**
      * Pretty prints an array of statements.
      *
@@ -13,7 +14,6 @@ interface PrettyPrinter {
      * @return string Pretty printed statements
      */
     public function prettyPrint(array $stmts): string;
-
     /**
      * Pretty prints an expression.
      *
@@ -22,7 +22,6 @@ interface PrettyPrinter {
      * @return string Pretty printed node
      */
     public function prettyPrintExpr(Expr $node): string;
-
     /**
      * Pretty prints a file of statements (includes the opening <?php tag if it is required).
      *
@@ -31,7 +30,6 @@ interface PrettyPrinter {
      * @return string Pretty printed statements
      */
     public function prettyPrintFile(array $stmts): string;
-
     /**
      * Perform a format-preserving pretty print of an AST.
      *

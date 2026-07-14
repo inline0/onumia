@@ -80,13 +80,13 @@ Keys configured here are available to dashboard users, who are administrators by
 
 ## Free plugin updates
 
-Onumia Free receives signed releases from `inline0/onumia` through the normal WordPress update screen. Public repositories need no configuration. While the repository is private, provide a GitHub token without storing it in WordPress:
+Onumia Free receives signed releases anonymously from the public `inline0/onumia` mirror through the normal WordPress update screen. No token is required. For a custom authenticated mirror or additional GitHub API rate-limit headroom, provide an optional read-only token without storing it in WordPress:
 
 ```php
 define('ONUMIA_GITHUB_UPDATER_TOKEN', 'github_pat_...');
 ```
 
-`ONUMIA_GITHUB_UPDATER_DISABLED` disables this update channel when set to a truthy value. The matching `onumia/github_updater/*` filters can override the repository, asset pattern, token, disabled state, and trusted public key for controlled integrations. Onumia Pro packages disable the Free GitHub channel automatically and use the licensed update channel below.
+`ONUMIA_GITHUB_UPDATER_DISABLED` disables this update channel when set to a truthy value. The matching `onumia/github_updater/*` filters can override the repository, asset pattern, optional token, disabled state, and trusted public key for controlled integrations. Onumia Pro packages disable the Free GitHub channel automatically and use the licensed update channel below.
 
 ## Software Licensing flags and secrets
 
@@ -97,6 +97,8 @@ define('ONUMIA_ENABLE_SOFTWARE_LICENSING_MODULE', true);
 ```
 
 Its credentials can be provided as constants instead of stored secrets: `ONUMIA_STRIPE_SECRET_KEY`, `ONUMIA_STRIPE_WEBHOOK_SECRET`, `ONUMIA_STRIPE_CHECKOUT_API_SECRET`, `ONUMIA_LICENSING_SIGNING_KEY`, and `ONUMIA_SOFTWARE_LICENSING_GITHUB_TOKEN` for private release repositories. A constant takes precedence over a stored secret of the same name.
+
+Production services can keep all module credentials out of WordPress by defining `ONUMIA_MODULE_SITE_SECRETS_FILE` as the absolute path to an owner-only JSON file outside the web root. The file uses `schemaVersion: 1`, with secrets nested under `sites`, the numeric WordPress blog ID, and the module name. Once configured, it is authoritative: an invalid file or missing entry does not fall back to WordPress options. Install and rotate the file through an owner-only hosting or deployment secret channel, then remove matching WordPress option values after external resolution is verified.
 
 ## Receiving licensed updates
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env php
-<?php
-
-declare(strict_types=1);
+<?php 
+declare (strict_types=1);
+namespace Onumia\Lib;
 
 /**
  * Generate test repos from git's own test suite by running setup scripts.
@@ -9,16 +9,11 @@ declare(strict_types=1);
  * We can't run git's full test framework (it needs its own harness),
  * but we can create repos that exercise the same edge cases.
  */
-
-$root = dirname(__DIR__);
+$root = \dirname(__DIR__);
 $upstreamDir = $root . '/scenarios/upstream/git-suite';
-
 // Define scenarios that replicate what git's test suite tests.
 // Each creates a repo exercising a specific edge case.
-$scenarios = [
-    'pack-objects-basic' => [
-        'description' => 'Pack and unpack objects (t5300)',
-        'setup' => <<<'BASH'
+$scenarios = ['pack-objects-basic' => ['description' => 'Pack and unpack objects (t5300)', 'setup' => <<<'BASH'
 git init .
 git config user.email "test@test.com"
 git config user.name "Test"
@@ -27,11 +22,8 @@ git add file.txt
 git commit -m "initial"
 for i in $(seq 1 20); do echo "line $i" >> file.txt; git add file.txt; git commit -m "commit $i"; done
 git gc
-BASH,
-    ],
-    'packed-refs' => [
-        'description' => 'Packed refs handling (t3210)',
-        'setup' => <<<'BASH'
+BASH
+], 'packed-refs' => ['description' => 'Packed refs handling (t3210)', 'setup' => <<<'BASH'
 git init .
 git config user.email "test@test.com"
 git config user.name "Test"
@@ -48,11 +40,8 @@ echo "more" >> file.txt
 git add file.txt
 git commit -m "after pack"
 git branch branch-after-pack
-BASH,
-    ],
-    'merge-recursive' => [
-        'description' => 'Recursive merge with multiple bases (t6036)',
-        'setup' => <<<'BASH'
+BASH
+], 'merge-recursive' => ['description' => 'Recursive merge with multiple bases (t6036)', 'setup' => <<<'BASH'
 git init .
 git config user.email "test@test.com"
 git config user.name "Test"
@@ -71,11 +60,8 @@ git commit -m "right"
 git checkout main
 git merge left --no-edit
 git merge right --no-edit
-BASH,
-    ],
-    'shallow-clone' => [
-        'description' => 'Shallow repository (t5500)',
-        'setup' => <<<'BASH'
+BASH
+], 'shallow-clone' => ['description' => 'Shallow repository (t5500)', 'setup' => <<<'BASH'
 git init source
 cd source
 git config user.email "test@test.com"
@@ -84,11 +70,8 @@ for i in 1 2 3 4 5; do echo "commit $i" > file.txt; git add file.txt; git commit
 cd ..
 git clone --depth=2 source shallow
 cd shallow
-BASH,
-    ],
-    'detached-head' => [
-        'description' => 'Detached HEAD state (t1501)',
-        'setup' => <<<'BASH'
+BASH
+], 'detached-head' => ['description' => 'Detached HEAD state (t1501)', 'setup' => <<<'BASH'
 git init .
 git config user.email "test@test.com"
 git config user.name "Test"
@@ -99,11 +82,8 @@ echo "second" >> file.txt
 git add file.txt
 git commit -m "second"
 git checkout HEAD~1
-BASH,
-    ],
-    'octopus-merge' => [
-        'description' => 'Octopus merge with 3+ branches (t6028)',
-        'setup' => <<<'BASH'
+BASH
+], 'octopus-merge' => ['description' => 'Octopus merge with 3+ branches (t6028)', 'setup' => <<<'BASH'
 git init .
 git config user.email "test@test.com"
 git config user.name "Test"
@@ -126,11 +106,8 @@ git add c.txt
 git commit -m "branch c"
 git checkout main
 git merge a b c --no-edit
-BASH,
-    ],
-    'tag-types' => [
-        'description' => 'Various tag types (t7004)',
-        'setup' => <<<'BASH'
+BASH
+], 'tag-types' => ['description' => 'Various tag types (t7004)', 'setup' => <<<'BASH'
 git init .
 git config user.email "test@test.com"
 git config user.name "Test"
@@ -144,11 +121,8 @@ echo "more" >> file.txt
 git add file.txt
 git commit -m "second"
 git tag -a v2.0 -m "version 2"
-BASH,
-    ],
-    'submodule-basic' => [
-        'description' => 'Basic submodule (t7400)',
-        'setup' => <<<'BASH'
+BASH
+], 'submodule-basic' => ['description' => 'Basic submodule (t7400)', 'setup' => <<<'BASH'
 git init sub
 cd sub
 git config user.email "test@test.com"
@@ -165,11 +139,8 @@ git add main.txt
 git commit -m "main initial"
 git submodule add ./sub subdir
 git commit -m "add submodule"
-BASH,
-    ],
-    'binary-diff' => [
-        'description' => 'Binary file handling (t4012)',
-        'setup' => <<<'BASH'
+BASH
+], 'binary-diff' => ['description' => 'Binary file handling (t4012)', 'setup' => <<<'BASH'
 git init .
 git config user.email "test@test.com"
 git config user.name "Test"
@@ -181,11 +152,8 @@ printf '\x00\x01\x02\x03modified binary\x04\x05\x06' > binary.dat
 echo "modified text" > text.txt
 git add binary.dat text.txt
 git commit -m "modify both"
-BASH,
-    ],
-    'rename-detection' => [
-        'description' => 'Rename detection (t4003)',
-        'setup' => <<<'BASH'
+BASH
+], 'rename-detection' => ['description' => 'Rename detection (t4003)', 'setup' => <<<'BASH'
 git init .
 git config user.email "test@test.com"
 git config user.name "Test"
@@ -194,21 +162,15 @@ git add original.txt
 git commit -m "initial"
 git mv original.txt renamed.txt
 git commit -m "rename file"
-BASH,
-    ],
-    'empty-tree' => [
-        'description' => 'Empty tree commit (t3600)',
-        'setup' => <<<'BASH'
+BASH
+], 'empty-tree' => ['description' => 'Empty tree commit (t3600)', 'setup' => <<<'BASH'
 git init .
 git config user.email "test@test.com"
 git config user.name "Test"
 EMPTY_TREE=$(git hash-object -t tree /dev/null)
 git commit --allow-empty -m "empty commit"
-BASH,
-    ],
-    'crlf-handling' => [
-        'description' => 'CRLF line ending handling (t0027)',
-        'setup' => <<<'BASH'
+BASH
+], 'crlf-handling' => ['description' => 'CRLF line ending handling (t0027)', 'setup' => <<<'BASH'
 git init .
 git config user.email "test@test.com"
 git config user.name "Test"
@@ -217,11 +179,8 @@ printf "line1\nline2\nline3\n" > lf.txt
 printf "line1\r\nline2\nline3\r\n" > mixed.txt
 git add crlf.txt lf.txt mixed.txt
 git commit -m "files with different line endings"
-BASH,
-    ],
-    'symlink' => [
-        'description' => 'Symbolic links (t3010)',
-        'setup' => <<<'BASH'
+BASH
+], 'symlink' => ['description' => 'Symbolic links (t3010)', 'setup' => <<<'BASH'
 git init .
 git config user.email "test@test.com"
 git config user.name "Test"
@@ -229,11 +188,8 @@ echo "target content" > target.txt
 ln -s target.txt link.txt
 git add target.txt link.txt
 git commit -m "with symlink"
-BASH,
-    ],
-    'unicode-paths' => [
-        'description' => 'Unicode file paths (t3910)',
-        'setup' => <<<'BASH'
+BASH
+], 'unicode-paths' => ['description' => 'Unicode file paths (t3910)', 'setup' => <<<'BASH'
 git init .
 git config user.email "test@test.com"
 git config user.name "Test"
@@ -244,11 +200,8 @@ echo "emoji" > "readme-🎉.txt"
 echo "chinese" > "文件.txt"
 git add .
 git commit -m "unicode paths"
-BASH,
-    ],
-    'notes' => [
-        'description' => 'Git notes (t3301)',
-        'setup' => <<<'BASH'
+BASH
+], 'notes' => ['description' => 'Git notes (t3301)', 'setup' => <<<'BASH'
 git init .
 git config user.email "test@test.com"
 git config user.name "Test"
@@ -260,11 +213,8 @@ echo "second" >> file.txt
 git add file.txt
 git commit -m "second commit"
 git notes add -m "Note on second commit"
-BASH,
-    ],
-    'stash' => [
-        'description' => 'Git stash operations (t3903)',
-        'setup' => <<<'BASH'
+BASH
+], 'stash' => ['description' => 'Git stash operations (t3903)', 'setup' => <<<'BASH'
 git init .
 git config user.email "test@test.com"
 git config user.name "Test"
@@ -276,11 +226,8 @@ git stash push -m "test stash"
 echo "another" > other.txt
 git add other.txt
 git stash push -m "second stash"
-BASH,
-    ],
-    'grafts-replace' => [
-        'description' => 'Grafts and replace objects (t6050)',
-        'setup' => <<<'BASH'
+BASH
+], 'grafts-replace' => ['description' => 'Grafts and replace objects (t6050)', 'setup' => <<<'BASH'
 git init .
 git config user.email "test@test.com"
 git config user.name "Test"
@@ -293,11 +240,8 @@ git commit -m "second"
 echo "third" >> file.txt
 git add file.txt
 git commit -m "third"
-BASH,
-    ],
-    'large-tree' => [
-        'description' => 'Tree with many entries (t1010)',
-        'setup' => <<<'BASH'
+BASH
+], 'large-tree' => ['description' => 'Tree with many entries (t1010)', 'setup' => <<<'BASH'
 git init .
 git config user.email "test@test.com"
 git config user.name "Test"
@@ -306,11 +250,8 @@ mkdir -p deep/nested/path
 echo "deep" > deep/nested/path/deep.txt
 git add .
 git commit -m "100 files + deep nesting"
-BASH,
-    ],
-    'merge-conflict' => [
-        'description' => 'Merge conflict markers (t7601)',
-        'setup' => <<<'BASH'
+BASH
+], 'merge-conflict' => ['description' => 'Merge conflict markers (t7601)', 'setup' => <<<'BASH'
 git init .
 git config user.email "test@test.com"
 git config user.name "Test"
@@ -328,40 +269,23 @@ git commit -m "main"
 git merge feature --no-edit 2>/dev/null || true
 git add file.txt
 git commit --no-edit -m "resolved merge" 2>/dev/null || true
-BASH,
-    ],
-];
-
-if (!is_dir($upstreamDir)) {
-    mkdir($upstreamDir, 0777, true);
+BASH
+]];
+if (!\is_dir($upstreamDir)) {
+    \mkdir($upstreamDir, 0777, \true);
 }
-
 $imported = 0;
-
 foreach ($scenarios as $name => $info) {
     $scenarioDir = $upstreamDir . '/' . $name;
-
-    if (is_dir($scenarioDir)) {
-        fwrite(STDOUT, "  EXISTS  {$name}\n");
+    if (\is_dir($scenarioDir)) {
+        \fwrite(\STDOUT, "  EXISTS  {$name}\n");
         continue;
     }
-
-    mkdir($scenarioDir, 0777, true);
-
-    file_put_contents($scenarioDir . '/setup.sh', "#!/bin/bash\nset -e\n\n" . $info['setup'] . "\n");
-    chmod($scenarioDir . '/setup.sh', 0755);
-
-    file_put_contents($scenarioDir . '/scenario.json', json_encode([
-        'name' => 'upstream/git-suite/' . $name,
-        'category' => 'upstream',
-        'description' => 'git test suite: ' . $info['description'],
-        'operations' => [],
-        'oracle_commands' => [],
-        'expectations' => ['exact_match' => [], 'fsck_clean' => true],
-    ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . "\n");
-
+    \mkdir($scenarioDir, 0777, \true);
+    \file_put_contents($scenarioDir . '/setup.sh', "#!/bin/bash\nset -e\n\n" . $info['setup'] . "\n");
+    \chmod($scenarioDir . '/setup.sh', 0755);
+    \file_put_contents($scenarioDir . '/scenario.json', \json_encode(['name' => 'upstream/git-suite/' . $name, 'category' => 'upstream', 'description' => 'git test suite: ' . $info['description'], 'operations' => [], 'oracle_commands' => [], 'expectations' => ['exact_match' => [], 'fsck_clean' => \true]], \JSON_PRETTY_PRINT | \JSON_UNESCAPED_SLASHES) . "\n");
     $imported++;
-    fwrite(STDOUT, "  OK    {$name}\n");
+    \fwrite(\STDOUT, "  OK    {$name}\n");
 }
-
-fwrite(STDOUT, "\nImported {$imported} git test suite scenarios.\n");
+\fwrite(\STDOUT, "\nImported {$imported} git test suite scenarios.\n");

@@ -1,25 +1,19 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Onumia\Lib\Pitmaster\Object;
 
 use Onumia\Lib\Pitmaster\Encoding\BinaryReader;
 use Onumia\Lib\Pitmaster\Exceptions\CorruptObjectException;
-
 final readonly class Tree extends GitObject
 {
     /**
      * @param array<int, TreeEntry> $entries
      */
-    public function __construct(
-        string $content,
-        ObjectId $id,
-        public array $entries,
-    ) {
+    public function __construct(string $content, ObjectId $id, public array $entries)
+    {
         parent::__construct(ObjectType::Tree, $content, $id);
     }
-
     /**
      * Parse tree object from raw content.
      *
@@ -30,32 +24,22 @@ final readonly class Tree extends GitObject
         $reader = new BinaryReader($content);
         $entries = [];
         $hashBytes = $id->hashLength();
-
         while (!$reader->isEof()) {
             // Read "<mode> <name>\0"
             $modeAndName = $reader->readNullTerminated();
             $spacePos = strpos($modeAndName, ' ');
-
-            if ($spacePos === false) {
-                throw CorruptObjectException::invalidContent(
-                    $id->hex,
-                    'tree entry missing space between mode and name'
-                );
+            if ($spacePos === \false) {
+                throw CorruptObjectException::invalidContent($id->hex, 'tree entry missing space between mode and name');
             }
-
             $mode = substr($modeAndName, 0, $spacePos);
             $name = substr($modeAndName, $spacePos + 1);
-
             // Read the entry hash using the repository object format.
             $hashHex = $reader->readHash($hashBytes);
             $hash = ObjectId::fromHex($hashHex);
-
             $entries[] = new TreeEntry($mode, $name, $hash);
         }
-
         return new self($content, $id, $entries);
     }
-
     /**
      * Build tree content from entries.
      *
@@ -64,14 +48,11 @@ final readonly class Tree extends GitObject
     public static function buildContent(array $entries): string
     {
         $content = '';
-
         foreach ($entries as $entry) {
-            $content .= $entry->mode . ' ' . $entry->name . "\0" . $entry->hash->binary;
+            $content .= $entry->mode . ' ' . $entry->name . "\x00" . $entry->hash->binary;
         }
-
         return $content;
     }
-
     /**
      * @param array<int, TreeEntry> $entries
      */
@@ -79,10 +60,8 @@ final readonly class Tree extends GitObject
     {
         $content = self::buildContent($entries);
         $id = ObjectId::compute(ObjectType::Tree, $content, $algo);
-
         return new self($content, $id, $entries);
     }
-
     /**
      * Find an entry by name.
      */
@@ -93,7 +72,6 @@ final readonly class Tree extends GitObject
                 return $entry;
             }
         }
-
         return null;
     }
 }

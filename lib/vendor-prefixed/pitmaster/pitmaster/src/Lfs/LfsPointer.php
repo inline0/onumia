@@ -1,7 +1,6 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Onumia\Lib\Pitmaster\Lfs;
 
 /**
@@ -14,13 +13,9 @@ namespace Onumia\Lib\Pitmaster\Lfs;
  */
 final readonly class LfsPointer
 {
-    public function __construct(
-        public string $oid,
-        public int $size,
-        public string $version = 'https://git-lfs.github.com/spec/v1',
-    ) {
+    public function __construct(public string $oid, public int $size, public string $version = 'https://git-lfs.github.com/spec/v1')
+    {
     }
-
     /**
      * Parse a pointer file content.
      */
@@ -29,14 +24,11 @@ final readonly class LfsPointer
         if (!str_starts_with($content, 'version ')) {
             return null;
         }
-
         $version = null;
         $oid = null;
         $size = null;
-
         foreach (explode("\n", $content) as $line) {
             $line = trim($line);
-
             if (str_starts_with($line, 'version ')) {
                 $version = substr($line, 8);
             } elseif (str_starts_with($line, 'oid sha256:')) {
@@ -45,24 +37,18 @@ final readonly class LfsPointer
                 $size = (int) substr($line, 5);
             }
         }
-
         if ($version === null || $oid === null || $size === null) {
             return null;
         }
-
         return new self($oid, $size, $version);
     }
-
     /**
      * Check if content looks like an LFS pointer.
      */
     public static function isPointer(string $content): bool
     {
-        return str_starts_with($content, 'version https://git-lfs.github.com/spec/v1')
-            && str_contains($content, 'oid sha256:')
-            && str_contains($content, 'size ');
+        return str_starts_with($content, 'version https://git-lfs.github.com/spec/v1') && str_contains($content, 'oid sha256:') && str_contains($content, 'size ');
     }
-
     /**
      * Serialize to pointer file content.
      */
@@ -70,7 +56,6 @@ final readonly class LfsPointer
     {
         return "version {$this->version}\noid sha256:{$this->oid}\nsize {$this->size}\n";
     }
-
     /**
      * Create a pointer for a file by hashing its content.
      */
@@ -78,7 +63,6 @@ final readonly class LfsPointer
     {
         $oid = hash('sha256', $content);
         $size = strlen($content);
-
         return new self($oid, $size);
     }
 }

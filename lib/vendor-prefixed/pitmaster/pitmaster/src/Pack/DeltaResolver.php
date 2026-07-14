@@ -1,7 +1,6 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Onumia\Lib\Pitmaster\Pack;
 
 /**
@@ -17,8 +16,6 @@ final class DeltaResolver
 {
     public static function maxChainDepth(): int
     {
-        return defined('PITMASTER_MAX_DELTA_CHAIN')
-            ? (int) constant('PITMASTER_MAX_DELTA_CHAIN')
-            : 50;
+        return defined('PITMASTER_MAX_DELTA_CHAIN') ? (int) constant('PITMASTER_MAX_DELTA_CHAIN') : 50;
     }
 }

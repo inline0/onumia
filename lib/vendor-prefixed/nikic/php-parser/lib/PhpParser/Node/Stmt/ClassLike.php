@@ -1,25 +1,25 @@
-<?php declare(strict_types=1);
+<?php
 
+declare (strict_types=1);
 namespace Onumia\Lib\PhpParser\Node\Stmt;
 
 use Onumia\Lib\PhpParser\Node;
 use Onumia\Lib\PhpParser\Node\PropertyItem;
-
-abstract class ClassLike extends Node\Stmt {
+abstract class ClassLike extends Node\Stmt
+{
     /** @var Node\Identifier|null Name */
     public ?Node\Identifier $name;
     /** @var Node\Stmt[] Statements */
     public array $stmts;
     /** @var Node\AttributeGroup[] PHP attribute groups */
     public array $attrGroups;
-
     /** @var Node\Name|null Namespaced name (if using NameResolver) */
     public ?Node\Name $namespacedName;
-
     /**
      * @return list<TraitUse>
      */
-    public function getTraitUses(): array {
+    public function getTraitUses(): array
+    {
         $traitUses = [];
         foreach ($this->stmts as $stmt) {
             if ($stmt instanceof TraitUse) {
@@ -28,11 +28,11 @@ abstract class ClassLike extends Node\Stmt {
         }
         return $traitUses;
     }
-
     /**
      * @return list<ClassConst>
      */
-    public function getConstants(): array {
+    public function getConstants(): array
+    {
         $constants = [];
         foreach ($this->stmts as $stmt) {
             if ($stmt instanceof ClassConst) {
@@ -41,11 +41,11 @@ abstract class ClassLike extends Node\Stmt {
         }
         return $constants;
     }
-
     /**
      * @return list<Property>
      */
-    public function getProperties(): array {
+    public function getProperties(): array
+    {
         $properties = [];
         foreach ($this->stmts as $stmt) {
             if ($stmt instanceof Property) {
@@ -54,7 +54,6 @@ abstract class ClassLike extends Node\Stmt {
         }
         return $properties;
     }
-
     /**
      * Gets property with the given name defined directly in this class/interface/trait.
      *
@@ -62,7 +61,8 @@ abstract class ClassLike extends Node\Stmt {
      *
      * @return Property|null Property node or null if the property does not exist
      */
-    public function getProperty(string $name): ?Property {
+    public function getProperty(string $name): ?Property
+    {
         foreach ($this->stmts as $stmt) {
             if ($stmt instanceof Property) {
                 foreach ($stmt->props as $prop) {
@@ -74,13 +74,13 @@ abstract class ClassLike extends Node\Stmt {
         }
         return null;
     }
-
     /**
      * Gets all methods defined directly in this class/interface/trait
      *
      * @return list<ClassMethod>
      */
-    public function getMethods(): array {
+    public function getMethods(): array
+    {
         $methods = [];
         foreach ($this->stmts as $stmt) {
             if ($stmt instanceof ClassMethod) {
@@ -89,7 +89,6 @@ abstract class ClassLike extends Node\Stmt {
         }
         return $methods;
     }
-
     /**
      * Gets method with the given name defined directly in this class/interface/trait.
      *
@@ -97,7 +96,8 @@ abstract class ClassLike extends Node\Stmt {
      *
      * @return ClassMethod|null Method node or null if the method does not exist
      */
-    public function getMethod(string $name): ?ClassMethod {
+    public function getMethod(string $name): ?ClassMethod
+    {
         $lowerName = strtolower($name);
         foreach ($this->stmts as $stmt) {
             if ($stmt instanceof ClassMethod && $lowerName === $stmt->name->toLowerString()) {

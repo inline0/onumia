@@ -1,29 +1,27 @@
-<?php declare(strict_types=1);
+<?php
 
+declare (strict_types=1);
 namespace Onumia\Lib\PhpParser\Builder;
 
 use Onumia\Lib\PhpParser\BuilderHelpers;
 use Onumia\Lib\PhpParser\Node;
-
-abstract class FunctionLike extends Declaration {
-    protected bool $returnByRef = false;
+abstract class FunctionLike extends Declaration
+{
+    protected bool $returnByRef = \false;
     /** @var Node\Param[] */
     protected array $params = [];
-
     /** @var Node\Identifier|Node\Name|Node\ComplexType|null */
     protected ?Node $returnType = null;
-
     /**
      * Make the function return by reference.
      *
      * @return $this The builder instance (for fluid interface)
      */
-    public function makeReturnByRef() {
-        $this->returnByRef = true;
-
+    public function makeReturnByRef()
+    {
+        $this->returnByRef = \true;
         return $this;
     }
-
     /**
      * Adds a parameter.
      *
@@ -31,18 +29,15 @@ abstract class FunctionLike extends Declaration {
      *
      * @return $this The builder instance (for fluid interface)
      */
-    public function addParam($param) {
+    public function addParam($param)
+    {
         $param = BuilderHelpers::normalizeNode($param);
-
         if (!$param instanceof Node\Param) {
             throw new \LogicException(sprintf('Expected parameter node, got "%s"', $param->getType()));
         }
-
         $this->params[] = $param;
-
         return $this;
     }
-
     /**
      * Adds multiple parameters.
      *
@@ -50,14 +45,13 @@ abstract class FunctionLike extends Declaration {
      *
      * @return $this The builder instance (for fluid interface)
      */
-    public function addParams(array $params) {
+    public function addParams(array $params)
+    {
         foreach ($params as $param) {
             $this->addParam($param);
         }
-
         return $this;
     }
-
     /**
      * Sets the return type for PHP 7.
      *
@@ -65,9 +59,9 @@ abstract class FunctionLike extends Declaration {
      *
      * @return $this The builder instance (for fluid interface)
      */
-    public function setReturnType($type) {
+    public function setReturnType($type)
+    {
         $this->returnType = BuilderHelpers::normalizeType($type);
-
         return $this;
     }
 }

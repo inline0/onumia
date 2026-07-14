@@ -1,7 +1,6 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Onumia\Lib\Pitmaster\Object;
 
 /**
@@ -12,33 +11,25 @@ namespace Onumia\Lib\Pitmaster\Object;
  */
 final readonly class TreeEntry
 {
-    public function __construct(
-        public string $mode,
-        public string $name,
-        public ObjectId $hash,
-    ) {
+    public function __construct(public string $mode, public string $name, public ObjectId $hash)
+    {
     }
-
     public function isBlob(): bool
     {
         return str_starts_with($this->mode, '10');
     }
-
     public function isTree(): bool
     {
         return $this->mode === '40000' || $this->mode === '040000';
     }
-
     public function isExecutable(): bool
     {
         return $this->mode === '100755';
     }
-
     public function isSymlink(): bool
     {
         return $this->mode === '120000';
     }
-
     public function isGitlink(): bool
     {
         return $this->mode === '160000';

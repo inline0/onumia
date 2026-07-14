@@ -89,6 +89,7 @@ return array(
     'Onumia\\Modules\\ModuleEntryDefinition' => $baseDir . '/src/Modules/ModuleEntryDefinition.php',
     'Onumia\\Modules\\ModuleEntryFieldDefinition' => $baseDir . '/src/Modules/ModuleEntryFieldDefinition.php',
     'Onumia\\Modules\\ModuleEntrySectionDefinition' => $baseDir . '/src/Modules/ModuleEntrySectionDefinition.php',
+    'Onumia\\Modules\\ModuleExternalSecretStore' => $baseDir . '/src/Modules/ModuleExternalSecretStore.php',
     'Onumia\\Modules\\ModuleFileRepository' => $baseDir . '/src/Modules/ModuleFileRepository.php',
     'Onumia\\Modules\\ModuleFileValidationException' => $baseDir . '/src/Modules/ModuleFileValidationException.php',
     'Onumia\\Modules\\ModuleHistoryRepository' => $baseDir . '/src/Modules/ModuleHistoryRepository.php',

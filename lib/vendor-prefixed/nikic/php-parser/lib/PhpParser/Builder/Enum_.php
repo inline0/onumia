@@ -1,15 +1,16 @@
-<?php declare(strict_types=1);
+<?php
 
+declare (strict_types=1);
 namespace Onumia\Lib\PhpParser\Builder;
 
-use PhpParser;
+use Onumia\Lib\PhpParser;
 use Onumia\Lib\PhpParser\BuilderHelpers;
 use Onumia\Lib\PhpParser\Node;
 use Onumia\Lib\PhpParser\Node\Identifier;
 use Onumia\Lib\PhpParser\Node\Name;
 use Onumia\Lib\PhpParser\Node\Stmt;
-
-class Enum_ extends Declaration {
+class Enum_ extends Declaration
+{
     protected string $name;
     protected ?Identifier $scalarType = null;
     /** @var list<Name> */
@@ -24,16 +25,15 @@ class Enum_ extends Declaration {
     protected array $methods = [];
     /** @var list<Node\AttributeGroup> */
     protected array $attributeGroups = [];
-
     /**
      * Creates an enum builder.
      *
      * @param string $name Name of the enum
      */
-    public function __construct(string $name) {
+    public function __construct(string $name)
+    {
         $this->name = $name;
     }
-
     /**
      * Sets the scalar type.
      *
@@ -41,12 +41,11 @@ class Enum_ extends Declaration {
      *
      * @return $this
      */
-    public function setScalarType($scalarType) {
+    public function setScalarType($scalarType)
+    {
         $this->scalarType = BuilderHelpers::normalizeType($scalarType);
-
         return $this;
     }
-
     /**
      * Implements one or more interfaces.
      *
@@ -54,14 +53,13 @@ class Enum_ extends Declaration {
      *
      * @return $this The builder instance (for fluid interface)
      */
-    public function implement(...$interfaces) {
+    public function implement(...$interfaces)
+    {
         foreach ($interfaces as $interface) {
             $this->implements[] = BuilderHelpers::normalizeName($interface);
         }
-
         return $this;
     }
-
     /**
      * Adds a statement.
      *
@@ -69,9 +67,9 @@ class Enum_ extends Declaration {
      *
      * @return $this The builder instance (for fluid interface)
      */
-    public function addStmt($stmt) {
+    public function addStmt($stmt)
+    {
         $stmt = BuilderHelpers::normalizeNode($stmt);
-
         if ($stmt instanceof Stmt\EnumCase) {
             $this->enumCases[] = $stmt;
         } elseif ($stmt instanceof Stmt\ClassMethod) {
@@ -83,10 +81,8 @@ class Enum_ extends Declaration {
         } else {
             throw new \LogicException(sprintf('Unexpected node of type "%s"', $stmt->getType()));
         }
-
         return $this;
     }
-
     /**
      * Adds an attribute group.
      *
@@ -94,23 +90,18 @@ class Enum_ extends Declaration {
      *
      * @return $this The builder instance (for fluid interface)
      */
-    public function addAttribute($attribute) {
+    public function addAttribute($attribute)
+    {
         $this->attributeGroups[] = BuilderHelpers::normalizeAttribute($attribute);
-
         return $this;
     }
-
     /**
      * Returns the built class node.
      *
      * @return Stmt\Enum_ The built enum node
      */
-    public function getNode(): Onumia\Lib\PhpParser\Node {
-        return new Stmt\Enum_($this->name, [
-            'scalarType' => $this->scalarType,
-            'implements' => $this->implements,
-            'stmts' => array_merge($this->uses, $this->enumCases, $this->constants, $this->methods),
-            'attrGroups' => $this->attributeGroups,
-        ], $this->attributes);
+    public function getNode(): Onumia\Lib\PhpParser\Node
+    {
+        return new Stmt\Enum_($this->name, ['scalarType' => $this->scalarType, 'implements' => $this->implements, 'stmts' => array_merge($this->uses, $this->enumCases, $this->constants, $this->methods), 'attrGroups' => $this->attributeGroups], $this->attributes);
     }
 }

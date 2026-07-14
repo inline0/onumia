@@ -1,9 +1,11 @@
-<?php declare(strict_types=1);
+<?php
 
+declare (strict_types=1);
 namespace Onumia\Lib\PhpParser;
 
 if (!\function_exists('Onumia\Lib\PhpParser\defineCompatibilityTokens')) {
-    function defineCompatibilityTokens(): void {
+    function defineCompatibilityTokens(): void
+    {
         $compatTokens = [
             // PHP 8.0
             'T_NAME_QUALIFIED',
@@ -26,7 +28,6 @@ if (!\function_exists('Onumia\Lib\PhpParser\defineCompatibilityTokens')) {
             'T_PIPE',
             'T_VOID_CAST',
         ];
-
         // PHP-Parser might be used together with another library that also emulates some or all
         // of these tokens. Perform a sanity-check that all already defined tokens have been
         // assigned a unique ID.
@@ -35,24 +36,15 @@ if (!\function_exists('Onumia\Lib\PhpParser\defineCompatibilityTokens')) {
             if (\defined($token)) {
                 $tokenId = \constant($token);
                 if (!\is_int($tokenId)) {
-                    throw new \Error(sprintf(
-                        'Token %s has ID of type %s, should be int. ' .
-                        'You may be using a library with broken token emulation',
-                        $token, \gettype($tokenId)
-                    ));
+                    throw new \Error(sprintf('Token %s has ID of type %s, should be int. ' . 'You may be using a library with broken token emulation', $token, \gettype($tokenId)));
                 }
                 $clashingToken = $usedTokenIds[$tokenId] ?? null;
                 if ($clashingToken !== null) {
-                    throw new \Error(sprintf(
-                        'Token %s has same ID as token %s, ' .
-                        'you may be using a library with broken token emulation',
-                        $token, $clashingToken
-                    ));
+                    throw new \Error(sprintf('Token %s has same ID as token %s, ' . 'you may be using a library with broken token emulation', $token, $clashingToken));
                 }
                 $usedTokenIds[$tokenId] = $token;
             }
         }
-
         // Now define any tokens that have not yet been emulated. Try to assign IDs from -1
         // downwards, but skip any IDs that may already be in use.
         $newTokenId = -1;
@@ -66,6 +58,5 @@ if (!\function_exists('Onumia\Lib\PhpParser\defineCompatibilityTokens')) {
             }
         }
     }
-
     defineCompatibilityTokens();
 }

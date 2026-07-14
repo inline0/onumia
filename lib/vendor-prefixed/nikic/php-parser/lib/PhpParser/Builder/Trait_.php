@@ -1,13 +1,14 @@
-<?php declare(strict_types=1);
+<?php
 
+declare (strict_types=1);
 namespace Onumia\Lib\PhpParser\Builder;
 
-use PhpParser;
+use Onumia\Lib\PhpParser;
 use Onumia\Lib\PhpParser\BuilderHelpers;
 use Onumia\Lib\PhpParser\Node;
 use Onumia\Lib\PhpParser\Node\Stmt;
-
-class Trait_ extends Declaration {
+class Trait_ extends Declaration
+{
     protected string $name;
     /** @var list<Stmt\TraitUse> */
     protected array $uses = [];
@@ -19,16 +20,15 @@ class Trait_ extends Declaration {
     protected array $methods = [];
     /** @var list<Node\AttributeGroup> */
     protected array $attributeGroups = [];
-
     /**
      * Creates an interface builder.
      *
      * @param string $name Name of the interface
      */
-    public function __construct(string $name) {
+    public function __construct(string $name)
+    {
         $this->name = $name;
     }
-
     /**
      * Adds a statement.
      *
@@ -36,9 +36,9 @@ class Trait_ extends Declaration {
      *
      * @return $this The builder instance (for fluid interface)
      */
-    public function addStmt($stmt) {
+    public function addStmt($stmt)
+    {
         $stmt = BuilderHelpers::normalizeNode($stmt);
-
         if ($stmt instanceof Stmt\Property) {
             $this->properties[] = $stmt;
         } elseif ($stmt instanceof Stmt\ClassMethod) {
@@ -50,10 +50,8 @@ class Trait_ extends Declaration {
         } else {
             throw new \LogicException(sprintf('Unexpected node of type "%s"', $stmt->getType()));
         }
-
         return $this;
     }
-
     /**
      * Adds an attribute group.
      *
@@ -61,23 +59,18 @@ class Trait_ extends Declaration {
      *
      * @return $this The builder instance (for fluid interface)
      */
-    public function addAttribute($attribute) {
+    public function addAttribute($attribute)
+    {
         $this->attributeGroups[] = BuilderHelpers::normalizeAttribute($attribute);
-
         return $this;
     }
-
     /**
      * Returns the built trait node.
      *
      * @return Stmt\Trait_ The built interface node
      */
-    public function getNode(): Onumia\Lib\PhpParser\Node {
-        return new Stmt\Trait_(
-            $this->name, [
-                'stmts' => array_merge($this->uses, $this->constants, $this->properties, $this->methods),
-                'attrGroups' => $this->attributeGroups,
-            ], $this->attributes
-        );
+    public function getNode(): Onumia\Lib\PhpParser\Node
+    {
+        return new Stmt\Trait_($this->name, ['stmts' => array_merge($this->uses, $this->constants, $this->properties, $this->methods), 'attrGroups' => $this->attributeGroups], $this->attributes);
     }
 }

@@ -1,5 +1,6 @@
-<?php declare(strict_types=1);
+<?php
 
+declare (strict_types=1);
 namespace Onumia\Lib\PhpParser\Node\Stmt;
 
 use Onumia\Lib\PhpParser\Modifiers;
@@ -8,8 +9,8 @@ use Onumia\Lib\PhpParser\Node\ComplexType;
 use Onumia\Lib\PhpParser\Node\Identifier;
 use Onumia\Lib\PhpParser\Node\Name;
 use Onumia\Lib\PhpParser\Node\PropertyItem;
-
-class Property extends Node\Stmt {
+class Property extends Node\Stmt
+{
     /** @var int Modifiers */
     public int $flags;
     /** @var PropertyItem[] Properties */
@@ -20,7 +21,6 @@ class Property extends Node\Stmt {
     public array $attrGroups;
     /** @var Node\PropertyHook[] Property hooks */
     public array $hooks;
-
     /**
      * Constructs a class property list node.
      *
@@ -31,7 +31,8 @@ class Property extends Node\Stmt {
      * @param Node\AttributeGroup[] $attrGroups PHP attribute groups
      * @param Node\PropertyHook[] $hooks Property hooks
      */
-    public function __construct(int $flags, array $props, array $attributes = [], ?Node $type = null, array $attrGroups = [], array $hooks = []) {
+    public function __construct(int $flags, array $props, array $attributes = [], ?Node $type = null, array $attrGroups = [], array $hooks = [])
+    {
         $this->attributes = $attributes;
         $this->flags = $flags;
         $this->props = $props;
@@ -39,83 +40,82 @@ class Property extends Node\Stmt {
         $this->attrGroups = $attrGroups;
         $this->hooks = $hooks;
     }
-
-    public function getSubNodeNames(): array {
+    public function getSubNodeNames(): array
+    {
         return ['attrGroups', 'flags', 'type', 'props', 'hooks'];
     }
-
     /**
      * Whether the property is explicitly or implicitly public.
      */
-    public function isPublic(): bool {
-        return ($this->flags & Modifiers::PUBLIC) !== 0
-            || ($this->flags & Modifiers::VISIBILITY_MASK) === 0;
+    public function isPublic(): bool
+    {
+        return ($this->flags & Modifiers::PUBLIC) !== 0 || ($this->flags & Modifiers::VISIBILITY_MASK) === 0;
     }
-
     /**
      * Whether the property is protected.
      */
-    public function isProtected(): bool {
+    public function isProtected(): bool
+    {
         return (bool) ($this->flags & Modifiers::PROTECTED);
     }
-
     /**
      * Whether the property is private.
      */
-    public function isPrivate(): bool {
+    public function isPrivate(): bool
+    {
         return (bool) ($this->flags & Modifiers::PRIVATE);
     }
-
     /**
      * Whether the property is static.
      */
-    public function isStatic(): bool {
+    public function isStatic(): bool
+    {
         return (bool) ($this->flags & Modifiers::STATIC);
     }
-
     /**
      * Whether the property is readonly.
      */
-    public function isReadonly(): bool {
+    public function isReadonly(): bool
+    {
         return (bool) ($this->flags & Modifiers::READONLY);
     }
-
     /**
      * Whether the property is abstract.
      */
-    public function isAbstract(): bool {
+    public function isAbstract(): bool
+    {
         return (bool) ($this->flags & Modifiers::ABSTRACT);
     }
-
     /**
      * Whether the property is final.
      */
-    public function isFinal(): bool {
+    public function isFinal(): bool
+    {
         return (bool) ($this->flags & Modifiers::FINAL);
     }
-
     /**
      * Whether the property has explicit public(set) visibility.
      */
-    public function isPublicSet(): bool {
+    public function isPublicSet(): bool
+    {
         return (bool) ($this->flags & Modifiers::PUBLIC_SET);
     }
-
     /**
      * Whether the property has explicit protected(set) visibility.
      */
-    public function isProtectedSet(): bool {
+    public function isProtectedSet(): bool
+    {
         return (bool) ($this->flags & Modifiers::PROTECTED_SET);
     }
-
     /**
      * Whether the property has explicit private(set) visibility.
      */
-    public function isPrivateSet(): bool {
+    public function isPrivateSet(): bool
+    {
         return (bool) ($this->flags & Modifiers::PRIVATE_SET);
     }
-
-    public function getType(): string {
+    public function getType(): string
+    {
         return 'Stmt_Property';
     }
 }

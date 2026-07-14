@@ -1,11 +1,9 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Onumia\Lib\Pitmaster\Merge;
 
 use Onumia\Lib\Pitmaster\Object\ObjectId;
-
 /**
  * Octopus merge: merge 3+ branches simultaneously.
  *
@@ -22,17 +20,13 @@ final class OctopusMerge
     public static function merge(string $base, array $contents): array
     {
         $result = $base;
-
         foreach ($contents as $theirs) {
             $merged = ThreeWayMerge::merge($result, $result, $theirs);
-
             if (!$merged['clean']) {
-                return ['content' => $result, 'clean' => false];
+                return ['content' => $result, 'clean' => \false];
             }
-
             $result = $merged['content'];
         }
-
-        return ['content' => $result, 'clean' => true];
+        return ['content' => $result, 'clean' => \true];
     }
 }

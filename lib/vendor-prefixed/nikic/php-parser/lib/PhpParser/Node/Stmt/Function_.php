@@ -1,11 +1,12 @@
-<?php declare(strict_types=1);
+<?php
 
+declare (strict_types=1);
 namespace Onumia\Lib\PhpParser\Node\Stmt;
 
 use Onumia\Lib\PhpParser\Node;
 use Onumia\Lib\PhpParser\Node\FunctionLike;
-
-class Function_ extends Node\Stmt implements FunctionLike {
+class Function_ extends Node\Stmt implements FunctionLike
+{
     /** @var bool Whether function returns by reference */
     public bool $byRef;
     /** @var Node\Identifier Name */
@@ -18,10 +19,8 @@ class Function_ extends Node\Stmt implements FunctionLike {
     public array $stmts;
     /** @var Node\AttributeGroup[] PHP attribute groups */
     public array $attrGroups;
-
     /** @var Node\Name|null Namespaced name (if using NameResolver) */
     public ?Node\Name $namespacedName;
-
     /**
      * Constructs a function node.
      *
@@ -40,42 +39,43 @@ class Function_ extends Node\Stmt implements FunctionLike {
      *             'attrGroups' => array(): PHP attribute groups
      * @param array<string, mixed> $attributes Additional attributes
      */
-    public function __construct($name, array $subNodes = [], array $attributes = []) {
+    public function __construct($name, array $subNodes = [], array $attributes = [])
+    {
         $this->attributes = $attributes;
-        $this->byRef = $subNodes['byRef'] ?? false;
+        $this->byRef = $subNodes['byRef'] ?? \false;
         $this->name = \is_string($name) ? new Node\Identifier($name) : $name;
         $this->params = $subNodes['params'] ?? [];
         $this->returnType = $subNodes['returnType'] ?? null;
         $this->stmts = $subNodes['stmts'] ?? [];
         $this->attrGroups = $subNodes['attrGroups'] ?? [];
     }
-
-    public function getSubNodeNames(): array {
+    public function getSubNodeNames(): array
+    {
         return ['attrGroups', 'byRef', 'name', 'params', 'returnType', 'stmts'];
     }
-
-    public function returnsByRef(): bool {
+    public function returnsByRef(): bool
+    {
         return $this->byRef;
     }
-
-    public function getParams(): array {
+    public function getParams(): array
+    {
         return $this->params;
     }
-
-    public function getReturnType() {
+    public function getReturnType()
+    {
         return $this->returnType;
     }
-
-    public function getAttrGroups(): array {
+    public function getAttrGroups(): array
+    {
         return $this->attrGroups;
     }
-
     /** @return Node\Stmt[] */
-    public function getStmts(): array {
+    public function getStmts(): array
+    {
         return $this->stmts;
     }
-
-    public function getType(): string {
+    public function getType(): string
+    {
         return 'Stmt_Function';
     }
 }

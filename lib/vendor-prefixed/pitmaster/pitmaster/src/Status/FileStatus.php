@@ -1,10 +1,9 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Onumia\Lib\Pitmaster\Status;
 
-enum FileStatus: string
+enum FileStatus : string
 {
     case Added = 'A';
     case Modified = 'M';

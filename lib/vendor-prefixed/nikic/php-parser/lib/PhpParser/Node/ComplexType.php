@@ -1,13 +1,14 @@
-<?php declare(strict_types=1);
+<?php
 
+declare (strict_types=1);
 namespace Onumia\Lib\PhpParser\Node;
 
 use Onumia\Lib\PhpParser\NodeAbstract;
-
 /**
  * This is a base class for complex types, including nullable types and union types.
  *
  * It does not provide any shared behavior and exists only for type-checking purposes.
  */
-abstract class ComplexType extends NodeAbstract {
+abstract class ComplexType extends NodeAbstract
+{
 }

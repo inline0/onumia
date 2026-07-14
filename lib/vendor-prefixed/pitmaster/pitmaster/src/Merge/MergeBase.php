@@ -1,14 +1,12 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Onumia\Lib\Pitmaster\Merge;
 
 use Onumia\Lib\Pitmaster\Object\Commit;
 use Onumia\Lib\Pitmaster\Object\ObjectId;
 use Onumia\Lib\Pitmaster\Pack\CommitGraph;
 use Onumia\Lib\Pitmaster\Storage\ObjectDatabase;
-
 /**
  * Find the lowest common ancestor(s) of two commits in the commit graph.
  *
@@ -17,12 +15,9 @@ use Onumia\Lib\Pitmaster\Storage\ObjectDatabase;
  */
 final class MergeBase
 {
-    public function __construct(
-        private readonly ObjectDatabase $objects,
-        private readonly ?CommitGraph $commitGraph = null,
-    ) {
+    public function __construct(private readonly ObjectDatabase $objects, private readonly ?CommitGraph $commitGraph = null)
+    {
     }
-
     /**
      * Find the merge base (LCA) of two commits.
      */
@@ -31,38 +26,31 @@ final class MergeBase
         if ($a->equals($b)) {
             return $a;
         }
-
         $ancestorsA = [];
         $ancestorsB = [];
         $queueA = [$a->hex];
         $queueB = [$b->hex];
-
         while ($queueA !== [] || $queueB !== []) {
             // Expand from A
             if ($queueA !== []) {
                 $hex = array_shift($queueA);
-
                 if (isset($ancestorsB[$hex])) {
                     return ObjectId::fromHex($hex);
                 }
-
-                $ancestorsA[$hex] = true;
+                $ancestorsA[$hex] = \true;
                 foreach ($this->parentsOf($hex) as $parentHex) {
                     if (!isset($ancestorsA[$parentHex])) {
                         $queueA[] = $parentHex;
                     }
                 }
             }
-
             // Expand from B
             if ($queueB !== []) {
                 $hex = array_shift($queueB);
-
                 if (isset($ancestorsA[$hex])) {
                     return ObjectId::fromHex($hex);
                 }
-
-                $ancestorsB[$hex] = true;
+                $ancestorsB[$hex] = \true;
                 foreach ($this->parentsOf($hex) as $parentHex) {
                     if (!isset($ancestorsB[$parentHex])) {
                         $queueB[] = $parentHex;
@@ -70,10 +58,8 @@ final class MergeBase
                 }
             }
         }
-
         return null;
     }
-
     /**
      * Find all lowest common ancestors for two commits.
      *
@@ -84,71 +70,56 @@ final class MergeBase
         if ($a->equals($b)) {
             return [$a];
         }
-
         $ancestorsA = $this->collectAncestors($a);
         $ancestorsB = $this->collectAncestors($b);
         $commonHexes = array_keys(array_intersect_key($ancestorsA, $ancestorsB));
         $lowest = [];
-
         foreach ($commonHexes as $hex) {
             $candidate = ObjectId::fromHex($hex);
-            $isLowest = true;
-
+            $isLowest = \true;
             foreach ($commonHexes as $otherHex) {
                 if ($hex === $otherHex) {
                     continue;
                 }
-
                 if ($this->isAncestor($candidate, ObjectId::fromHex($otherHex))) {
-                    $isLowest = false;
+                    $isLowest = \false;
                     break;
                 }
             }
-
             if ($isLowest) {
                 $lowest[] = $candidate;
             }
         }
-
-        usort($lowest, static fn (ObjectId $left, ObjectId $right): int => strcmp($left->hex, $right->hex));
-
+        usort($lowest, static fn(ObjectId $left, ObjectId $right): int => strcmp($left->hex, $right->hex));
         return $lowest;
     }
-
     /**
      * Check if A is an ancestor of B (for fast-forward detection).
      */
     public function isAncestor(ObjectId $a, ObjectId $b): bool
     {
         if ($a->equals($b)) {
-            return true;
+            return \true;
         }
-
         $visited = [];
         $queue = [$b->hex];
-
         while ($queue !== []) {
             $hex = array_shift($queue);
-
             if ($hex === $a->hex) {
-                return true;
+                return \true;
             }
-
             if (isset($visited[$hex])) {
                 continue;
             }
-
-            $visited[$hex] = true;
+            $visited[$hex] = \true;
             foreach ($this->parentsOf($hex) as $parentHex) {
                 if (!isset($visited[$parentHex])) {
                     $queue[] = $parentHex;
                 }
             }
         }
-
-        return false;
+        return \false;
     }
-
     /**
      * @return array<string, true>
      */
@@ -156,45 +127,33 @@ final class MergeBase
     {
         $ancestors = [];
         $queue = [$start->hex];
-
         while ($queue !== []) {
             $hex = array_shift($queue);
-
             if ($hex === null || isset($ancestors[$hex])) {
                 continue;
             }
-
-            $ancestors[$hex] = true;
+            $ancestors[$hex] = \true;
             foreach ($this->parentsOf($hex) as $parentHex) {
                 if (!isset($ancestors[$parentHex])) {
                     $queue[] = $parentHex;
                 }
             }
         }
-
         return $ancestors;
     }
-
     /**
      * @return list<string>
      */
     private function parentsOf(string $hex): array
     {
         $graphParents = $this->commitGraph?->parentHashes($hex);
-
         if ($graphParents !== null) {
             return $graphParents;
         }
-
         $commit = $this->objects->read(ObjectId::fromHex($hex));
-
         if (!$commit instanceof Commit) {
             return [];
         }
-
-        return array_map(
-            static fn (ObjectId $parent): string => $parent->hex,
-            $commit->parents,
-        );
+        return array_map(static fn(ObjectId $parent): string => $parent->hex, $commit->parents);
     }
 }

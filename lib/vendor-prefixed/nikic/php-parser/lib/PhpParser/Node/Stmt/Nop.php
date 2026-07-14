@@ -1,16 +1,18 @@
-<?php declare(strict_types=1);
+<?php
 
+declare (strict_types=1);
 namespace Onumia\Lib\PhpParser\Node\Stmt;
 
 use Onumia\Lib\PhpParser\Node;
-
 /** Nop/empty statement (;). */
-class Nop extends Node\Stmt {
-    public function getSubNodeNames(): array {
+class Nop extends Node\Stmt
+{
+    public function getSubNodeNames(): array
+    {
         return [];
     }
-
-    public function getType(): string {
+    public function getType(): string
+    {
         return 'Stmt_Nop';
     }
 }

@@ -1,13 +1,12 @@
 #!/usr/bin/env php
-<?php
-
-declare(strict_types=1);
+<?php 
+declare (strict_types=1);
+namespace Onumia\Lib;
 
 /**
  * Import isomorphic-git test fixtures (bare .git repos).
  */
-
-$root = dirname(__DIR__);
+$root = \dirname(__DIR__);
 $source = $root . '/fixtures/upstream/isomorphic-git/__tests__/__fixtures__';
 $setupHeader = <<<'BASH'
 #!/bin/bash
@@ -15,70 +14,38 @@ set -e
 PITMASTER_ROOT="${PITMASTER_ROOT:-$(cd "$(dirname "$0")/../../../.." && pwd)}"
 BASH;
 $setupHeader .= "\n";
-
-if (!is_dir($source)) {
-    fwrite(STDERR, "isomorphic-git fixtures not found at {$source}\n");
+if (!\is_dir($source)) {
+    \fwrite(\STDERR, "isomorphic-git fixtures not found at {$source}\n");
     exit(1);
 }
-
 $upstreamDir = $root . '/scenarios/upstream/isomorphic-git';
 $imported = 0;
-
-foreach (scandir($source) as $entry) {
+foreach (\scandir($source) as $entry) {
     if ($entry === '.' || $entry === '..') {
         continue;
     }
-
     $sourcePath = $source . '/' . $entry;
-
     // Only import bare .git repos (most useful for reading)
-    if (!str_ends_with($entry, '.git') || !is_dir($sourcePath)) {
+    if (!\str_ends_with($entry, '.git') || !\is_dir($sourcePath)) {
         continue;
     }
-
     // Check it has a HEAD file (valid git repo)
-    if (!is_file($sourcePath . '/HEAD')) {
+    if (!\is_file($sourcePath . '/HEAD')) {
         continue;
     }
-
-    $safeName = str_replace('.git', '', $entry);
+    $safeName = \str_replace('.git', '', $entry);
     $scenarioDir = $upstreamDir . '/' . $safeName;
-
-    if (is_dir($scenarioDir)) {
+    if (\is_dir($scenarioDir)) {
         continue;
     }
-
-    mkdir($scenarioDir, 0777, true);
-
+    \mkdir($scenarioDir, 0777, \true);
     $fixturePath = '${PITMASTER_ROOT}/fixtures/upstream/isomorphic-git/__tests__/__fixtures__/' . $entry;
-    $setupContent = $setupHeader
-        . "\n# isomorphic-git fixture: {$entry}\n"
-        . "git init .\n"
-        . "cp -r " . escapeshellarg($fixturePath) . "/* .git/\n"
-        . "git checkout -- . 2>/dev/null || true\n";
-
-    file_put_contents($scenarioDir . '/setup.sh', $setupContent);
-    chmod($scenarioDir . '/setup.sh', 0755);
-
-    $scenario = [
-        'name' => 'upstream/isomorphic-git/' . $safeName,
-        'category' => 'upstream',
-        'description' => 'isomorphic-git: ' . $safeName,
-        'operations' => [],
-        'oracle_commands' => [],
-        'expectations' => [
-            'exact_match' => [],
-            'fsck_clean' => false,
-        ],
-    ];
-
-    file_put_contents(
-        $scenarioDir . '/scenario.json',
-        json_encode($scenario, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . "\n"
-    );
-
+    $setupContent = $setupHeader . "\n# isomorphic-git fixture: {$entry}\n" . "git init .\n" . "cp -r " . \escapeshellarg($fixturePath) . "/* .git/\n" . "git checkout -- . 2>/dev/null || true\n";
+    \file_put_contents($scenarioDir . '/setup.sh', $setupContent);
+    \chmod($scenarioDir . '/setup.sh', 0755);
+    $scenario = ['name' => 'upstream/isomorphic-git/' . $safeName, 'category' => 'upstream', 'description' => 'isomorphic-git: ' . $safeName, 'operations' => [], 'oracle_commands' => [], 'expectations' => ['exact_match' => [], 'fsck_clean' => \false]];
+    \file_put_contents($scenarioDir . '/scenario.json', \json_encode($scenario, \JSON_PRETTY_PRINT | \JSON_UNESCAPED_SLASHES) . "\n");
     $imported++;
-    fwrite(STDOUT, "  OK    {$safeName}\n");
+    \fwrite(\STDOUT, "  OK    {$safeName}\n");
 }
-
-fwrite(STDOUT, "\nImported {$imported} isomorphic-git fixtures.\n");
+\fwrite(\STDOUT, "\nImported {$imported} isomorphic-git fixtures.\n");

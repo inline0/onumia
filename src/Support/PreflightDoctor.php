@@ -24,9 +24,9 @@ use Onumia\Pro\Modules\SoftwareLicensing\LicensingStore;
 use Onumia\Pro\Modules\SoftwareLicensing\Stripe\StripeConfig;
 
 final class PreflightDoctor {
-	private const STATUS_HEALTHY  = 'healthy';
-	private const STATUS_WARNING  = 'warning';
-	private const STATUS_CRITICAL = 'critical';
+	private const STATUS_HEALTHY   = 'healthy';
+	private const STATUS_WARNING   = 'warning';
+	private const STATUS_CRITICAL  = 'critical';
 	private const MODULE_LICENSING = 'onumia/software-licensing';
 
 	/** @var list<array{name:string,status:string,message:string,data:array<string,mixed>}> */
@@ -53,6 +53,7 @@ final class PreflightDoctor {
 		$this->check_table_registry();
 		$this->check_cron_events();
 		$this->check_rest_routes();
+		$this->check_external_secret_config();
 		$this->check_stripe_config();
 		$this->check_github_config();
 		$this->check_updater_readiness();
@@ -69,6 +70,54 @@ final class PreflightDoctor {
 			),
 			'summary'     => $summary,
 			'checks'      => $this->checks,
+		);
+	}
+
+	private function check_external_secret_config(): void {
+		$module = $this->licensing_module();
+		if ( null === $module ) {
+			$this->add_check( 'secrets.external', self::STATUS_WARNING, 'Software Licensing module is not available.', array( 'available' => false ) );
+			return;
+		}
+
+		$external = $this->secret_repository->external_status();
+		$secrets  = array();
+		$ready    = $external['configured'] && $external['valid'];
+		foreach ( array(
+			'githubReleaseCredential' => 'githubToken',
+			'licensingSigner'         => 'licensingSigningKey',
+		) as $label => $name ) {
+			$source      = $this->secret_repository->source( $module, $name );
+			$fingerprint = null;
+			try {
+				$fingerprint = $this->secret_repository->fingerprint( $module, $name );
+			} catch ( \Throwable ) {
+				$fingerprint = null;
+			}
+			$stored            = $this->secret_repository->stored( $module, $name );
+			$secrets[ $label ] = array(
+				'present'        => null !== $fingerprint,
+				'source'         => $source,
+				'fingerprint'    => $fingerprint,
+				'storedFallback' => $stored,
+			);
+			$ready             = $ready && 'external' === $source && null !== $fingerprint && ! $stored;
+		}
+
+		$status = $external['configured'] && ! $external['valid']
+			? self::STATUS_CRITICAL
+			: ( $ready ? self::STATUS_HEALTHY : self::STATUS_WARNING );
+		$this->add_check(
+			'secrets.external',
+			$status,
+			self::STATUS_HEALTHY === $status ? 'Required licensing secrets are externally managed.' : 'Required licensing secrets are not fully externalized.',
+			array(
+				'configured' => $external['configured'],
+				'valid'      => $external['valid'],
+				'siteId'     => $external['siteId'],
+				'error'      => $external['error'],
+				'secrets'    => $secrets,
+			)
 		);
 	}
 
@@ -250,7 +299,17 @@ final class PreflightDoctor {
 		}
 
 		$this->require_licensing_runtime( $module );
-		$config = StripeConfig::from_module( $module, $this->settings_repository->settings( $module ), $this->secret_repository );
+		try {
+			$config = StripeConfig::from_module( $module, $this->settings_repository->settings( $module ), $this->secret_repository );
+		} catch ( \Throwable ) {
+			$this->add_check(
+				'stripe.config',
+				self::STATUS_CRITICAL,
+				'Stripe configuration could not resolve the external secret store.',
+				array( 'secretResolution' => 'failed' )
+			);
+			return;
+		}
 		$safe   = $config->safe_status();
 		$status = true !== $safe['stripeEnabled']
 			? self::STATUS_HEALTHY
@@ -271,23 +330,33 @@ final class PreflightDoctor {
 			return;
 		}
 
-		$settings    = $this->settings_repository->settings( $module );
-		$repository  = is_string( $settings['githubRepository'] ?? null ) ? trim( $settings['githubRepository'] ) : '';
-		$product     = is_string( $settings['githubProductSlug'] ?? null ) ? trim( $settings['githubProductSlug'] ) : '';
-		$secret      = $this->secret_repository->status( $module )['githubToken'] ?? array( 'present' => false );
-		$token       = true === ( $secret['present'] ?? false );
+		$settings          = $this->settings_repository->settings( $module );
+		$repository        = is_string( $settings['githubRepository'] ?? null ) ? trim( $settings['githubRepository'] ) : '';
+		$product           = is_string( $settings['githubProductSlug'] ?? null ) ? trim( $settings['githubProductSlug'] ) : '';
+		$token_source      = $this->secret_repository->source( $module, 'githubToken' );
+		$token_fingerprint = null;
+		try {
+			$token_fingerprint = $this->secret_repository->fingerprint( $module, 'githubToken' );
+		} catch ( \Throwable ) {
+			$token_fingerprint = null;
+		}
+		$token       = null !== $token_fingerprint;
 		$release_row = $this->private_release_count();
 
-		$status = $release_row > 0 && ! $token ? self::STATUS_WARNING : self::STATUS_HEALTHY;
+		$status = 'external-invalid' === $token_source
+			? self::STATUS_CRITICAL
+			: ( $release_row > 0 && ! $token ? self::STATUS_WARNING : self::STATUS_HEALTHY );
 		$this->add_check(
 			'github.config',
 			$status,
 			self::STATUS_HEALTHY === $status ? 'GitHub release sync configuration is safe to report.' : 'Private GitHub releases exist but no GitHub token is configured.',
 			array(
-				'repositoryConfigured' => '' !== $repository,
-				'productSlug'          => '' === $product ? 'onumia-pro' : $product,
-				'tokenPresent'         => $token,
-				'privateReleaseCount'  => $release_row,
+				'repositoryConfigured'  => '' !== $repository,
+				'productSlug'           => '' === $product ? 'onumia-pro' : $product,
+				'credentialPresent'     => $token,
+				'credentialSource'      => $token_source,
+				'credentialFingerprint' => $token_fingerprint,
+				'privateReleaseCount'   => $release_row,
 			)
 		);
 	}
@@ -639,6 +708,8 @@ final class PreflightDoctor {
 			array(
 				'src/GitHubReleaseProvider.php',
 				'src/WordPressGitHubReleaseProvider.php',
+				'src/ReleaseManifestVerifier.php',
+				'src/ReleasePackageVerifier.php',
 				'src/LicensingSigningSecret.php',
 				'src/LicenseKeyService.php',
 				'src/LicensingRecordMapper.php',

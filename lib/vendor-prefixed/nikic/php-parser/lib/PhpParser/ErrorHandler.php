@@ -1,8 +1,10 @@
-<?php declare(strict_types=1);
+<?php
 
+declare (strict_types=1);
 namespace Onumia\Lib\PhpParser;
 
-interface ErrorHandler {
+interface ErrorHandler
+{
     /**
      * Handle an error generated during lexing, parsing or some other operation.
      *

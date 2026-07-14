@@ -1,12 +1,13 @@
-<?php declare(strict_types=1);
+<?php
 
+declare (strict_types=1);
 namespace Onumia\Lib\PhpParser\Node\Expr;
 
 use Onumia\Lib\PhpParser\Node\Arg;
 use Onumia\Lib\PhpParser\Node\Expr;
 use Onumia\Lib\PhpParser\Node\VariadicPlaceholder;
-
-abstract class CallLike extends Expr {
+abstract class CallLike extends Expr
+{
     /**
      * Return raw arguments, which may be actual Args, or VariadicPlaceholders for first-class
      * callables.
@@ -14,25 +15,24 @@ abstract class CallLike extends Expr {
      * @return array<Arg|VariadicPlaceholder>
      */
     abstract public function getRawArgs(): array;
-
     /**
      * Returns whether this call expression is actually a first class callable.
      */
-    public function isFirstClassCallable(): bool {
+    public function isFirstClassCallable(): bool
+    {
         $rawArgs = $this->getRawArgs();
         return count($rawArgs) === 1 && current($rawArgs) instanceof VariadicPlaceholder;
     }
-
     /**
      * Assert that this is not a first-class callable and return only ordinary Args.
      *
      * @return Arg[]
      */
-    public function getArgs(): array {
+    public function getArgs(): array
+    {
         assert(!$this->isFirstClassCallable());
         return $this->getRawArgs();
     }
-
     /**
      * Retrieves a specific argument from the raw arguments.
      *
@@ -40,7 +40,8 @@ abstract class CallLike extends Expr {
      * positional (unnamed) argument that exists at the given `$position`,
      * otherwise, returns `null` for first-class callables or if no match is found.
      */
-    public function getArg(string $name, int $position): ?Arg {
+    public function getArg(string $name, int $position): ?Arg
+    {
         if ($this->isFirstClassCallable()) {
             return null;
         }
@@ -48,10 +49,7 @@ abstract class CallLike extends Expr {
             if ($arg->unpack) {
                 continue;
             }
-            if (
-                ($arg->name !== null && $arg->name->toString() === $name)
-                || ($arg->name === null && $i === $position)
-            ) {
+            if ($arg->name !== null && $arg->name->toString() === $name || $arg->name === null && $i === $position) {
                 return $arg;
             }
         }

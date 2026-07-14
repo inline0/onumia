@@ -1,13 +1,11 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Onumia\Lib\Pitmaster\Graph;
 
 use Onumia\Lib\Pitmaster\Object\Commit;
 use Onumia\Lib\Pitmaster\Object\ObjectId;
 use Onumia\Lib\Pitmaster\Storage\ObjectDatabase;
-
 /**
  * Topological commit traversal (log).
  *
@@ -20,7 +18,6 @@ final class CommitWalker
     public function __construct(private readonly ObjectDatabase $objects)
     {
     }
-
     /**
      * Walk commits starting from the given ID.
      *
@@ -31,22 +28,16 @@ final class CommitWalker
         $commits = [];
         $visited = [];
         $queue = new \SplPriorityQueue();
-
         $this->enqueue($queue, $from, $visited);
-
         while (!$queue->isEmpty() && count($commits) < $limit) {
             ['id' => $id, 'commit' => $object] = $queue->extract();
-
             $commits[] = $object;
-
             foreach ($object->parents as $parentId) {
                 $this->enqueue($queue, $parentId, $visited);
             }
         }
-
         return $commits;
     }
-
     /**
      * Walk all commits from multiple starting points.
      *
@@ -58,24 +49,18 @@ final class CommitWalker
         $commits = [];
         $visited = [];
         $queue = new \SplPriorityQueue();
-
         foreach ($from as $id) {
             $this->enqueue($queue, $id, $visited);
         }
-
         while (!$queue->isEmpty() && count($commits) < $limit) {
             ['id' => $id, 'commit' => $object] = $queue->extract();
-
             $commits[] = $object;
-
             foreach ($object->parents as $parentId) {
                 $this->enqueue($queue, $parentId, $visited);
             }
         }
-
         return $commits;
     }
-
     /**
      * @param array<string, true> $visited
      */
@@ -84,11 +69,8 @@ final class CommitWalker
         if (isset($visited[$id->hex])) {
             return;
         }
-
-        $visited[$id->hex] = true;
-
+        $visited[$id->hex] = \true;
         $object = $this->objects->read($id);
-
         if ($object instanceof Commit) {
             $timestamp = $object->committerTimestamp() ?? 0;
             $queue->insert(['id' => $id, 'commit' => $object], $timestamp);

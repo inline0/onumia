@@ -1,7 +1,6 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Onumia\Lib\Pitmaster\Config;
 
 /**
@@ -9,14 +8,9 @@ namespace Onumia\Lib\Pitmaster\Config;
  */
 final readonly class ConfigEntry
 {
-    public function __construct(
-        public string $section,
-        public ?string $subsection,
-        public string $key,
-        public string $value,
-    ) {
+    public function __construct(public string $section, public ?string $subsection, public string $key, public string $value)
+    {
     }
-
     /**
      * Full qualified key: section.subsection.key or section.key.
      */
@@ -25,7 +19,6 @@ final readonly class ConfigEntry
         if ($this->subsection !== null) {
             return "{$this->section}.{$this->subsection}.{$this->key}";
         }
-
         return "{$this->section}.{$this->key}";
     }
 }

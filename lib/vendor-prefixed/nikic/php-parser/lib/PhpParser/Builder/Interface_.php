@@ -1,14 +1,15 @@
-<?php declare(strict_types=1);
+<?php
 
+declare (strict_types=1);
 namespace Onumia\Lib\PhpParser\Builder;
 
-use PhpParser;
+use Onumia\Lib\PhpParser;
 use Onumia\Lib\PhpParser\BuilderHelpers;
 use Onumia\Lib\PhpParser\Node;
 use Onumia\Lib\PhpParser\Node\Name;
 use Onumia\Lib\PhpParser\Node\Stmt;
-
-class Interface_ extends Declaration {
+class Interface_ extends Declaration
+{
     protected string $name;
     /** @var list<Name> */
     protected array $extends = [];
@@ -18,16 +19,15 @@ class Interface_ extends Declaration {
     protected array $methods = [];
     /** @var list<Node\AttributeGroup> */
     protected array $attributeGroups = [];
-
     /**
      * Creates an interface builder.
      *
      * @param string $name Name of the interface
      */
-    public function __construct(string $name) {
+    public function __construct(string $name)
+    {
         $this->name = $name;
     }
-
     /**
      * Extends one or more interfaces.
      *
@@ -35,14 +35,13 @@ class Interface_ extends Declaration {
      *
      * @return $this The builder instance (for fluid interface)
      */
-    public function extend(...$interfaces) {
+    public function extend(...$interfaces)
+    {
         foreach ($interfaces as $interface) {
             $this->extends[] = BuilderHelpers::normalizeName($interface);
         }
-
         return $this;
     }
-
     /**
      * Adds a statement.
      *
@@ -50,9 +49,9 @@ class Interface_ extends Declaration {
      *
      * @return $this The builder instance (for fluid interface)
      */
-    public function addStmt($stmt) {
+    public function addStmt($stmt)
+    {
         $stmt = BuilderHelpers::normalizeNode($stmt);
-
         if ($stmt instanceof Stmt\ClassConst) {
             $this->constants[] = $stmt;
         } elseif ($stmt instanceof Stmt\ClassMethod) {
@@ -62,10 +61,8 @@ class Interface_ extends Declaration {
         } else {
             throw new \LogicException(sprintf('Unexpected node of type "%s"', $stmt->getType()));
         }
-
         return $this;
     }
-
     /**
      * Adds an attribute group.
      *
@@ -73,22 +70,18 @@ class Interface_ extends Declaration {
      *
      * @return $this The builder instance (for fluid interface)
      */
-    public function addAttribute($attribute) {
+    public function addAttribute($attribute)
+    {
         $this->attributeGroups[] = BuilderHelpers::normalizeAttribute($attribute);
-
         return $this;
     }
-
     /**
      * Returns the built interface node.
      *
      * @return Stmt\Interface_ The built interface node
      */
-    public function getNode(): Onumia\Lib\PhpParser\Node {
-        return new Stmt\Interface_($this->name, [
-            'extends' => $this->extends,
-            'stmts' => array_merge($this->constants, $this->methods),
-            'attrGroups' => $this->attributeGroups,
-        ], $this->attributes);
+    public function getNode(): Onumia\Lib\PhpParser\Node
+    {
+        return new Stmt\Interface_($this->name, ['extends' => $this->extends, 'stmts' => array_merge($this->constants, $this->methods), 'attrGroups' => $this->attributeGroups], $this->attributes);
     }
 }
