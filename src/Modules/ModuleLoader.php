@@ -98,10 +98,6 @@ final class ModuleLoader {
 		$modules = array();
 		foreach ( $this->meta_files( $root ) as $file ) {
 			$directory = dirname( $file );
-			if ( $this->has_unavailable_optional_shared_structure( $directory ) ) {
-				continue;
-			}
-
 			$module = $this->load_directory( $directory );
 			$modules[] = $module;
 		}
@@ -141,7 +137,7 @@ final class ModuleLoader {
 		$this->validator->validate_meta( $meta, $meta_file );
 		$this->hydrate_component_registry_for_directory( $directory );
 
-		$structure = $this->structure_loader->load_file( $this->structure_file( $directory, $meta ) );
+		$structure = $this->structure_loader->load_directory( $directory );
 		$messages  = $this->message_loader->load_directory( $directory );
 		$parsed    = $this->contract_parser->parse_file( $directory . DIRECTORY_SEPARATOR . 'boot.php' );
 		$contract  = $parsed[0];
@@ -708,42 +704,6 @@ final class ModuleLoader {
 		}
 
 		return $label;
-	}
-
-	/**
-	 * @param array<string,mixed> $meta Module metadata.
-	 */
-	private function structure_file( string $directory, array $meta ): string {
-		$local_file = $directory . DIRECTORY_SEPARATOR . 'structure.json';
-		if ( is_file( $local_file ) ) {
-			return $local_file;
-		}
-
-		$module_name = $meta['name'] ?? null;
-		if ( is_string( $module_name ) ) {
-			$shared_file = SharedStructureFiles::for_module( $module_name, $directory );
-			if ( null !== $shared_file ) {
-				return $shared_file;
-			}
-		}
-
-		return $local_file;
-	}
-
-	private function has_unavailable_optional_shared_structure( string $directory ): bool {
-		$local_file = $directory . DIRECTORY_SEPARATOR . 'structure.json';
-		if ( is_file( $local_file ) ) {
-			return false;
-		}
-
-		$meta_file = $directory . DIRECTORY_SEPARATOR . 'meta.json';
-		$meta      = JsonFile::read_object( $meta_file, 'Module meta' );
-		$this->validator->validate_meta( $meta, $meta_file );
-
-		$module_name = $meta['name'] ?? null;
-		return is_string( $module_name )
-			&& SharedStructureFiles::is_optional_module( $module_name )
-			&& null === SharedStructureFiles::for_module( $module_name, $directory );
 	}
 
 	/**

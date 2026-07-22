@@ -1,9 +1,0 @@
-{
-  "$schema": "../../schemas/meta.json",
-  "name": "onumia/404-log",
-  "category": "routing",
-  "tags": ["404", "routing", "redirects"],
-  "label": "404 Log",
-  "description": "Records grouped 404 requests with referrer and user-agent context for broken-link review.",
-  "version": "0.1.0"
-}

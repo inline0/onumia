@@ -10,7 +10,6 @@ declare(strict_types=1);
 
 namespace Onumia\PublicApi;
 
-use Onumia\Core\Plugin;
 use Onumia\Modules\ModuleDefinition;
 use Onumia\Modules\ModuleTableDefinition;
 
@@ -28,8 +27,8 @@ final class Filters {
 	/**
 	 * Filters module root directories used during module discovery.
 	 *
-	 * Use this when an integration needs Onumia to discover bundled or custom
-	 * modules from an additional trusted directory. Returned paths should be
+	 * Use this when an integration needs Onumia to discover packaged modules from
+	 * an additional trusted directory. Returned paths should be
 	 * absolute directories that contain module folders with `meta.json` files.
 	 *
 	 * Non-string values are ignored by the caller after this filter runs. The
@@ -115,82 +114,25 @@ final class Filters {
 	}
 
 	/**
-	 * Filters the React entrypoint used for the Onumia admin app.
+	 * Filters whether the primary Onumia admin app owns the full viewport.
 	 *
-	 * Use this when a distribution needs to swap the free dashboard entrypoint
-	 * for another built entry, such as the Pro dashboard entry. The filtered
-	 * value should be a non-empty path relative to the Vite app source root.
-	 *
-	 * Empty or non-string values are ignored by the caller. The filter should
-	 * not enqueue scripts directly.
+	 * The fullscreen workspace receives a minimal shell and removes the WordPress
+	 * admin stylesheet stack without changing other admin screens.
 	 *
 	 * @api
-	 * @since 0.1.0
-	 * @hook onumia/admin/app_entrypoint
+	 * @since 0.1.1
+	 * @hook onumia/admin/app_fullscreen
 	 * @category Admin
-	 * @order 20
+	 * @order 40
 	 *
-	 * @param string $entrypoint Default app entrypoint.
-	 * @return string Filtered app entrypoint.
+	 * @param bool $fullscreen Whether the primary app uses the fullscreen shell.
+	 * @return bool Filtered fullscreen state.
 	 */
-	public static function app_entrypoint( string $entrypoint ): string {
+	public static function app_fullscreen( bool $fullscreen ): bool {
 		// phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores -- Onumia public hooks intentionally use slash-style names.
-		$filtered = \apply_filters( 'onumia/admin/app_entrypoint', $entrypoint );
+		$filtered = \apply_filters( 'onumia/admin/app_fullscreen', $fullscreen );
 
-		return is_string( $filtered ) ? $filtered : $entrypoint;
-	}
-
-	/**
-	 * Filters the built asset directory used for the Onumia admin app.
-	 *
-	 * Use this when a distribution needs Onumia to load a different built asset
-	 * directory, such as a Pro build. The filtered value should be a non-empty
-	 * path relative to the plugin root.
-	 *
-	 * Empty or non-string values are ignored by the caller. The filter should
-	 * not read the manifest or enqueue scripts directly.
-	 *
-	 * @api
-	 * @since 0.1.0
-	 * @hook onumia/admin/app_asset_directory
-	 * @category Admin
-	 * @order 30
-	 *
-	 * @param string $directory Default asset directory.
-	 * @return string Filtered asset directory.
-	 */
-	public static function app_asset_directory( string $directory ): string {
-		// phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores -- Onumia public hooks intentionally use slash-style names.
-		$filtered = \apply_filters( 'onumia/admin/app_asset_directory', $directory );
-
-		return is_string( $filtered ) ? $filtered : $directory;
-	}
-
-	/**
-	 * Filters Pro app root directories used during app discovery.
-	 *
-	 * Use this when a Pro integration stores custom app definitions outside the
-	 * active theme convention. Returned paths should be absolute directories
-	 * containing Onumia app folders.
-	 *
-	 * Non-string values are ignored by the caller after this filter runs. The
-	 * filter should not load app definitions itself.
-	 *
-	 * @api
-	 * @since 0.1.0
-	 * @hook onumia/pro/app_roots
-	 * @category Pro
-	 * @order 10
-	 *
-	 * @param string[] $roots Default Pro app root directories.
-	 * @param Plugin   $plugin Active Onumia plugin runtime.
-	 * @return string[] Filtered Pro app root directories.
-	 */
-	public static function pro_app_roots( array $roots, Plugin $plugin ): array {
-		// phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores -- Onumia public hooks intentionally use slash-style names.
-		$filtered = \apply_filters( 'onumia/pro/app_roots', $roots, $plugin );
-
-		return is_array( $filtered ) ? array_values( array_filter( $filtered, 'is_string' ) ) : $roots;
+		return is_bool( $filtered ) ? $filtered : $fullscreen;
 	}
 
 	/**
@@ -328,7 +270,7 @@ final class Filters {
 	}
 
 	/**
-	 * Filters the GitHub repository used for Onumia Free updates.
+	 * Filters the GitHub repository used for Onumia updates.
 	 *
 	 * @api
 	 * @since 0.1.0
@@ -345,7 +287,7 @@ final class Filters {
 	}
 
 	/**
-	 * Filters the Onumia Free release asset filename pattern.
+	 * Filters the Onumia release asset filename pattern.
 	 *
 	 * @api
 	 * @since 0.1.0
@@ -379,7 +321,7 @@ final class Filters {
 	}
 
 	/**
-	 * Filters whether the Onumia Free GitHub updater is disabled.
+	 * Filters whether the Onumia GitHub updater is disabled.
 	 *
 	 * @api
 	 * @since 0.1.0
@@ -396,7 +338,7 @@ final class Filters {
 	}
 
 	/**
-	 * Filters the trusted Ed25519 key used for Onumia Free releases.
+	 * Filters the trusted Ed25519 key used for Onumia releases.
 	 *
 	 * @api
 	 * @since 0.1.0

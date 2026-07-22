@@ -11,29 +11,22 @@ declare(strict_types=1);
 namespace Onumia\Rest;
 
 use Onumia\Component\ComponentRegistry;
+use Onumia\Dev\UiLabAccess;
 use Onumia\Modules\ModuleActionDispatcher;
 use Onumia\Modules\ModuleBooter;
 use Onumia\Modules\ModuleDataSourceDispatcher;
 use Onumia\Modules\ModuleDefinition;
-use Onumia\Modules\ModuleFileRepository;
-use Onumia\Modules\ModuleFileValidationException;
-use Onumia\Modules\ModuleHistoryRepository;
 use Onumia\Modules\ModuleRegistry;
-use Onumia\Modules\ModuleRemixer;
 use Onumia\Modules\ModuleSettingsRepository;
 use Onumia\Structure\StructureDataSourceResolver;
 use Onumia\Support\AccessPolicy;
-use Onumia\Support\CustomEntityName;
 
 final class ModuleRoutes {
 
 	private const NAMESPACE = 'onumia/v1';
 
-	public static function register( ModuleRegistry $registry, ModuleSettingsRepository $settings_repository, ModuleDataSourceDispatcher $data_source_dispatcher, StructureDataSourceResolver $data_source_resolver = new StructureDataSourceResolver(), ?ModuleActionDispatcher $action_dispatcher = null, ?ModuleRemixer $remixer = null, ?ModuleHistoryRepository $history_repository = null, ?ModuleFileRepository $file_repository = null, ?ComponentRegistry $component_registry = null ): void {
+	public static function register( ModuleRegistry $registry, ModuleSettingsRepository $settings_repository, ModuleDataSourceDispatcher $data_source_dispatcher, StructureDataSourceResolver $data_source_resolver = new StructureDataSourceResolver(), ?ModuleActionDispatcher $action_dispatcher = null, ?ComponentRegistry $component_registry = null ): void {
 		$action_dispatcher  ??= new ModuleActionDispatcher( new ModuleBooter( $settings_repository ) );
-		$remixer            ??= new ModuleRemixer();
-		$history_repository ??= new ModuleHistoryRepository();
-		$file_repository    ??= new ModuleFileRepository();
 		$component_registry ??= new ComponentRegistry();
 
 		\register_rest_route(
@@ -43,11 +36,6 @@ final class ModuleRoutes {
 				array(
 					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => static fn( \WP_REST_Request $request ): \WP_REST_Response => self::list_modules( $registry, $settings_repository, $request, $component_registry ),
-					'permission_callback' => array( self::class, 'can_manage_onumia' ),
-				),
-				array(
-					'methods'             => \WP_REST_Server::EDITABLE,
-					'callback'            => static fn( \WP_REST_Request $request ): \WP_REST_Response|\WP_Error => self::create_module( $registry, $settings_repository, $history_repository, $file_repository, $request ),
 					'permission_callback' => array( self::class, 'can_manage_onumia' ),
 				),
 			)
@@ -83,79 +71,7 @@ final class ModuleRoutes {
 			array(
 				array(
 					'methods'             => \WP_REST_Server::EDITABLE,
-					'callback'            => static fn( \WP_REST_Request $request ): \WP_REST_Response|\WP_Error => self::update_module_settings( $registry, $settings_repository, $history_repository, $request ),
-					'permission_callback' => array( self::class, 'can_manage_onumia' ),
-				),
-			)
-		);
-
-		\register_rest_route(
-			self::NAMESPACE,
-			'/modules/(?P<module>.+)/check-files',
-			array(
-				array(
-					'methods'             => \WP_REST_Server::EDITABLE,
-					'callback'            => static fn( \WP_REST_Request $request ): \WP_REST_Response|\WP_Error => self::check_module_files( $registry, $file_repository, $request ),
-					'permission_callback' => array( self::class, 'can_manage_onumia' ),
-				),
-			)
-		);
-
-		\register_rest_route(
-			self::NAMESPACE,
-			'/modules/(?P<module>.+)/files',
-			array(
-				array(
-					'methods'             => \WP_REST_Server::EDITABLE,
-					'callback'            => static fn( \WP_REST_Request $request ): \WP_REST_Response|\WP_Error => self::update_module_files( $registry, $settings_repository, $history_repository, $file_repository, $request ),
-					'permission_callback' => array( self::class, 'can_manage_onumia' ),
-				),
-			)
-		);
-
-		\register_rest_route(
-			self::NAMESPACE,
-			'/modules/(?P<module>.+)/remix',
-			array(
-				array(
-					'methods'             => \WP_REST_Server::EDITABLE,
-					'callback'            => static fn( \WP_REST_Request $request ): \WP_REST_Response|\WP_Error => self::remix_module( $registry, $settings_repository, $remixer, $history_repository, $request ),
-					'permission_callback' => array( self::class, 'can_manage_onumia' ),
-				),
-			)
-		);
-
-		\register_rest_route(
-			self::NAMESPACE,
-			'/modules/(?P<module>.+)/history',
-			array(
-				array(
-					'methods'             => \WP_REST_Server::READABLE,
-					'callback'            => static fn( \WP_REST_Request $request ): \WP_REST_Response|\WP_Error => self::list_module_history( $registry, $settings_repository, $history_repository, $request ),
-					'permission_callback' => array( self::class, 'can_manage_onumia' ),
-				),
-			)
-		);
-
-		\register_rest_route(
-			self::NAMESPACE,
-			'/modules/(?P<module>.+)/history/(?P<revision>[A-Za-z0-9_.-]+)',
-			array(
-				array(
-					'methods'             => \WP_REST_Server::READABLE,
-					'callback'            => static fn( \WP_REST_Request $request ): \WP_REST_Response|\WP_Error => self::get_module_history_snapshot( $registry, $settings_repository, $history_repository, $request ),
-					'permission_callback' => array( self::class, 'can_manage_onumia' ),
-				),
-			)
-		);
-
-		\register_rest_route(
-			self::NAMESPACE,
-			'/modules/(?P<module>.+)/history/(?P<revision>[A-Za-z0-9_.-]+)/revert',
-			array(
-				array(
-					'methods'             => \WP_REST_Server::EDITABLE,
-					'callback'            => static fn( \WP_REST_Request $request ): \WP_REST_Response|\WP_Error => self::revert_module_history( $registry, $settings_repository, $history_repository, $request ),
+					'callback'            => static fn( \WP_REST_Request $request ): \WP_REST_Response|\WP_Error => self::update_module_settings( $registry, $settings_repository, $request ),
 					'permission_callback' => array( self::class, 'can_manage_onumia' ),
 				),
 			)
@@ -182,50 +98,6 @@ final class ModuleRoutes {
 		);
 
 		return new \WP_REST_Response( $modules, 200 );
-	}
-
-	/**
-	 * @return \WP_REST_Response|\WP_Error
-	 */
-	public static function create_module( ModuleRegistry $registry, ModuleSettingsRepository $settings_repository, ModuleHistoryRepository $history_repository, ModuleFileRepository $file_repository, \WP_REST_Request $request ) {
-		$name = self::request_custom_name( $request->get_param( 'name' ) );
-		if ( null === $name ) {
-			return new \WP_Error( 'onumia_invalid_module_name', 'Custom module name is required.', array( 'status' => 400 ) );
-		}
-		if ( null !== $registry->get( $name ) ) {
-			return new \WP_Error( 'onumia_module_exists', 'Module already exists.', array( 'status' => 409 ) );
-		}
-
-		$files = self::request_file_map( $request->get_param( 'files' ) );
-		if ( null === $files ) {
-			return new \WP_Error( 'onumia_invalid_module_files', 'Module files payload must be a string map.', array( 'status' => 400 ) );
-		}
-
-		$settings = self::request_settings( $request->get_param( 'settings' ) ?? array() );
-		if ( null === $settings ) {
-			return new \WP_Error( 'onumia_invalid_settings', 'Settings payload must be an object.', array( 'status' => 400 ) );
-		}
-
-		try {
-			$result = $file_repository->create_files( $name, $files, $settings, $settings_repository, $history_repository );
-			$registry->register( $result['module'] );
-
-			return new \WP_REST_Response(
-				self::prepare_module_for_response( $result['module'], $settings_repository, $result['settings'] ),
-				201
-			);
-		} catch ( ModuleFileValidationException $exception ) {
-			return new \WP_Error(
-				'onumia_module_file_validation_failed',
-				$exception->getMessage(),
-				array(
-					'status'      => 400,
-					'diagnostics' => self::findings_for_response( $exception->findings(), '' ),
-				)
-			);
-		} catch ( \Throwable $throwable ) {
-			return new \WP_Error( 'onumia_module_create_failed', $throwable->getMessage(), array( 'status' => 400 ) );
-		}
 	}
 
 	/**
@@ -318,7 +190,7 @@ final class ModuleRoutes {
 	/**
 	 * @return \WP_REST_Response|\WP_Error
 	 */
-	public static function update_module_settings( ModuleRegistry $registry, ModuleSettingsRepository $settings_repository, ModuleHistoryRepository $history_repository, \WP_REST_Request $request ) {
+	public static function update_module_settings( ModuleRegistry $registry, ModuleSettingsRepository $settings_repository, \WP_REST_Request $request ) {
 		$module_name = $request->get_param( 'module' );
 		if ( ! is_string( $module_name ) || '' === $module_name ) {
 			return new \WP_Error( 'onumia_missing_module', 'Module name is required.', array( 'status' => 400 ) );
@@ -338,23 +210,8 @@ final class ModuleRoutes {
 		}
 
 		try {
-			if ( self::module_is_custom( $module ) ) {
-				( new ModuleFileRepository() )->assert_current_valid( $module );
-			}
 			$settings_repository->update_settings( $module, $settings );
 			self::notify_module_settings_updated( $module, $settings_repository );
-			if ( self::module_is_custom( $module ) ) {
-				$history_repository->commit_current( $module, $settings_repository->settings( $module ), 'Update module settings' );
-			}
-		} catch ( ModuleFileValidationException $exception ) {
-			return new \WP_Error(
-				'onumia_module_file_validation_failed',
-				$exception->getMessage(),
-				array(
-					'status'      => 400,
-					'diagnostics' => self::findings_for_response( $exception->findings(), $module->directory() ),
-				)
-			);
 		} catch ( \Throwable $throwable ) {
 			return new \WP_Error( 'onumia_invalid_settings', $throwable->getMessage(), array( 'status' => 400 ) );
 		}
@@ -362,222 +219,8 @@ final class ModuleRoutes {
 		return new \WP_REST_Response( self::prepare_module_for_response( $module, $settings_repository ), 200 );
 	}
 
-	/**
-	 * @return \WP_REST_Response|\WP_Error
-	 */
-	public static function check_module_files( ModuleRegistry $registry, ModuleFileRepository $file_repository, \WP_REST_Request $request ) {
-		$module = self::module_from_request( $registry, $request );
-		if ( $module instanceof \WP_Error ) {
-			return $module;
-		}
-		if ( ! self::module_is_custom( $module ) ) {
-			return new \WP_Error( 'onumia_module_files_unavailable', 'Module files can only be checked for custom modules.', array( 'status' => 400 ) );
-		}
-
-		$files = self::request_file_map( $request->get_param( 'files' ) );
-		if ( null === $files ) {
-			return new \WP_Error( 'onumia_invalid_module_files', 'Module files payload must be a string map.', array( 'status' => 400 ) );
-		}
-
-		try {
-			$diagnostics = $file_repository->check_files( $module, $files );
-		} catch ( \Throwable $throwable ) {
-			return new \WP_Error( 'onumia_module_file_check_failed', $throwable->getMessage(), array( 'status' => 400 ) );
-		}
-
-		return new \WP_REST_Response(
-			array(
-				'ok'          => ! self::has_error_diagnostics( $diagnostics ),
-				'diagnostics' => $diagnostics,
-			),
-			200
-		);
-	}
-
-	/**
-	 * @return \WP_REST_Response|\WP_Error
-	 */
-	public static function update_module_files( ModuleRegistry $registry, ModuleSettingsRepository $settings_repository, ModuleHistoryRepository $history_repository, ModuleFileRepository $file_repository, \WP_REST_Request $request ) {
-		$module = self::module_from_request( $registry, $request );
-		if ( $module instanceof \WP_Error ) {
-			return $module;
-		}
-		if ( ! self::module_is_custom( $module ) ) {
-			return new \WP_Error( 'onumia_module_files_unavailable', 'Module files can only be updated for custom modules.', array( 'status' => 400 ) );
-		}
-
-		$files = self::request_file_map( $request->get_param( 'files' ) );
-		if ( null === $files ) {
-			return new \WP_Error( 'onumia_invalid_module_files', 'Module files payload must be a string map.', array( 'status' => 400 ) );
-		}
-
-		$settings = self::request_settings( $request->get_param( 'settings' ) ?? $settings_repository->settings( $module ) );
-		if ( null === $settings ) {
-			return new \WP_Error( 'onumia_invalid_settings', 'Settings payload must be an object.', array( 'status' => 400 ) );
-		}
-
-		try {
-			$result = $file_repository->update_files( $module, $files, $settings, $settings_repository, $history_repository );
-			self::notify_module_settings_updated( $result['module'], $settings_repository );
-
-			return new \WP_REST_Response(
-				self::prepare_module_for_response( $result['module'], $settings_repository, $result['settings'] ),
-				200
-			);
-		} catch ( ModuleFileValidationException $exception ) {
-			return new \WP_Error(
-				'onumia_module_file_validation_failed',
-				$exception->getMessage(),
-				array(
-					'status'      => 400,
-					'diagnostics' => self::findings_for_response( $exception->findings(), $module->directory() ),
-				)
-			);
-		} catch ( \Throwable $throwable ) {
-			return new \WP_Error( 'onumia_module_files_failed', $throwable->getMessage(), array( 'status' => 400 ) );
-		}
-	}
-
-	/**
-	 * @return \WP_REST_Response|\WP_Error
-	 */
-	public static function remix_module( ModuleRegistry $registry, ModuleSettingsRepository $settings_repository, ModuleRemixer $remixer, ModuleHistoryRepository $history_repository, \WP_REST_Request $request ) {
-		$module_name = $request->get_param( 'module' );
-		if ( ! is_string( $module_name ) || '' === $module_name ) {
-			return new \WP_Error( 'onumia_missing_module', 'Module name is required.', array( 'status' => 400 ) );
-		}
-
-		$module = $registry->get( $module_name );
-		if ( null === $module ) {
-			return new \WP_Error( 'onumia_unknown_module', 'Module was not found.', array( 'status' => 404 ) );
-		}
-		if ( ! self::module_is_visible_for_request( $module, $request ) ) {
-			return new \WP_Error( 'onumia_unknown_module', 'Module was not found.', array( 'status' => 404 ) );
-		}
-
-		$settings = self::request_settings( $request->get_param( 'settings' ) ?? $settings_repository->settings( $module ) );
-		if ( null === $settings ) {
-			return new \WP_Error( 'onumia_invalid_settings', 'Settings payload must be an object.', array( 'status' => 400 ) );
-		}
-
-		try {
-			$settings_repository->validate_settings( $module, $settings );
-		} catch ( \Throwable $throwable ) {
-			return new \WP_Error( 'onumia_invalid_settings', $throwable->getMessage(), array( 'status' => 400 ) );
-		}
-
-		try {
-			$remixed = $remixer->remix( $module, $registry );
-			$registry->register( $remixed );
-			$settings_repository->update_settings( $remixed, $settings );
-			$history_repository->commit_current( $remixed, $settings_repository->settings( $remixed ), "Create remix from {$module->name()}" );
-		} catch ( \Throwable $throwable ) {
-			return new \WP_Error( 'onumia_remix_failed', $throwable->getMessage(), array( 'status' => 400 ) );
-		}
-
-		return new \WP_REST_Response( self::prepare_module_for_response( $remixed, $settings_repository ), 201 );
-	}
-
-	/**
-	 * @return \WP_REST_Response|\WP_Error
-	 */
-	public static function list_module_history( ModuleRegistry $registry, ModuleSettingsRepository $settings_repository, ModuleHistoryRepository $history_repository, \WP_REST_Request $request ) {
-		$module = self::module_from_request( $registry, $request );
-		if ( $module instanceof \WP_Error ) {
-			return $module;
-		}
-		if ( ! self::module_is_custom( $module ) ) {
-			return new \WP_Error( 'onumia_history_unavailable', 'Module history is only available for custom modules.', array( 'status' => 400 ) );
-		}
-
-		$limit = is_numeric( $request->get_param( 'limit' ) ) ? (int) $request->get_param( 'limit' ) : 50;
-
-		try {
-			$commits   = $history_repository->history( $module, $limit );
-			$snapshots = array();
-			foreach ( $commits as $commit ) {
-				$snapshot    = $history_repository->snapshot( $module, $settings_repository, $commit['id'] );
-				$snapshots[] = array(
-					'commit' => $snapshot['commit'],
-					'module' => self::prepare_module_for_response( $snapshot['module'], $settings_repository, $snapshot['settings'] ),
-				);
-			}
-
-			return new \WP_REST_Response(
-				array(
-					'commits'   => $commits,
-					'snapshots' => $snapshots,
-				),
-				200
-			);
-		} catch ( \Throwable $throwable ) {
-			return new \WP_Error( 'onumia_history_failed', $throwable->getMessage(), array( 'status' => 400 ) );
-		}
-	}
-
-	/**
-	 * @return \WP_REST_Response|\WP_Error
-	 */
-	public static function get_module_history_snapshot( ModuleRegistry $registry, ModuleSettingsRepository $settings_repository, ModuleHistoryRepository $history_repository, \WP_REST_Request $request ) {
-		$module = self::module_from_request( $registry, $request );
-		if ( $module instanceof \WP_Error ) {
-			return $module;
-		}
-		if ( ! self::module_is_custom( $module ) ) {
-			return new \WP_Error( 'onumia_history_unavailable', 'Module history is only available for custom modules.', array( 'status' => 400 ) );
-		}
-
-		$revision = $request->get_param( 'revision' );
-		if ( ! is_string( $revision ) || '' === $revision ) {
-			return new \WP_Error( 'onumia_missing_revision', 'Git revision is required.', array( 'status' => 400 ) );
-		}
-
-		try {
-			$snapshot = $history_repository->snapshot( $module, $settings_repository, $revision );
-
-			return new \WP_REST_Response(
-				array(
-					'commit' => $snapshot['commit'],
-					'module' => self::prepare_module_for_response( $snapshot['module'], $settings_repository, $snapshot['settings'] ),
-				),
-				200
-			);
-		} catch ( \Throwable $throwable ) {
-			return new \WP_Error( 'onumia_history_failed', $throwable->getMessage(), array( 'status' => 400 ) );
-		}
-	}
-
-	/**
-	 * @return \WP_REST_Response|\WP_Error
-	 */
-	public static function revert_module_history( ModuleRegistry $registry, ModuleSettingsRepository $settings_repository, ModuleHistoryRepository $history_repository, \WP_REST_Request $request ) {
-		$module = self::module_from_request( $registry, $request );
-		if ( $module instanceof \WP_Error ) {
-			return $module;
-		}
-		if ( ! self::module_is_custom( $module ) ) {
-			return new \WP_Error( 'onumia_history_unavailable', 'Module history is only available for custom modules.', array( 'status' => 400 ) );
-		}
-
-		$revision = $request->get_param( 'revision' );
-		if ( ! is_string( $revision ) || '' === $revision ) {
-			return new \WP_Error( 'onumia_missing_revision', 'Git revision is required.', array( 'status' => 400 ) );
-		}
-
-		try {
-			$result = $history_repository->revert( $module, $settings_repository, $revision );
-
-			return new \WP_REST_Response(
-				self::prepare_module_for_response( $result['module'], $settings_repository, $result['settings'] ),
-				200
-			);
-		} catch ( \Throwable $throwable ) {
-			return new \WP_Error( 'onumia_history_revert_failed', $throwable->getMessage(), array( 'status' => 400 ) );
-		}
-	}
-
 	private static function module_is_visible_for_request( ModuleDefinition $module, \WP_REST_Request $request ): bool {
-		if ( $module->dev_only() && ! self::dev_mode_requested( $request ) ) {
+		if ( $module->dev_only() && ! UiLabAccess::enabled_for_rest_request( $request ) ) {
 			return false;
 		}
 
@@ -614,44 +257,9 @@ final class ModuleRoutes {
 		return false;
 	}
 
-	private static function dev_mode_requested( \WP_REST_Request $request ): bool {
-		$dev = $request->get_param( 'dev' );
-		if ( null === $dev ) {
-			return false;
-		}
-
-		if ( is_bool( $dev ) ) {
-			return $dev;
-		}
-
-		if ( is_scalar( $dev ) ) {
-			$value = strtolower( trim( (string) $dev ) );
-			return '' === $value || ! in_array( $value, array( '0', 'false', 'no', 'off' ), true );
-		}
-
-		return false;
-	}
-
-	private static function module_from_request( ModuleRegistry $registry, \WP_REST_Request $request ): ModuleDefinition|\WP_Error {
-		$module_name = $request->get_param( 'module' );
-		if ( ! is_string( $module_name ) || '' === $module_name ) {
-			return new \WP_Error( 'onumia_missing_module', 'Module name is required.', array( 'status' => 400 ) );
-		}
-
-		$module = $registry->get( $module_name );
-		if ( null === $module ) {
-			return new \WP_Error( 'onumia_unknown_module', 'Module was not found.', array( 'status' => 404 ) );
-		}
-		if ( ! self::module_is_visible_for_request( $module, $request ) ) {
-			return new \WP_Error( 'onumia_unknown_module', 'Module was not found.', array( 'status' => 404 ) );
-		}
-
-		return $module;
-	}
-
-		/**
-		 * @return list<array{source:string,params:array<string,mixed>,key:?string}>|null
-		 */
+	/**
+	 * @return list<array{source:string,params:array<string,mixed>,key:?string}>|null
+	 */
 	private static function request_sources( mixed $sources ): ?array {
 		if ( ! is_array( $sources ) || ! array_is_list( $sources ) ) {
 			return null;
@@ -680,7 +288,7 @@ final class ModuleRoutes {
 
 	/**
 	 * @param  array<string,mixed>|null $settings Settings override.
-	 * @return array{name:string,label:string,description:string,category:string,tags:list<string>,version:string,devOnly:bool,releaseEnabled:bool,releaseReason:string,custom:bool,enabled:bool,defaultEnabled:bool,capability:string,access:array<string,mixed>|\stdClass,settings:array<string,mixed>,settingDefinitions:array<string,array<string,mixed>>,entryDefinitions:array<string,array<string,mixed>>,structure:array<string,mixed>,messages:array<string,string>,files?:array<string,string>}
+	 * @return array{name:string,label:string,description:string,category:string,tags:list<string>,version:string,devOnly:bool,releaseEnabled:bool,releaseReason:string,enabled:bool,defaultEnabled:bool,capability:string,access:array<string,mixed>|\stdClass,settings:array<string,mixed>,settingDefinitions:array<string,array<string,mixed>>,entryDefinitions:array<string,array<string,mixed>>,structure:array<string,mixed>,messages:array<string,string>}
 	 */
 	private static function prepare_module_for_response( ModuleDefinition $module, ModuleSettingsRepository $settings_repository, ?array $settings = null, ?ComponentRegistry $component_registry = null ): array {
 		$component_registry ??= new ComponentRegistry();
@@ -694,7 +302,6 @@ final class ModuleRoutes {
 			'devOnly'            => $module->dev_only(),
 			'releaseEnabled'     => $module->release_enabled(),
 			'releaseReason'      => $module->release_reason(),
-			'custom'             => self::module_is_custom( $module ),
 			'enabled'            => $settings_repository->has_active_settings( $module ),
 			'defaultEnabled'     => $module->contract()->default_enabled(),
 			'capability'         => $module->contract()->capability(),
@@ -705,10 +312,6 @@ final class ModuleRoutes {
 			'structure'          => self::structure_for_response( $module, $component_registry ),
 			'messages'           => $module->messages()->messages(),
 		);
-
-		if ( self::module_is_custom( $module ) ) {
-			$response['files'] = ( new ModuleFileRepository() )->files( $module );
-		}
 
 		return $response;
 	}
@@ -813,14 +416,6 @@ final class ModuleRoutes {
 		return array() === $access ? new \stdClass() : $access;
 	}
 
-	private static function module_is_custom( ModuleDefinition $module ): bool {
-		return str_starts_with( $module->name(), 'custom/' );
-	}
-
-	private static function request_custom_name( mixed $name ): ?string {
-		return CustomEntityName::normalize( $name );
-	}
-
 	/**
 	 * @return array<string,mixed>|null
 	 */
@@ -833,25 +428,6 @@ final class ModuleRoutes {
 	 */
 	private static function request_settings( mixed $settings ): ?array {
 		return self::request_record( $settings );
-	}
-
-	/**
-	 * @return array<string,string>|null
-	 */
-	private static function request_file_map( mixed $files ): ?array {
-		if ( ! is_array( $files ) || array_is_list( $files ) ) {
-			return null;
-		}
-
-		$normalized = array();
-		foreach ( $files as $path => $content ) {
-			if ( ! is_string( $path ) || ! is_string( $content ) ) {
-				return null;
-			}
-			$normalized[ $path ] = $content;
-		}
-
-		return $normalized;
 	}
 
 	/**
@@ -887,45 +463,5 @@ final class ModuleRoutes {
 		}
 
 		return $normalized;
-	}
-
-	/**
-	 * @param  \Onumia\Check\Finding[] $findings Findings.
-	 * @return array<int,array{message:string,identifier:string,file:string,line:int,severity:string}>
-	 */
-	private static function findings_for_response( array $findings, string $root ): array {
-		$root = rtrim( $root, '/\\' );
-
-		return array_values(
-			array_map(
-				static function ( \Onumia\Check\Finding $finding ) use ( $root ): array {
-					$file = str_starts_with( $finding->file, $root )
-						? str_replace( '\\', '/', ltrim( substr( $finding->file, strlen( $root ) ), '/\\' ) )
-						: $finding->file;
-
-					return array(
-						'message'    => $finding->message,
-						'identifier' => $finding->identifier,
-						'file'       => $file,
-						'line'       => $finding->line,
-						'severity'   => $finding->severity,
-					);
-				},
-				$findings
-			)
-		);
-	}
-
-	/**
-	 * @param array<int,array{message:string,identifier:string,file:string,line:int,severity:string}> $diagnostics Diagnostics.
-	 */
-	private static function has_error_diagnostics( array $diagnostics ): bool {
-		foreach ( $diagnostics as $diagnostic ) {
-			if ( 'error' === $diagnostic['severity'] ) {
-				return true;
-			}
-		}
-
-		return false;
 	}
 }

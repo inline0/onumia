@@ -1,0 +1,10 @@
+{
+  "$schema": "../../../schemas/meta.json",
+  "name": "onumia/dev/ui-lab",
+  "category": "development",
+  "tags": ["dev", "testing", "ui"],
+  "label": "UI Lab",
+  "description": "Development-only module that exercises the Onumia structure renderer.",
+  "version": "0.1.0",
+  "devOnly": true
+}

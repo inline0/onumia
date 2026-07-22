@@ -1,9 +1,0 @@
-{
-  "$schema": "../../schemas/meta.json",
-  "name": "onumia/admin-menu",
-  "category": "admin",
-  "tags": ["admin", "menu", "roles"],
-  "label": "Admin Menu",
-  "description": "Controls top-level WordPress admin menu visibility, order, and labels per role.",
-  "version": "0.1.0"
-}

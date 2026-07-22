@@ -1,9 +1,0 @@
-{
-  "$schema": "../../schemas/meta.json",
-  "name": "onumia/activity-log",
-  "category": "operations",
-  "tags": ["activity", "audit", "events"],
-  "label": "Activity Log",
-  "description": "Records significant WordPress activity in a module-owned SQLite audit log.",
-  "version": "0.1.0"
-}

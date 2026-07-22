@@ -1,9 +1,0 @@
-{
-  "$schema": "../../schemas/meta.json",
-  "name": "onumia/dashboard-widgets",
-  "category": "admin",
-  "tags": ["dashboard", "widgets", "admin"],
-  "label": "Dashboard Widgets",
-  "description": "Controls dashboard widget visibility per role and registers custom static HTML dashboard widgets.",
-  "version": "0.1.0"
-}

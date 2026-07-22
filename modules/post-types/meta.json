@@ -1,9 +1,0 @@
-{
-  "$schema": "../../schemas/meta.json",
-  "name": "onumia/post-types",
-  "category": "content",
-  "tags": ["post-types", "content", "cpt"],
-  "label": "Post Types",
-  "description": "Lets operators edit existing post types and register new ones.",
-  "version": "0.1.0"
-}

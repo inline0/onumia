@@ -1,9 +1,0 @@
-{
-  "$schema": "../../schemas/meta.json",
-  "name": "onumia/disable-comments",
-  "category": "content",
-  "tags": ["comments", "moderation", "content"],
-  "label": "Disable Comments",
-  "description": "Rule-based comment controls by post type, role, route, or post age.",
-  "version": "0.1.0"
-}

@@ -485,12 +485,15 @@ final class ChatRoutes {
 		if ( ! is_string( $type ) || '' === trim( $type ) ) {
 			return new \WP_Error( 'onumia_chat_missing_entity_type', 'Chat entity type is required.', array( 'status' => 400 ) );
 		}
+		if ( 'page' !== trim( $type ) ) {
+			return new \WP_Error( 'onumia_chat_invalid_entity_type', 'Chat entity type must be page.', array( 'status' => 400 ) );
+		}
 		if ( ! is_string( $id ) || '' === trim( $id ) ) {
 			return new \WP_Error( 'onumia_chat_missing_entity_id', 'Chat entity id is required.', array( 'status' => 400 ) );
 		}
 
 		return array(
-			'type' => $type,
+			'type' => 'page',
 			'id'   => $id,
 		);
 	}

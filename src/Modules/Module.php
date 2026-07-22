@@ -18,8 +18,8 @@ use Onumia\PublicApi\Filters;
 /**
  * Provides the base runtime API for Onumia module implementations.
  *
- * Extend this class from a module `boot.php` file when implementing bundled,
- * Pro, or custom module behavior. It gives module code typed access to saved
+ * Extend this class from a module `boot.php` file when implementing bundled or
+ * Module behavior. It gives module code typed access to saved
  * settings, module-owned tables, privacy helpers, and WordPress hook
  * registration without exposing internal loader services.
  *

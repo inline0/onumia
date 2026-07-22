@@ -11,6 +11,7 @@ declare(strict_types=1);
 namespace Onumia\Rest;
 
 use Onumia\Core\Errors;
+use Onumia\Dev\UiLabAccess;
 use Onumia\Modules\ModuleBooter;
 use Onumia\Modules\ModuleDefinition;
 use Onumia\Modules\ModulePublicRouteDefinition;
@@ -66,6 +67,9 @@ final class ModulePublicRoutes {
 
 	private function can_access( ModuleDefinition $module, ModulePublicRouteDefinition $route, \WP_REST_Request $request ): bool {
 		if ( ! $module->feature_enabled() ) {
+			return false;
+		}
+		if ( $module->dev_only() && ! UiLabAccess::enabled_for_rest_request( $request ) ) {
 			return false;
 		}
 

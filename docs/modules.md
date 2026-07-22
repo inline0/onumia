@@ -1,64 +1,67 @@
 ---
 title: "Modules"
-meta_title: "Onumia Modules"
-meta_description: "How Onumia modules work: discovery, the activation model, settings in the active theme, secrets, capabilities, and scheduled jobs."
+meta_title: "Onumia PHP Modules"
+meta_description: "Extend Onumia with user-owned declarative screens and PHP settings, actions, data sources, tables, hooks, and jobs."
 path: "modules"
-order: 150
+order: 50
 section: "Modules"
 ---
 
 # Modules
 
-A module is the unit of behavior in Onumia. Each one solves a single concrete problem, exposes a structured settings screen in the dashboard, and runs focused WordPress behavior behind that screen. Modules are useful on their own; you activate the ones you want and ignore the rest.
+Onumia keeps a generic extension contract for user-owned PHP modules. A module
+provides a declarative structure for the shared renderer and a PHP contract for
+WordPress behavior.
 
-This page explains the model: where modules come from, what makes one active, and where everything they own is stored.
+## Contract
 
-## What a module is made of
+A module folder normally contains `meta.json`, `structure.json`, a message
+catalog, and PHP boot code. It may also declare typed settings, actions, data
+sources, entry collections, tables, public routes, hooks, secrets, migrations,
+and jobs.
 
-A module is a folder. It contains a small manifest with the module's identity, category, label, and description; a JSON definition of its settings screen; a PHP file that owns the runtime behavior, settings types, defaults, validation rules, actions, and WordPress hooks; and a message catalog for its UI text. Modules that keep operational records also declare their data tables.
+The boundary is deliberate: React renders the declarative structure; PHP
+validates input, enforces capabilities, and performs server-side work. Do not
+translate a module into document blocks or a second frontend schema.
 
-The split matters in practice: everything you see in the dashboard is described declaratively, while everything the module does to WordPress is plain PHP. The dashboard renders the screen, the PHP validates and applies your settings, and neither side can drift from the other because saves are checked against the PHP contract.
+## Discovery
 
-Stable module identity comes from the manifest name, such as `onumia/redirects` or `custom/redirects`, not from the folder path. Bundled modules use the `onumia/` namespace; your custom modules use `custom/`.
+Add absolute module roots with the `onumia/modules/roots` filter:
 
-## Where modules come from
-
-Onumia discovers modules from explicit roots: the plugin's own `modules/` directory for the bundled catalog, and the active theme's `onumia/modules/` directory, in both the child and parent theme when both exist, for modules that belong to your site. The Pro bundle adds its own module root for Pro modules. Any folder below a root that contains a manifest is a module.
-
-This is why custom modules travel with your theme: they are ordinary discovered modules that happen to live in theme territory. Deploying the theme deploys the modules.
-
-Development-only modules exist in the bundled tree but stay hidden unless the dashboard is explicitly opened in dev mode, so you will not normally see them.
-
-## The activation model
-
-Onumia has no stored on/off flag for modules. A module's runtime boots when, and only when, it has active saved settings in the settings file: a switch saved on, a non-zero number, a non-empty list, a meaningful string. Until then the module is just a catalog entry you can open, read, and configure.
-
-This makes the dashboard trustworthy as a review surface. Every discovered module is always editable, but the set of modules actually hooking into WordPress is exactly the set with active settings. Turning everything in a module off, or clearing its values, deactivates it without any residue.
-
-## Settings live in the active theme
-
-All module settings are stored in one JSON file in the active theme's stylesheet directory:
-
-```text
-wp-content/themes/<active-theme>/onumia.settings.json
+```php
+add_filter('onumia/modules/roots', static function (array $roots): array {
+    $roots[] = WP_CONTENT_DIR . '/onumia-modules';
+    return $roots;
+});
 ```
 
-Saves are validated against each module's typed contract, merged partially with what is already stored, and written atomically under a lock. The file is plain, readable JSON keyed by module name, which makes configuration reviewable, diffable, and easy to version control alongside the theme.
+Append rather than replace existing roots. Keep each root narrow; discovery
+must not walk unrelated trees on normal requests.
 
-Two consequences follow from this choice. First, switching themes switches configuration: each theme carries its own Onumia state, which is often exactly what a theme-level project wants, but can surprise you if you switch casually. Second, on multisite, sites that share the same active theme directory share the same settings file. Per-site runtime state belongs in options or module-owned tables, not in the theme file.
+Onumia itself registers only the UI Lab directory, and only for a request that
+passes both its exact query opt-in and administrator capability gate.
 
-The settings file location is filterable for setups that want it elsewhere; see the configuration reference.
+## Settings and activation
 
-## Secrets stay out of the theme
+Settings are validated against typed PHP definitions before they are saved.
+Runtime hooks boot only when the module's activation/settings contract permits
+them, so an unconfigured module should not unexpectedly change WordPress.
 
-Some modules need credentials, such as API tokens for the Software Licensing module. Secrets are deliberately not stored in the theme settings file. They live in a WordPress option or come from PHP constants, so they never end up committed with a theme. Production services can define `ONUMIA_MODULE_SITE_SECRETS_FILE` and resolve every module secret from an owner-only, site-scoped file outside the web root; when configured, that file is authoritative and an invalid file fails closed. The dashboard shows whether each declared secret is present without revealing its value.
+The default settings repository writes atomic, reviewable JSON to the active
+theme's `onumia.settings.json`. Relocate it with `onumia_settings_file` if
+settings should not travel with the theme. Secrets never belong in that file;
+use protected WordPress storage or trusted host configuration.
 
-## Capabilities
+## Data, actions, and routes
 
-Every module declares the WordPress capability required to use it, `manage_options` unless the module says otherwise, and each action or data source can require its own capability on top. The Software Licensing module, for example, requires `manage_onumia_licenses`, which Pro grants to administrators. Modules can additionally carry an access policy that limits visibility to specific roles, users, or capabilities; a module that fails its policy simply does not appear for that user.
+Renderer controls can request declared PHP data sources and invoke declared
+actions. Operational records use module-owned MySQL tables or optional SQLite
+storage. Entry screens, tables, charts, and status controls receive live values
+through the same backend contract.
 
-Since the dashboard itself already requires `manage_options`, these layers matter most when a site deliberately broadens or narrows access through filters or custom roles.
+The workspace defaults to `manage_options`. A module, action, data source, or
+route can demand a stricter capability. Public routes require an explicit
+contract with their own authentication and rate-limiting rules.
 
-## Scheduled work
-
-Modules schedule recurring work through WP-Cron. Post Revisions registers a daily pruning event while its retention rules are enabled, and the Software Licensing module declares jobs that sync releases daily and expire licenses hourly. Separately, Onumia runs its own `onumia_tables_cleanup` event twice a day to enforce the retention windows of module data tables. All of this depends on WP-Cron actually running on your site.
+Recurring jobs use WP-Cron. The shared `onumia_tables_cleanup` event enforces
+declared retention windows for module tables.

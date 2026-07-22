@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Onumia
  * Description: Onumia modular WordPress control layer.
- * Version: 0.1.1
+ * Version: 0.1.3
  * Requires PHP: 8.2
  * License: AGPL-3.0-or-later
  * License URI: https://www.gnu.org/licenses/agpl-3.0.html
@@ -42,16 +42,6 @@ if ( file_exists( $onumia_scoped_autoloader ) ) {
 	require_once $onumia_scoped_autoloader;
 }
 
-$onumia_pro_bootstrap = __DIR__ . '/src/Pro/Bootstrap.php';
-if ( file_exists( $onumia_pro_bootstrap ) ) {
-	require_once $onumia_pro_bootstrap;
-}
-
-$onumia_pro_bootstrap_class = '\\Onumia\\Pro\\Bootstrap';
-if ( class_exists( $onumia_pro_bootstrap_class, false ) && method_exists( $onumia_pro_bootstrap_class, 'register_pre_boot' ) ) {
-	$onumia_pro_bootstrap_class::register_pre_boot();
-}
-
 if ( function_exists( 'register_activation_hook' ) ) {
 	register_activation_hook(
 		ONUMIA_PLUGIN_FILE,
@@ -67,9 +57,5 @@ if ( function_exists( 'register_uninstall_hook' ) ) {
 
 $onumia_plugin = new Onumia\Core\Plugin( ONUMIA_PLUGIN_FILE, ONUMIA_VERSION );
 $onumia_plugin->boot();
-
-if ( class_exists( $onumia_pro_bootstrap_class, false ) && method_exists( $onumia_pro_bootstrap_class, 'boot' ) ) {
-	$onumia_pro_bootstrap_class::boot( $onumia_plugin );
-}
 
 unset( $onumia_version );

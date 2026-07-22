@@ -1,9 +1,0 @@
-{
-  "$schema": "../../schemas/meta.json",
-  "name": "onumia/cron-events",
-  "category": "operations",
-  "tags": ["cron", "scheduled", "operations"],
-  "label": "Cron Events",
-  "description": "Surfaces scheduled WP-Cron events, records manual runs, and guards unsafe unschedule actions.",
-  "version": "0.1.0"
-}

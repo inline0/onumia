@@ -31,35 +31,6 @@
             "install-path": "..\/inline0\/wordpress-github-updater"
         },
         {
-            "name": "inline0\/wordpress-licensed-updater",
-            "version": "dev-main",
-            "version_normalized": "dev-main",
-            "dist": {
-                "type": "path",
-                "url": "..\/..\/..\/..\/packages\/wordpress-licensed-updater",
-                "reference": "4ab9fe576807040ca51046129f8b4961824a05cb"
-            },
-            "require": {
-                "php": "^8.2"
-            },
-            "type": "library",
-            "installation-source": "dist",
-            "autoload": {
-                "psr-4": {
-                    "Onumia\\Lib\\Onumia\\Lib\\Inline0\\WordPressLicensedUpdater\\": "src\/"
-                }
-            },
-            "license": [
-                "GPL-2.0-or-later"
-            ],
-            "description": "Reusable licensed update client for Inline0 WordPress products.",
-            "transport-options": {
-                "symlink": false,
-                "relative": true
-            },
-            "install-path": "..\/inline0\/wordpress-licensed-updater"
-        },
-        {
             "name": "nikic\/php-parser",
             "version": "v5.7.0",
             "version_normalized": "5.7.0.0",

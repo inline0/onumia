@@ -1,9 +1,0 @@
-{
-  "$schema": "../../schemas/meta.json",
-  "name": "onumia/error-log",
-  "category": "operations",
-  "tags": ["errors", "logging", "php"],
-  "label": "Error Log",
-  "description": "Captures PHP errors, exceptions, deprecated notices, and shutdown fatals in a module-owned SQLite table.",
-  "version": "0.1.0"
-}

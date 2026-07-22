@@ -41,7 +41,7 @@ final class UiStateRoutes {
 	public static function get_state( \WP_REST_Request $request ): \WP_REST_Response {
 		unset( $request );
 
-		return new \WP_REST_Response( UiStateNormalizer::prepare_state_for_response( self::load_state() ), 200 );
+		return new \WP_REST_Response( UiStateNormalizer::prepare_state_for_response( self::current_state() ), 200 );
 	}
 
 	public static function update_state( \WP_REST_Request $request ): \WP_REST_Response {
@@ -56,9 +56,9 @@ final class UiStateRoutes {
 	}
 
 	/**
-	 * @return array{custom_modules:array<string,array{active_chat_id:string|null,sidebar_open:bool,sidebar_tab:string}>,module_archive:array{category:string,settings:string,view:string},module_detail:array{list_sidebar_open:bool,full_width:bool}}
+	 * @return array{theme_mode:string,page_sidebar:array{expanded_page_ids:list<string>,mobile_sidebar_open:bool,navigation_groups:list<array{emoji:string|null,id:string,item_ids:list<string>,label:string,open:bool}>,module_group_open:bool,sidebar_open:bool},page_tabs:array{active_page_id:?string,open_page_ids:list<string>,top_level_page_ids:array<string,string>}}
 	 */
-	private static function load_state(): array {
+	public static function current_state(): array {
 		$user_id = \get_current_user_id();
 		$raw     = \get_user_meta( $user_id, self::META_KEY, true );
 

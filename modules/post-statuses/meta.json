@@ -1,9 +1,0 @@
-{
-  "$schema": "../../schemas/meta.json",
-  "name": "onumia/post-statuses",
-  "category": "content",
-  "tags": ["post-statuses", "content", "workflow"],
-  "label": "Post Statuses",
-  "description": "Lets operators edit existing post statuses and register workflow-specific statuses.",
-  "version": "0.1.0"
-}

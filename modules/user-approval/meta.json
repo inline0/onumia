@@ -1,9 +1,0 @@
-{
-  "$schema": "../../schemas/meta.json",
-  "name": "onumia/user-approval",
-  "category": "users",
-  "tags": ["registration", "users", "approval"],
-  "label": "User Approval",
-  "description": "Holds new registrations in a pending queue until an admin approves them, with optional trusted-domain auto approval.",
-  "version": "0.1.0"
-}

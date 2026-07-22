@@ -1,9 +1,0 @@
-{
-  "$schema": "../../schemas/meta.json",
-  "name": "onumia/image-sizes",
-  "category": "media",
-  "tags": ["media", "images", "regeneration"],
-  "label": "Image Sizes",
-  "description": "Registers custom image sizes, overrides core image dimensions, and batch-regenerates attachment derivatives.",
-  "version": "0.1.0"
-}

@@ -519,10 +519,9 @@ final class ModuleTableInstaller {
 		$wpdb->flush();
 
 		try {
-			// @codeCoverageIgnoreStart
-			$property = new \ReflectionProperty( $wpdb, 'col_meta' );
-			$property->setAccessible( true );
-			$property->setValue( $wpdb, array() );
+				// @codeCoverageIgnoreStart
+				$property = new \ReflectionProperty( $wpdb, 'col_meta' );
+				$property->setValue( $wpdb, array() );
 			// @codeCoverageIgnoreEnd
 		} catch ( \ReflectionException $exception ) {
 			// @codeCoverageIgnoreStart

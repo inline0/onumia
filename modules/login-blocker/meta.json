@@ -1,9 +1,0 @@
-{
-  "$schema": "../../schemas/meta.json",
-  "name": "onumia/login-blocker",
-  "category": "security",
-  "tags": ["security", "login", "brute-force"],
-  "label": "Login Blocker",
-  "description": "Blocks login attempts by rule, throttles brute-force traffic, and records attempts in module-owned SQLite tables.",
-  "version": "0.1.0"
-}

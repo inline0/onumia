@@ -14,13 +14,11 @@ use Onumia\Structure\StructureComponentTypes;
 
 final class ModuleCatalogAuditor {
 	/**
-	 * @return array{total:int,free:int,pro:int,dev:int,releaseDisabled:int,tabSurfaces:int,real:int,placeholders:int,partials:int,placeholderTabs:string[],modules:array<int,array{name:string,tabSurfaces:int,real:int,placeholders:int,partials:int,placeholderTabs:string[],devOnly:bool,pro:bool,releaseEnabled:bool}>}
+	 * @return array{total:int,dev:int,releaseDisabled:int,tabSurfaces:int,real:int,placeholders:int,partials:int,placeholderTabs:string[],modules:array<int,array{name:string,tabSurfaces:int,real:int,placeholders:int,partials:int,placeholderTabs:string[],devOnly:bool,releaseEnabled:bool}>}
 	 */
 	public function audit( ModuleRegistry $registry ): array {
 		$result = array(
 			'total'           => 0,
-			'free'            => 0,
-			'pro'             => 0,
 			'dev'             => 0,
 			'releaseDisabled' => 0,
 			'tabSurfaces'     => 0,
@@ -36,17 +34,10 @@ final class ModuleCatalogAuditor {
 
 		foreach ( $modules as $module ) {
 			++$result['total'];
-			$is_pro       = $this->is_pro_module( $module );
 			$tab_surfaces = $this->tab_surfaces( $module );
 			$placeholder  = $this->is_placeholder( $module );
 			$partial      = $this->is_partial( $module );
 			$real         = ! $placeholder && ! $partial && $this->is_real( $module );
-
-			if ( $is_pro ) {
-				++$result['pro'];
-			} else {
-				++$result['free'];
-			}
 
 			if ( $module->dev_only() ) {
 				++$result['dev'];
@@ -79,7 +70,6 @@ final class ModuleCatalogAuditor {
 				'partials'        => $partial ? $tab_surfaces : 0,
 				'placeholderTabs' => $placeholder_tabs,
 				'devOnly'         => $module->dev_only(),
-				'pro'             => $is_pro,
 				'releaseEnabled'  => $module->release_enabled(),
 			);
 		}
@@ -87,12 +77,8 @@ final class ModuleCatalogAuditor {
 		return $result;
 	}
 
-	private function is_pro_module( ModuleDefinition $module ): bool {
-		return str_contains( $module->directory(), DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'Pro' . DIRECTORY_SEPARATOR . 'modules' . DIRECTORY_SEPARATOR );
-	}
-
 	private function is_placeholder( ModuleDefinition $module ): bool {
-		if ( $module->dev_only() || $this->is_pro_module( $module ) ) {
+		if ( $module->dev_only() ) {
 			return false;
 		}
 
@@ -114,7 +100,7 @@ final class ModuleCatalogAuditor {
 	}
 
 	private function is_partial( ModuleDefinition $module ): bool {
-		if ( $module->dev_only() || $this->is_pro_module( $module ) || ! $module->release_enabled() ) {
+		if ( $module->dev_only() || ! $module->release_enabled() ) {
 			return false;
 		}
 
@@ -131,7 +117,7 @@ final class ModuleCatalogAuditor {
 			return false;
 		}
 
-		if ( $module->dev_only() || $this->is_pro_module( $module ) ) {
+		if ( $module->dev_only() ) {
 			return true;
 		}
 

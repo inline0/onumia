@@ -14,28 +14,19 @@ use Onumia\Core\Plugin;
 use Onumia\Data\ModuleStorageResolver;
 use Onumia\Data\SqlitePathResolver;
 use Onumia\Modules\ModuleDefinition;
-use Onumia\Modules\ModuleRegistry;
-use Onumia\Modules\ModuleSecretRepository;
-use Onumia\Modules\ModuleSettingsRepository;
 use Onumia\Modules\ModuleTableDefinition;
 use Onumia\Modules\ModuleTableName;
-use Onumia\Pro\Modules\SoftwareLicensing\LicensingService;
-use Onumia\Pro\Modules\SoftwareLicensing\LicensingStore;
-use Onumia\Pro\Modules\SoftwareLicensing\Stripe\StripeConfig;
 
 final class PreflightDoctor {
 	private const STATUS_HEALTHY   = 'healthy';
 	private const STATUS_WARNING   = 'warning';
-	private const STATUS_CRITICAL  = 'critical';
-	private const MODULE_LICENSING = 'onumia/software-licensing';
+	private const STATUS_CRITICAL = 'critical';
 
 	/** @var list<array{name:string,status:string,message:string,data:array<string,mixed>}> */
 	private array $checks = array();
 
 	public function __construct(
 		private readonly Plugin $plugin,
-		private readonly ModuleSettingsRepository $settings_repository,
-		private readonly ModuleSecretRepository $secret_repository = new ModuleSecretRepository(),
 		private readonly ModuleTableName $table_names = new ModuleTableName(),
 		private readonly ModuleStorageResolver $storage_resolver = new ModuleStorageResolver(),
 		private readonly SqlitePathResolver $sqlite_paths = new SqlitePathResolver(),
@@ -53,10 +44,6 @@ final class PreflightDoctor {
 		$this->check_table_registry();
 		$this->check_cron_events();
 		$this->check_rest_routes();
-		$this->check_external_secret_config();
-		$this->check_stripe_config();
-		$this->check_github_config();
-		$this->check_updater_readiness();
 		$this->check_asset_manifests();
 
 		$summary = $this->summary();
@@ -73,65 +60,14 @@ final class PreflightDoctor {
 		);
 	}
 
-	private function check_external_secret_config(): void {
-		$module = $this->licensing_module();
-		if ( null === $module ) {
-			$this->add_check( 'secrets.external', self::STATUS_WARNING, 'Software Licensing module is not available.', array( 'available' => false ) );
-			return;
-		}
-
-		$external = $this->secret_repository->external_status();
-		$secrets  = array();
-		$ready    = $external['configured'] && $external['valid'];
-		foreach ( array(
-			'githubReleaseCredential' => 'githubToken',
-			'licensingSigner'         => 'licensingSigningKey',
-		) as $label => $name ) {
-			$source      = $this->secret_repository->source( $module, $name );
-			$fingerprint = null;
-			try {
-				$fingerprint = $this->secret_repository->fingerprint( $module, $name );
-			} catch ( \Throwable ) {
-				$fingerprint = null;
-			}
-			$stored            = $this->secret_repository->stored( $module, $name );
-			$secrets[ $label ] = array(
-				'present'        => null !== $fingerprint,
-				'source'         => $source,
-				'fingerprint'    => $fingerprint,
-				'storedFallback' => $stored,
-			);
-			$ready             = $ready && 'external' === $source && null !== $fingerprint && ! $stored;
-		}
-
-		$status = $external['configured'] && ! $external['valid']
-			? self::STATUS_CRITICAL
-			: ( $ready ? self::STATUS_HEALTHY : self::STATUS_WARNING );
-		$this->add_check(
-			'secrets.external',
-			$status,
-			self::STATUS_HEALTHY === $status ? 'Required licensing secrets are externally managed.' : 'Required licensing secrets are not fully externalized.',
-			array(
-				'configured' => $external['configured'],
-				'valid'      => $external['valid'],
-				'siteId'     => $external['siteId'],
-				'error'      => $external['error'],
-				'secrets'    => $secrets,
-			)
-		);
-	}
-
 	private function check_plugin_runtime(): void {
-		$pro_available = class_exists( '\Onumia\Pro\Bootstrap' ) && true === \Onumia\Pro\Bootstrap::available();
-
 		$this->add_check(
 			'plugin.runtime',
 			$this->plugin->is_booted() ? self::STATUS_HEALTHY : self::STATUS_CRITICAL,
 			$this->plugin->is_booted() ? 'Onumia runtime is booted.' : 'Onumia runtime is not booted.',
 			array(
-				'version'      => $this->plugin->version(),
-				'proAvailable' => $pro_available,
-				'modules'      => count( $this->plugin->registry()->all() ),
+				'version' => $this->plugin->version(),
+				'modules' => count( $this->plugin->registry()->all() ),
 			)
 		);
 	}
@@ -141,8 +77,6 @@ final class PreflightDoctor {
 		$template   = $this->theme_directory( 'get_template_directory' );
 		$targets    = array(
 			'themeSettings' => $stylesheet . DIRECTORY_SEPARATOR . 'onumia.settings.json',
-			'customModules' => $stylesheet . DIRECTORY_SEPARATOR . 'onumia' . DIRECTORY_SEPARATOR . 'modules',
-			'customApps'    => $stylesheet . DIRECTORY_SEPARATOR . 'onumia' . DIRECTORY_SEPARATOR . 'apps',
 		);
 		$results    = array();
 		$writable   = true;
@@ -159,7 +93,7 @@ final class PreflightDoctor {
 		$this->add_check(
 			'paths.theme',
 			$writable ? self::STATUS_HEALTHY : self::STATUS_WARNING,
-			$writable ? 'Theme settings and custom Onumia directories are writable.' : 'One or more theme Onumia paths are not writable.',
+			$writable ? 'The Onumia theme settings path is writable.' : 'The Onumia theme settings path is not writable.',
 			array(
 				'stylesheetTheme' => $this->relative_or_basename( $stylesheet ),
 				'templateTheme'   => $this->relative_or_basename( $template ),
@@ -291,143 +225,9 @@ final class PreflightDoctor {
 		);
 	}
 
-	private function check_stripe_config(): void {
-		$module = $this->licensing_module();
-		if ( null === $module ) {
-			$this->add_check( 'stripe.config', self::STATUS_WARNING, 'Software Licensing module is not available.', array( 'available' => false ) );
-			return;
-		}
-
-		$this->require_licensing_runtime( $module );
-		try {
-			$config = StripeConfig::from_module( $module, $this->settings_repository->settings( $module ), $this->secret_repository );
-		} catch ( \Throwable ) {
-			$this->add_check(
-				'stripe.config',
-				self::STATUS_CRITICAL,
-				'Stripe configuration could not resolve the external secret store.',
-				array( 'secretResolution' => 'failed' )
-			);
-			return;
-		}
-		$safe   = $config->safe_status();
-		$status = true !== $safe['stripeEnabled']
-			? self::STATUS_HEALTHY
-			: ( true === $safe['stripeConfigured'] && true === $safe['stripeCheckoutApiConfigured'] && true === $safe['stripeWebhookConfigured'] ? self::STATUS_HEALTHY : self::STATUS_WARNING );
-
-		$this->add_check(
-			'stripe.config',
-			$status,
-			self::STATUS_HEALTHY === $status ? 'Stripe configuration is consistent.' : 'Stripe is enabled but one or more Stripe secrets are missing.',
-			$safe
-		);
-	}
-
-	private function check_github_config(): void {
-		$module = $this->licensing_module();
-		if ( null === $module ) {
-			$this->add_check( 'github.config', self::STATUS_WARNING, 'Software Licensing module is not available.', array( 'available' => false ) );
-			return;
-		}
-
-		$settings          = $this->settings_repository->settings( $module );
-		$repository        = is_string( $settings['githubRepository'] ?? null ) ? trim( $settings['githubRepository'] ) : '';
-		$product           = is_string( $settings['githubProductSlug'] ?? null ) ? trim( $settings['githubProductSlug'] ) : '';
-		$token_source      = $this->secret_repository->source( $module, 'githubToken' );
-		$token_fingerprint = null;
-		try {
-			$token_fingerprint = $this->secret_repository->fingerprint( $module, 'githubToken' );
-		} catch ( \Throwable ) {
-			$token_fingerprint = null;
-		}
-		$token       = null !== $token_fingerprint;
-		$release_row = $this->private_release_count();
-
-		$status = 'external-invalid' === $token_source
-			? self::STATUS_CRITICAL
-			: ( $release_row > 0 && ! $token ? self::STATUS_WARNING : self::STATUS_HEALTHY );
-		$this->add_check(
-			'github.config',
-			$status,
-			self::STATUS_HEALTHY === $status ? 'GitHub release sync configuration is safe to report.' : 'Private GitHub releases exist but no GitHub token is configured.',
-			array(
-				'repositoryConfigured'  => '' !== $repository,
-				'productSlug'           => '' === $product ? 'onumia-pro' : $product,
-				'credentialPresent'     => $token,
-				'credentialSource'      => $token_source,
-				'credentialFingerprint' => $token_fingerprint,
-				'privateReleaseCount'   => $release_row,
-			)
-		);
-	}
-
-	private function check_updater_readiness(): void {
-		$module = $this->licensing_module();
-		if ( null === $module ) {
-			$this->add_check( 'updater.readiness', self::STATUS_WARNING, 'Software Licensing module is not available.', array( 'products' => array() ) );
-			return;
-		}
-
-		try {
-			$this->require_licensing_runtime( $module );
-			$service  = new LicensingService( new LicensingStore( $module ) );
-			$products = $service->products();
-			$releases = $service->releases();
-		} catch ( \Throwable $throwable ) {
-			$this->add_check(
-				'updater.readiness',
-				self::STATUS_WARNING,
-				'Updater readiness could not be read from licensing tables.',
-				array( 'failure' => $throwable->getMessage() )
-			);
-			return;
-		}
-
-		$published_by_product = array();
-		foreach ( $releases as $release ) {
-			if ( 'published' !== ( $release['status'] ?? '' ) ) {
-				continue;
-			}
-			$product_slug = is_string( $release['productSlug'] ?? null ) ? $release['productSlug'] : '';
-			if ( '' !== $product_slug ) {
-				$published_by_product[ $product_slug ] = ( $published_by_product[ $product_slug ] ?? 0 ) + 1;
-			}
-		}
-
-		$readiness = array();
-		foreach ( $products as $product ) {
-			$slug = is_string( $product['slug'] ?? null ) ? $product['slug'] : '';
-			if ( '' === $slug || ! isset( $published_by_product[ $slug ] ) ) {
-				continue;
-			}
-
-			$readiness[] = array(
-				'productSlug'       => $slug,
-				'publishedReleases' => $published_by_product[ $slug ],
-				'updaterCodeReady'  => is_string( $product['updaterCode'] ?? null ) && '' !== trim( $product['updaterCode'] ),
-			);
-		}
-
-		$not_ready = array_values(
-			array_filter(
-				$readiness,
-				static fn( array $product ): bool => true !== $product['updaterCodeReady']
-			)
-		);
-		$status    = array() === $readiness ? self::STATUS_WARNING : ( array() === $not_ready ? self::STATUS_HEALTHY : self::STATUS_WARNING );
-
-		$this->add_check(
-			'updater.readiness',
-			$status,
-			self::STATUS_HEALTHY === $status ? 'Products with published releases have generated updater code.' : 'No ready updater products were found, or some products are missing generated updater code.',
-			array( 'products' => $readiness )
-		);
-	}
-
 	private function check_asset_manifests(): void {
 		$manifests = array(
-			'app'    => $this->plugin->directory() . 'assets/app/manifest.json',
-			'appPro' => $this->plugin->directory() . 'assets/app-pro/manifest.json',
+			'app' => $this->plugin->directory() . 'assets/app/manifest.json',
 		);
 		$results   = array();
 		$missing   = false;
@@ -533,23 +333,6 @@ final class PreflightDoctor {
 			}
 		}
 
-		if ( null !== $this->licensing_module() ) {
-			$routes = array_merge(
-				$routes,
-				array(
-					'/public/modules/software-licensing/stripe/checkout/sessions',
-					'/public/modules/software-licensing/stripe/checkout/sessions/status',
-					'/public/modules/software-licensing/stripe/billing-portal/sessions',
-					'/public/modules/software-licensing/stripe/invoices/url',
-					'/public/modules/software-licensing/stripe/webhook',
-					'/public/modules/software-licensing/customers/portfolio',
-					'/public/modules/software-licensing/activations/deactivate',
-					'/public/modules/software-licensing/releases/latest',
-					'/public/modules/software-licensing/downloads/token',
-				)
-			);
-		}
-
 		sort( $routes );
 		return array_values( array_unique( $routes ) );
 	}
@@ -600,36 +383,6 @@ final class PreflightDoctor {
 		$slug  = trim( $slug, '-' );
 
 		return '' === $slug ? 'module' : $slug;
-	}
-
-	private function licensing_module(): ?ModuleDefinition {
-		$module = $this->plugin->registry()->get( self::MODULE_LICENSING );
-		if ( null === $module || ! $module->release_enabled() || ! $module->feature_enabled() ) {
-			return null;
-		}
-
-		return $module;
-	}
-
-	private function private_release_count(): int {
-		$module = $this->licensing_module();
-		if ( null === $module ) {
-			return 0;
-		}
-
-		try {
-			$this->require_licensing_runtime( $module );
-			$count = 0;
-			foreach ( ( new LicensingService( new LicensingStore( $module ) ) )->releases() as $release ) {
-				$metadata = $release['metadata'] ?? null;
-				if ( is_array( $metadata ) && true === ( $metadata['githubRepositoryPrivate'] ?? false ) ) {
-					++$count;
-				}
-			}
-			return $count;
-		} catch ( \Throwable ) {
-			return 0;
-		}
 	}
 
 	/**
@@ -703,28 +456,6 @@ final class PreflightDoctor {
 		return 'onumia_module_job_' . substr( sha1( $module . ':' . $job ), 0, 24 );
 	}
 
-	private function require_licensing_runtime( ModuleDefinition $module ): void {
-		foreach (
-			array(
-				'src/GitHubReleaseProvider.php',
-				'src/WordPressGitHubReleaseProvider.php',
-				'src/ReleaseManifestVerifier.php',
-				'src/ReleasePackageVerifier.php',
-				'src/LicensingSigningSecret.php',
-				'src/LicenseKeyService.php',
-				'src/LicensingRecordMapper.php',
-				'src/LicensingStore.php',
-				'src/LicensingService.php',
-				'src/Stripe/StripeConfig.php',
-			) as $relative
-		) {
-			$file = $module->directory() . DIRECTORY_SEPARATOR . $relative;
-			if ( is_file( $file ) ) {
-				require_once $file;
-			}
-		}
-	}
-
 	/**
 	 * @param array<string,mixed> $data Data.
 	 */
@@ -793,7 +524,7 @@ final class PreflightDoctor {
 	}
 
 	private function should_redact_key( string $key ): bool {
-		return 1 === preg_match( '/\A(?:name|customerName)\z|(?:secret|token|licenseKey|authorization|password|customerEmail|email)/i', $key );
+		return 1 === preg_match( '/\Aname\z|(?:secret|token|authorization|password|email)/i', $key );
 	}
 
 	private function path_writable( string $path ): bool {

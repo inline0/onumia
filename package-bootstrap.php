@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 if ( ! function_exists( 'onumia_package_bootstrap' ) ) {
 	/**
-	 * Establish the packaged flavor and reject renamed side-by-side installs.
+	 * Establish the packaged identity and reject renamed side-by-side installs.
 	 */
 	function onumia_package_bootstrap( string $plugin_file ): bool {
 		$root = dirname( $plugin_file );
@@ -15,9 +15,6 @@ if ( ! function_exists( 'onumia_package_bootstrap' ) ) {
 			$manifest = is_array( $decoded ) && ! array_is_list( $decoded ) ? $decoded : null;
 		}
 
-		$flavor = is_string( $manifest['flavor'] ?? null )
-			? $manifest['flavor']
-			: ( is_file( $root . '/src/Pro/Bootstrap.php' ) ? 'pro' : 'free' );
 		$target = is_string( $manifest['target'] ?? null ) ? $manifest['target'] : 'onumia-source';
 
 		$expected = is_string( $manifest['plugin']['basename'] ?? null ) ? $manifest['plugin']['basename'] : '';
@@ -25,9 +22,6 @@ if ( ! function_exists( 'onumia_package_bootstrap' ) ) {
 			? (string) plugin_basename( $plugin_file )
 			: basename( $root ) . '/' . basename( $plugin_file );
 		if ( '' === $expected || $actual === $expected ) {
-			if ( ! defined( 'ONUMIA_PACKAGE_FLAVOR' ) ) {
-				define( 'ONUMIA_PACKAGE_FLAVOR', $flavor );
-			}
 			if ( ! defined( 'ONUMIA_PACKAGE_TARGET' ) ) {
 				define( 'ONUMIA_PACKAGE_TARGET', $target );
 			}

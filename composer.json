@@ -9,10 +9,7 @@
     "autoload": {
         "psr-4": {
             "Onumia\\": "src/"
-        },
-        "exclude-from-classmap": [
-            "/src/Pro/modules/software-licensing/"
-        ]
+        }
     },
     "config": {
         "optimize-autoloader": true

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Onumia Free GitHub Releases updater.
+ * Onumia GitHub Releases updater.
  *
  * @package Onumia
  */
@@ -16,7 +16,7 @@ use Onumia\Lib\Inline0\WordPressGitHubUpdater\UpdaterConfig;
 use Onumia\PublicApi\Filters;
 
 /**
- * Configures the shared signed GitHub updater for Onumia Free.
+ * Configures the shared signed GitHub updater for Onumia.
  */
 final class GitHubReleaseUpdater {
 	public const REPOSITORY_URL = 'https://github.com/inline0/onumia/';
@@ -114,9 +114,6 @@ final class GitHubReleaseUpdater {
 
 	private static function is_disabled(): bool {
 		$disabled = self::constant_bool( 'ONUMIA_GITHUB_UPDATER_DISABLED' );
-		if ( defined( 'ONUMIA_PACKAGE_TARGET' ) && 'onumia-pro' === constant( 'ONUMIA_PACKAGE_TARGET' ) ) {
-			$disabled = true;
-		}
 
 		return (bool) Filters::github_updater_disabled( $disabled );
 	}

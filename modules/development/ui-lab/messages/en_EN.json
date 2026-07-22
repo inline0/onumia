@@ -1,0 +1,453 @@
+{
+  "component": {
+    "inlineNotice": "Unsaved changes stay local until you save.",
+    "inlineNoticeLabel": "Inline notice component",
+    "inlineNoticeDescription": "Reusable development-only notice component."
+  },
+  "sections": {
+    "booleans": "Boolean controls",
+    "textInputs": "Text inputs",
+    "numbers": "Number controls",
+    "structuredData": "Structured data",
+    "display": "Display elements",
+    "actions": "Action elements",
+    "conditions": "Conditional logic",
+    "helpLabelExamples": "Help label examples"
+  },
+  "tabs": {
+    "static": "Static options",
+    "sources": "Source-backed options",
+    "dateTime": "Date and time",
+    "layout": "Layout grid",
+    "charts": "Charts",
+    "tables": "Tables",
+    "entries": "Entries",
+    "miniApp": "Mini apps",
+    "helpLabel": "Help label",
+    "drawer": "Drawers"
+  },
+  "fields": {
+    "checkboxEnabled": "Checkbox",
+    "toggleEnabled": "Toggle",
+    "title": "Text input",
+    "url": "URL input",
+    "email": "Email input",
+    "password": "Password input",
+    "phone": "Phone input",
+    "notes": "Textarea",
+    "code": "Code editor",
+    "dateField": "Date field",
+    "datePicker": "Date picker",
+    "dateRange": "Date range picker",
+    "timeField": "Time field",
+    "layoutTitle": "Layout title",
+    "layoutUrl": "Layout URL",
+    "layoutEmail": "Layout email",
+    "layoutPhone": "Layout phone",
+    "layoutLimit": "Layout limit",
+    "layoutEnabled": "Layout enabled",
+    "count": "Integer input",
+    "rangeValue": "Range",
+    "moduleSelect": "Combobox select",
+    "postTypes": "Multi-select",
+    "selectedUser": "User select",
+    "selectedUsers": "User multi-select",
+    "selectedPost": "Post select",
+    "selectedPosts": "Post multi-select",
+    "selectedTerm": "Term select",
+    "selectedTerms": "Term multi-select",
+    "selectedTaxonomy": "Taxonomy select",
+    "selectedTaxonomies": "Taxonomy multi-select",
+    "customRestItem": "Custom REST query",
+    "missingSourceValues": "Missing selected backend data",
+    "missingSelectedUser": "Missing user select",
+    "missingSelectedUsers": "Missing user multi-select",
+    "missingSelectedPost": "Missing post select",
+    "missingSelectedPosts": "Missing post multi-select",
+    "missingSelectedTerm": "Missing term select",
+    "missingSelectedTerms": "Missing term multi-select",
+    "missingSelectedTaxonomy": "Missing taxonomy select",
+    "missingSelectedTaxonomies": "Missing taxonomy multi-select",
+    "roles": "Roles",
+    "radioChoice": "Radio group",
+    "checkboxGroup": "Checkbox group",
+    "keyValuePairs": "Key/value editor",
+    "repeaterRows": "Repeater",
+    "repeaterLabel": "Label",
+    "repeaterValue": "Value",
+    "previewState": "Preview",
+    "statusItems": "Status list: system checks",
+    "tableRows": "Module inventory",
+    "selectedTableRow": "Selected row",
+    "selectedTableRows": "Selected rows",
+    "selectedTableRowIds": "Selected row IDs",
+    "conditionalFeatureEnabled": "Advanced controls enabled",
+    "conditionalMode": "Condition mode",
+    "conditionalAudience": "Audience",
+    "conditionalLimit": "Condition limit",
+    "conditionalVisibleText": "Visible when advanced controls are enabled",
+    "conditionalEnabledNote": "Enabled for editor audience",
+    "conditionalRequiredBrief": "Required in advanced mode",
+    "conditionalReadOnlySlug": "Read-only in locked mode",
+    "conditionalValidatedScore": "Validated score",
+    "conditionalSourceChoice": "Source-backed options guard",
+    "miniAppName": "Experience name",
+    "miniAppMode": "Launch mode",
+    "miniAppPublic": "Public launch",
+    "contentTitle": "Content title",
+    "contentGoal": "Content goal",
+    "contentAudience": "Audience",
+    "contentChannels": "Channels",
+    "contentPostTypes": "Post types",
+    "contentLaunchDate": "Launch date",
+    "contentWindow": "Publishing window",
+    "contentReviewTime": "Review time",
+    "contentRulesCode": "Rules code",
+    "contentBrief": "Generated brief",
+    "contentBriefStatus": "Brief status",
+    "contentBriefSections": "Brief sections",
+    "opsEnvironment": "Environment",
+    "opsContactPhone": "Contact phone",
+    "opsSecret": "Deploy token",
+    "opsDryRun": "Dry run",
+    "opsLimit": "Audit limit",
+    "opsIntensity": "Intensity",
+    "opsModules": "Modules",
+    "opsChecklist": "Checklist",
+    "opsPayload": "Payload",
+    "opsAuditResult": "Audit result",
+    "opsAuditStatus": "Audit status",
+    "opsAuditRows": "Audit rows",
+    "opsSecretHelp": "Private credential used only on the server side.",
+    "helpApiNamespace": "API namespace",
+    "helpBatchSize": "Batch size",
+    "helpFallbackRole": "Fallback role",
+    "helpDryRun": "Dry run",
+    "drawerTitle": "Drawer title",
+    "drawerLimit": "Drawer limit",
+    "drawerMode": "Drawer mode",
+    "drawerEntityName": "Entity name",
+    "drawerEntitySlug": "Entity slug",
+    "drawerEntityType": "Entity type",
+    "drawerEntityPublic": "Public entity",
+    "drawerEntityNotes": "Entity notes",
+    "drawerEntityCode": "Mapping code",
+    "drawerRules": "Editable rules",
+    "drawerRuleLabel": "Rule label",
+    "drawerRuleAction": "Rule action",
+    "drawerRuleNotes": "Rule notes",
+    "drawerRuleEnabled": "Rule enabled",
+    "drawerPreviewText": "Drawer preview",
+    "drawerPreviewPayload": "Preview payload",
+    "drawerDeepValue": "Deep value"
+  },
+  "options": {
+    "compact": "Compact",
+    "comfortable": "Comfortable",
+    "spacious": "Spacious",
+    "header": "Header",
+    "footer": "Footer",
+    "sidebar": "Sidebar",
+    "guided": "Guided",
+    "manual": "Manual",
+    "automatic": "Automatic",
+    "simple": "Simple",
+    "advanced": "Advanced",
+    "locked": "Locked",
+    "editors": "Editors",
+    "members": "Members",
+    "customers": "Customers",
+    "site": "Site",
+    "email": "Email",
+    "social": "Social",
+    "search": "Search",
+    "staging": "Staging",
+    "production": "Production",
+    "backup": "Backup",
+    "cache": "Cache",
+    "roles": "Roles",
+    "content": "Content",
+    "draft": "Draft",
+    "review": "Review",
+    "published": "Published",
+    "segment": "Segment",
+    "workflow": "Workflow",
+    "report": "Report",
+    "notify": "Notify",
+    "assign": "Assign",
+    "archive": "Archive"
+  },
+  "display": {
+    "text": "Text: Primary status connected.",
+    "notice": "Notice: Module contracts available.",
+    "preview": "Preview: Last action response"
+  },
+  "charts": {
+    "bar": {
+      "series": {
+        "desktop": "Desktop",
+        "mobile": "Mobile"
+      }
+    },
+    "barDescription": "Grouped and stacked bars with grid, axis, tooltip, and legend support.",
+    "line": "Line chart",
+    "lineDescription": "Multiple line series with shadcn chart tooltip and legend.",
+    "area": "Area chart",
+    "areaDescription": "Stackable area series for trend previews.",
+    "pie": {
+      "series": {
+        "chrome": "Chrome",
+        "safari": "Safari",
+        "firefox": "Firefox",
+        "edge": "Edge",
+        "other": "Other"
+      }
+    },
+    "pieDescription": "Segment charts driven by dataKey and nameKey.",
+    "donut": "Donut chart",
+    "donutDescription": "Pie chart variant with configurable inner and outer radius.",
+    "radar": {
+      "series": {
+        "current": "Current",
+        "target": "Target"
+      }
+    },
+    "radarDescription": "Polar comparison across multiple metrics.",
+    "radial": {
+      "series": {
+        "security": "Security",
+        "media": "Media"
+      }
+    },
+    "radialDescription": "Radial bar chart for proportional status summaries.",
+    "barLabel": "Bar",
+    "pieLabel": "Pie",
+    "radarLabel": "Radar",
+    "radialLabel": "Radial"
+  },
+  "tables": {
+    "inline": "Inline table",
+    "inlineDescription": "Inline table with global search, pagination, sortable columns, badge cells, boolean cells, and a default sort.",
+    "card": "Card table",
+    "cardDescription": "Full-card table with search, sorting, pagination, badges, and boolean cells.",
+    "selectable": "Selectable rows",
+    "selectableDescription": "Table selection with visible-page select all, shift-click range selection, and selected-row bulk action payloads.",
+    "selectAllVisible": "Select visible rows",
+    "reviewSelected": "Review selected rows",
+    "selectedRowsPreview": "Selected row payload from the latest bulk action.",
+    "selectedRowIdsPreview": "Stable selected row IDs from the latest bulk action.",
+    "filters": "Structured filters",
+    "filtersDescription": "Column/operator/value filters for text, number, option, multi-option, boolean, and source-backed options.",
+    "addFilter": "Add filter",
+    "clearFilters": "Clear filters",
+    "rowState": "Row click state",
+    "rowStateDescription": "Click a row to route into a detail state and write the clicked row into runtime data.",
+    "rowDetail": "Selected row detail",
+    "selectedRow": "Selected row",
+    "search": "Search table",
+    "searchPlaceholder": "Search modules",
+    "columns": {
+      "module": "Module",
+      "area": "Area",
+      "status": "Status",
+      "owner": "Owner",
+      "score": "Score",
+      "public": "Public",
+      "updated": "Updated"
+    },
+    "status": {
+      "enabled": "Enabled",
+      "draft": "Draft",
+      "review": "Review",
+      "paused": "Paused"
+    }
+  },
+  "actions": {
+    "button": "Button",
+    "buttonGroup": "Button group",
+    "submit": "Submit button",
+    "reset": "Reset button",
+    "danger": "Danger button",
+    "startMiniApp": "Start setup",
+    "back": "Back",
+    "review": "Review",
+    "confirm": "Confirm",
+    "restart": "Restart",
+    "planContent": "Plan content",
+    "generateBrief": "Generate brief",
+    "configureOps": "Configure audit",
+    "safeMode": "Force safe mode",
+    "reviewOps": "Review audit",
+    "runAudit": "Run audit",
+    "drawerPreview": "Run preview"
+  },
+  "drawers": {
+    "simple": {
+      "label": "Simple settings drawer",
+      "description": "A small drawer with standard form controls.",
+      "trigger": "Open simple drawer",
+      "section": "Drawer settings"
+    },
+    "createEntity": {
+      "label": "Create entity",
+      "description": "A realistic create flow with nested advanced settings.",
+      "trigger": "Create entity",
+      "details": "Entity details"
+    },
+    "advanced": {
+      "label": "Advanced mapping",
+      "description": "Nested drawer content can include the same controls as the parent drawer.",
+      "trigger": "Open advanced mapping",
+      "section": "Advanced mapping"
+    },
+    "editRule": {
+      "label": "Edit rule",
+      "description": "Repeater rows can expose focused edit drawers for details that should not clutter the list.",
+      "trigger": "Edit rule"
+    },
+    "preview": {
+      "label": "Preview drawer",
+      "description": "Drawer content can mix display elements and backend actions.",
+      "trigger": "Open preview drawer",
+      "section": "Preview content",
+      "text": "This drawer combines static copy, structured preview data, and an action button."
+    },
+    "previewNested": {
+      "label": "Bottom nested drawer level two",
+      "description": "Bottom drawers can stack upward while the preview drawer remains visible behind them.",
+      "trigger": "Open nested bottom drawer"
+    },
+    "previewNestedSecond": {
+      "label": "Bottom nested drawer level three",
+      "description": "The same nested drawer contract works from the bottom edge.",
+      "trigger": "Open deep bottom drawer",
+      "section": "Bottom nested content",
+      "text": "The preview drawer stays mounted underneath this bottom drawer stack."
+    },
+    "deep": {
+      "label": "Nested drawer level one",
+      "description": "Open nested drawers without leaving the parent drawer state.",
+      "trigger": "Open nested drawer"
+    },
+    "deepSecond": {
+      "label": "Nested drawer level two",
+      "description": "The parent drawer remains mounted while the child is open.",
+      "trigger": "Open level two"
+    },
+    "deepThird": {
+      "label": "Nested drawer level three",
+      "description": "Deep drawer content can still edit module settings.",
+      "trigger": "Open level three",
+      "section": "Deep nested content"
+    },
+    "leftDeep": {
+      "label": "Left nested drawer level one",
+      "description": "Left drawers keep the previous level visible behind the active drawer.",
+      "trigger": "Open left nested drawer"
+    },
+    "leftDeepSecond": {
+      "label": "Left nested drawer level two",
+      "description": "The parent left drawer stays mounted while a deeper drawer opens.",
+      "trigger": "Open left level two"
+    },
+    "leftDeepThird": {
+      "label": "Left nested drawer level three",
+      "description": "Deep left drawer content can use the same module controls.",
+      "trigger": "Open left level three",
+      "section": "Left nested content",
+      "text": "Left-side nested drawers reveal an even stack behind the active level."
+    },
+    "topDeep": {
+      "label": "Top nested drawer level one",
+      "description": "Top drawers stack downward while preserving the parent drawer state.",
+      "trigger": "Open top nested drawer"
+    },
+    "topDeepSecond": {
+      "label": "Top nested drawer level two",
+      "description": "The same drawer component supports vertical nesting from the top edge.",
+      "trigger": "Open top level two"
+    },
+    "topDeepThird": {
+      "label": "Top nested drawer level three",
+      "description": "Deep top drawer content stays editable inside the active level.",
+      "trigger": "Open top level three",
+      "section": "Top nested content",
+      "text": "Top-side nested drawers reveal an even stack above the app content."
+    },
+    "stress": {
+      "label": "Mini UI lab drawer",
+      "description": "A full renderer stress drawer containing every non-drawer UI Lab surface.",
+      "trigger": "Open Mini UI lab drawer"
+    }
+  },
+  "entries": {
+    "settingsBacked": "Settings-backed",
+    "sourceBacked": "Source-backed",
+    "tableBacked": "Table-backed",
+    "readonly": "Read-only",
+    "search": "Search entries",
+    "segments": {
+      "label": "Workflow segments",
+      "description": "Settings-backed entries with ordering, generated drawer sections, and related rules.",
+      "new": "New segment",
+      "deleteTitle": "Delete selected segments",
+      "deleteDescription": "Selected segment rows will be removed from local module settings."
+    },
+    "activity": {
+      "label": "Activity events",
+      "description": "Manual source-backed entries that send search, filters, sorting, and pagination to PHP.",
+      "new": "New event"
+    },
+    "contacts": {
+      "label": "Table-inferred contacts",
+      "description": "Custom table entries whose list columns, filters, and drawer fields come from tables.php column metadata.",
+      "new": "New contact",
+      "deleteTitle": "Delete selected contacts",
+      "deleteDescription": "Selected contact rows will be sent to the table-backed delete action."
+    },
+    "readonlyLabel": "Read-only segment browser"
+  },
+  "miniApp": {
+    "welcome": "Launch setup starts with a short configuration flow.",
+    "configure": "Configure a few settings, then move to review.",
+    "review": "Review mode uses the same saved settings with a different view.",
+    "complete": "The mini app reached a final state without leaving the tab."
+  },
+  "miniApps": {
+    "launchWizard": "Launch wizard",
+    "contentStudio": "Content studio",
+    "operationsConsole": "Operations console",
+    "contentStart": "Compose a campaign brief from module settings, source-backed options, date controls, code, and a backend action.",
+    "contentReview": "The generated result below came from the PHP action and was written back into the renderer runtime data.",
+    "operationsStart": "Configure an operational audit, review the payload, then run a PHP action that returns rows and statuses.",
+    "operationsReview": "Review the structured payload before it is sent to the backend action."
+  },
+  "help": {
+    "sectionLabel": "Help label examples",
+    "sectionText": "Examples where help adds context that the visible label cannot carry alone.",
+    "apiNamespaceLabel": "API namespace help",
+    "apiNamespaceText": "Use a stable lowercase namespace. Changing it later can break existing integrations.",
+    "batchSizeLabel": "Batch size help",
+    "batchSizeText": "Large batches can time out on slow hosts. Start low and increase after a successful dry run.",
+    "fallbackRoleLabel": "Fallback role help",
+    "fallbackRoleText": "Used only when a visitor does not match a more specific role rule.",
+    "dryRunLabel": "Dry run help",
+    "dryRunText": "Dry runs show the planned changes without writing to the database.",
+    "conditionalFeatureEnabledLabel": "Advanced controls enabled",
+    "conditionalFeatureEnabledText": "Drives the visibleWhen example below.",
+    "conditionalModeLabel": "Condition mode",
+    "conditionalModeText": "Advanced makes one field required. Locked makes another field read-only.",
+    "conditionalVisibleLabel": "Visible when",
+    "conditionalVisibleText": "This control is only rendered while advanced controls are enabled.",
+    "conditionalEnabledLabel": "Enabled when",
+    "conditionalEnabledText": "This control is editable only when the audience is editors.",
+    "conditionalRequiredLabel": "Required when",
+    "conditionalRequiredText": "This control becomes required when condition mode is advanced.",
+    "conditionalReadOnlyLabel": "Read-only when",
+    "conditionalReadOnlyText": "This control becomes read-only when condition mode is locked.",
+    "conditionalValidatedLabel": "Validate when",
+    "conditionalValidatedText": "This field carries a validation condition tied to the condition limit value.",
+    "conditionalSourceLabel": "Options when",
+    "conditionalSourceText": "This select declares that its options depend on the public post type source being available."
+  }
+}

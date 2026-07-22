@@ -1,9 +1,0 @@
-{
-  "$schema": "../../schemas/meta.json",
-  "name": "onumia/database-optimizer",
-  "category": "operations",
-  "tags": ["database", "cleanup", "performance"],
-  "label": "Database Optimizer",
-  "description": "Runs opt-in database cleanup tasks for transients, orphaned metadata, comments, posts, and MyISAM table optimization.",
-  "version": "0.1.0"
-}

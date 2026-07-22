@@ -1,9 +1,0 @@
-{
-  "$schema": "../../schemas/meta.json",
-  "name": "onumia/inactive-users",
-  "category": "users",
-  "tags": ["users", "security", "cleanup"],
-  "label": "Inactive Users",
-  "description": "Finds dormant WordPress accounts, exempts known users, and can disable or delete inactive users with an audit log.",
-  "version": "0.1.0"
-}

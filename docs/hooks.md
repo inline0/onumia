@@ -3,7 +3,7 @@ title: "Hooks"
 meta_title: "Onumia Hooks"
 meta_description: "Public filters, actions, and PHP APIs exposed by Onumia for developers extending modules and the plugin runtime."
 path: "hooks"
-order: 950
+order: 130
 section: "Reference"
 ---
 
@@ -19,8 +19,8 @@ This reference lists the public filters, actions, and PHP APIs Onumia supports f
 | --- | ---: | --- |
 | [Public Classes](#public-classes) | 29 | Module Schema (28), Modules (1) |
 | [Public Methods And Functions](#public-methods-and-functions) | 1 | Uncategorized (1) |
-| [Public Filters](#public-filters) | 16 | Admin (3), Components (1), Data (5), Modules (1), Pro (1), Updates (5) |
-| [Public Actions](#public-actions) | 5 | Licensing (3), Pro (1), Runtime (1) |
+| [Public Filters](#public-filters) | 14 | Admin (2), Components (1), Data (5), Modules (1), Updates (5) |
+| [Public Actions](#public-actions) | 1 | Runtime (1) |
 
 ### Public Classes
 
@@ -61,8 +61,7 @@ This reference lists the public filters, actions, and PHP APIs Onumia supports f
 ### Public Filters
 
 - [`onumia/admin/menu_location`](#filter-onumia-admin-menu-location) — Admin
-- [`onumia/admin/app_entrypoint`](#filter-onumia-admin-app-entrypoint) — Admin
-- [`onumia/admin/app_asset_directory`](#filter-onumia-admin-app-asset-directory) — Admin
+- [`onumia/admin/app_fullscreen`](#filter-onumia-admin-app-fullscreen) — Admin
 - [`onumia/components/roots`](#filter-onumia-components-roots) — Components
 - [`onumia/data/sqlite_data_directory`](#filter-onumia-data-sqlite-data-directory) — Data
 - [`onumia/data/sqlite_available`](#filter-onumia-data-sqlite-available) — Data
@@ -70,7 +69,6 @@ This reference lists the public filters, actions, and PHP APIs Onumia supports f
 - [`onumia/data/table_uri_redaction`](#filter-onumia-data-table-uri-redaction) — Data
 - [`onumia/data/table_ip_handling`](#filter-onumia-data-table-ip-handling) — Data
 - [`onumia/modules/roots`](#filter-onumia-modules-roots) — Modules
-- [`onumia/pro/app_roots`](#filter-onumia-pro-app-roots) — Pro
 - [`onumia/github_updater/repository_url`](#filter-onumia-github-updater-repository-url) — Updates
 - [`onumia/github_updater/asset_regex`](#filter-onumia-github-updater-asset-regex) — Updates
 - [`onumia/github_updater/token`](#filter-onumia-github-updater-token) — Updates
@@ -79,10 +77,6 @@ This reference lists the public filters, actions, and PHP APIs Onumia supports f
 
 ### Public Actions
 
-- [`onumia/licensing/license_issued`](#action-onumia-licensing-license-issued) — Licensing
-- [`onumia/licensing/license_status_changed`](#action-onumia-licensing-license-status-changed) — Licensing
-- [`onumia/licensing/purchase_recorded`](#action-onumia-licensing-purchase-recorded) — Licensing
-- [`onumia/pro/loaded`](#action-onumia-pro-loaded) — Pro
 - [`onumia/runtime/loaded`](#action-onumia-runtime-loaded) — Runtime
 
 ## Public Classes
@@ -604,8 +598,8 @@ _Category: Modules · Since 0.1.0_
 
 Provides the base runtime API for Onumia module implementations.
 
-Extend this class from a module `boot.php` file when implementing bundled,
-Pro, or custom module behavior. It gives module code typed access to saved
+Extend this class from a module `boot.php` file when implementing bundled or
+Module behavior. It gives module code typed access to saved
 settings, module-owned tables, privacy helpers, and WordPress hook
 registration without exposing internal loader services.
 
@@ -627,7 +621,7 @@ Returns the currently booted Onumia plugin instance when available.
 This accessor exists for integrations that load after the initial
 `onumia/runtime/loaded` action has already fired.
 
-**Source** [`src/Core/Plugin.php:176`](../src/Core/Plugin.php#L176)
+**Source** [`src/Core/Plugin.php:172`](../src/Core/Plugin.php#L172)
 
 ## Public Filters
 
@@ -662,73 +656,36 @@ add_filter( 'onumia/admin/menu_location', function ( $location ): mixed {
 
 **Returns** `array{placement:string,position:int}\|array<string,mixed>` — Filtered admin menu location.
 
-**Source** [`src/PublicApi/Filters.php:80`](../src/PublicApi/Filters.php#L80)
+**Source** [`src/PublicApi/Filters.php:79`](../src/PublicApi/Filters.php#L79)
 
 
-<a id="filter-onumia-admin-app-entrypoint"></a>
+<a id="filter-onumia-admin-app-fullscreen"></a>
 
-### `onumia/admin/app_entrypoint`
+### `onumia/admin/app_fullscreen`
 
-_Category: Admin · Since 0.1.0_
+_Category: Admin · Since 0.1.1_
 
-Filters the React entrypoint used for the Onumia admin app.
+Filters whether the primary Onumia admin app owns the full viewport.
 
-Use this when a distribution needs to swap the free dashboard entrypoint
-for another built entry, such as the Pro dashboard entry. The filtered
-value should be a non-empty path relative to the Vite app source root.
-
-Empty or non-string values are ignored by the caller. The filter should
-not enqueue scripts directly.
+The fullscreen workspace receives a minimal shell and removes the WordPress
+admin stylesheet stack without changing other admin screens.
 
 **Usage**
 
 ```php
-add_filter( 'onumia/admin/app_entrypoint', function ( string $entrypoint ): string {
-    // $entrypoint — Default app entrypoint.
-    return $entrypoint;
+add_filter( 'onumia/admin/app_fullscreen', function ( bool $fullscreen ): bool {
+    // $fullscreen — Whether the primary app uses the fullscreen shell.
+    return $fullscreen;
 }, 10, 1 );
 ```
 
 | Parameter | Type | Description |
 | --- | --- | --- |
-| `$entrypoint` | `string` | Default app entrypoint. |
+| `$fullscreen` | `bool` | Whether the primary app uses the fullscreen shell. |
 
-**Returns** `string` — Filtered app entrypoint.
+**Returns** `bool` — Filtered fullscreen state.
 
-**Source** [`src/PublicApi/Filters.php:117`](../src/PublicApi/Filters.php#L117)
-
-
-<a id="filter-onumia-admin-app-asset-directory"></a>
-
-### `onumia/admin/app_asset_directory`
-
-_Category: Admin · Since 0.1.0_
-
-Filters the built asset directory used for the Onumia admin app.
-
-Use this when a distribution needs Onumia to load a different built asset
-directory, such as a Pro build. The filtered value should be a non-empty
-path relative to the plugin root.
-
-Empty or non-string values are ignored by the caller. The filter should
-not read the manifest or enqueue scripts directly.
-
-**Usage**
-
-```php
-add_filter( 'onumia/admin/app_asset_directory', function ( string $directory ): string {
-    // $directory — Default asset directory.
-    return $directory;
-}, 10, 1 );
-```
-
-| Parameter | Type | Description |
-| --- | --- | --- |
-| `$directory` | `string` | Default asset directory. |
-
-**Returns** `string` — Filtered asset directory.
-
-**Source** [`src/PublicApi/Filters.php:143`](../src/PublicApi/Filters.php#L143)
+**Source** [`src/PublicApi/Filters.php:116`](../src/PublicApi/Filters.php#L116)
 
 
 <a id="filter-onumia-components-roots"></a>
@@ -761,7 +718,7 @@ add_filter( 'onumia/components/roots', function ( $roots ): mixed {
 
 **Returns** `string[]` — Filtered component root directories.
 
-**Source** [`src/PublicApi/Filters.php:54`](../src/PublicApi/Filters.php#L54)
+**Source** [`src/PublicApi/Filters.php:53`](../src/PublicApi/Filters.php#L53)
 
 
 <a id="filter-onumia-data-sqlite-data-directory"></a>
@@ -794,7 +751,7 @@ add_filter( 'onumia/data/sqlite_data_directory', function ( string $directory ):
 
 **Returns** `string` — Filtered module data directory.
 
-**Source** [`src/PublicApi/Filters.php:196`](../src/PublicApi/Filters.php#L196)
+**Source** [`src/PublicApi/Filters.php:138`](../src/PublicApi/Filters.php#L138)
 
 
 <a id="filter-onumia-data-sqlite-available"></a>
@@ -827,7 +784,7 @@ add_filter( 'onumia/data/sqlite_available', function ( bool $available ): bool {
 
 **Returns** `bool` — Filtered SQLite availability.
 
-**Source** [`src/PublicApi/Filters.php:222`](../src/PublicApi/Filters.php#L222)
+**Source** [`src/PublicApi/Filters.php:164`](../src/PublicApi/Filters.php#L164)
 
 
 <a id="filter-onumia-data-storage-driver"></a>
@@ -860,7 +817,7 @@ add_filter( 'onumia/data/storage_driver', function ( string $driver ): string {
 
 **Returns** `string` — Filtered driver override.
 
-**Source** [`src/PublicApi/Filters.php:248`](../src/PublicApi/Filters.php#L248)
+**Source** [`src/PublicApi/Filters.php:190`](../src/PublicApi/Filters.php#L190)
 
 
 <a id="filter-onumia-data-table-uri-redaction"></a>
@@ -899,7 +856,7 @@ add_filter( 'onumia/data/table_uri_redaction', function ( string $value, string 
 
 **Returns** `string` — Filtered URI-like value.
 
-**Source** [`src/PublicApi/Filters.php:274`](../src/PublicApi/Filters.php#L274)
+**Source** [`src/PublicApi/Filters.php:216`](../src/PublicApi/Filters.php#L216)
 
 
 <a id="filter-onumia-data-table-ip-handling"></a>
@@ -935,7 +892,7 @@ add_filter( 'onumia/data/table_ip_handling', function ( string $handling, string
 
 **Returns** `string` — Filtered IP handling strategy.
 
-**Source** [`src/PublicApi/Filters.php:303`](../src/PublicApi/Filters.php#L303)
+**Source** [`src/PublicApi/Filters.php:245`](../src/PublicApi/Filters.php#L245)
 
 
 <a id="filter-onumia-modules-roots"></a>
@@ -946,8 +903,8 @@ _Category: Modules · Since 0.1.0_
 
 Filters module root directories used during module discovery.
 
-Use this when an integration needs Onumia to discover bundled or custom
-modules from an additional trusted directory. Returned paths should be
+Use this when an integration needs Onumia to discover packaged modules from
+an additional trusted directory. Returned paths should be
 absolute directories that contain module folders with `meta.json` files.
 
 Non-string values are ignored by the caller after this filter runs. The
@@ -968,42 +925,7 @@ add_filter( 'onumia/modules/roots', function ( $roots ): mixed {
 
 **Returns** `string[]` — Filtered module root directories.
 
-**Source** [`src/PublicApi/Filters.php:28`](../src/PublicApi/Filters.php#L28)
-
-
-<a id="filter-onumia-pro-app-roots"></a>
-
-### `onumia/pro/app_roots`
-
-_Category: Pro · Since 0.1.0_
-
-Filters Pro app root directories used during app discovery.
-
-Use this when a Pro integration stores custom app definitions outside the
-active theme convention. Returned paths should be absolute directories
-containing Onumia app folders.
-
-Non-string values are ignored by the caller after this filter runs. The
-filter should not load app definitions itself.
-
-**Usage**
-
-```php
-add_filter( 'onumia/pro/app_roots', function ( $roots, Plugin $plugin ): mixed {
-    // $roots — Default Pro app root directories.
-    // $plugin — Active Onumia plugin runtime.
-    return $roots;
-}, 10, 2 );
-```
-
-| Parameter | Type | Description |
-| --- | --- | --- |
-| `$roots` | `string[]` | Default Pro app root directories. |
-| `$plugin` | `Plugin` | Active Onumia plugin runtime. |
-
-**Returns** `string[]` — Filtered Pro app root directories.
-
-**Source** [`src/PublicApi/Filters.php:169`](../src/PublicApi/Filters.php#L169)
+**Source** [`src/PublicApi/Filters.php:27`](../src/PublicApi/Filters.php#L27)
 
 
 <a id="filter-onumia-github-updater-repository-url"></a>
@@ -1012,7 +934,7 @@ add_filter( 'onumia/pro/app_roots', function ( $roots, Plugin $plugin ): mixed {
 
 _Category: Updates · Since 0.1.0_
 
-Filters the GitHub repository used for Onumia Free updates.
+Filters the GitHub repository used for Onumia updates.
 
 **Usage**
 
@@ -1029,7 +951,7 @@ add_filter( 'onumia/github_updater/repository_url', function ( string $repositor
 
 **Returns** `mixed` — Filtered repository URL.
 
-**Source** [`src/PublicApi/Filters.php:330`](../src/PublicApi/Filters.php#L330)
+**Source** [`src/PublicApi/Filters.php:272`](../src/PublicApi/Filters.php#L272)
 
 
 <a id="filter-onumia-github-updater-asset-regex"></a>
@@ -1038,7 +960,7 @@ add_filter( 'onumia/github_updater/repository_url', function ( string $repositor
 
 _Category: Updates · Since 0.1.0_
 
-Filters the Onumia Free release asset filename pattern.
+Filters the Onumia release asset filename pattern.
 
 **Usage**
 
@@ -1055,7 +977,7 @@ add_filter( 'onumia/github_updater/asset_regex', function ( string $asset_regex 
 
 **Returns** `mixed` — Filtered release asset pattern.
 
-**Source** [`src/PublicApi/Filters.php:347`](../src/PublicApi/Filters.php#L347)
+**Source** [`src/PublicApi/Filters.php:289`](../src/PublicApi/Filters.php#L289)
 
 
 <a id="filter-onumia-github-updater-token"></a>
@@ -1081,7 +1003,7 @@ add_filter( 'onumia/github_updater/token', function ( string $token ): mixed {
 
 **Returns** `mixed` — Filtered GitHub token.
 
-**Source** [`src/PublicApi/Filters.php:364`](../src/PublicApi/Filters.php#L364)
+**Source** [`src/PublicApi/Filters.php:306`](../src/PublicApi/Filters.php#L306)
 
 
 <a id="filter-onumia-github-updater-disabled"></a>
@@ -1090,7 +1012,7 @@ add_filter( 'onumia/github_updater/token', function ( string $token ): mixed {
 
 _Category: Updates · Since 0.1.0_
 
-Filters whether the Onumia Free GitHub updater is disabled.
+Filters whether the Onumia GitHub updater is disabled.
 
 **Usage**
 
@@ -1107,7 +1029,7 @@ add_filter( 'onumia/github_updater/disabled', function ( bool $disabled ): mixed
 
 **Returns** `mixed` — Filtered disabled state.
 
-**Source** [`src/PublicApi/Filters.php:381`](../src/PublicApi/Filters.php#L381)
+**Source** [`src/PublicApi/Filters.php:323`](../src/PublicApi/Filters.php#L323)
 
 
 <a id="filter-onumia-github-updater-public-key"></a>
@@ -1116,7 +1038,7 @@ add_filter( 'onumia/github_updater/disabled', function ( bool $disabled ): mixed
 
 _Category: Updates · Since 0.1.0_
 
-Filters the trusted Ed25519 key used for Onumia Free releases.
+Filters the trusted Ed25519 key used for Onumia releases.
 
 **Usage**
 
@@ -1133,122 +1055,9 @@ add_filter( 'onumia/github_updater/public_key', function ( string $public_key ):
 
 **Returns** `mixed` — Filtered public key.
 
-**Source** [`src/PublicApi/Filters.php:398`](../src/PublicApi/Filters.php#L398)
+**Source** [`src/PublicApi/Filters.php:340`](../src/PublicApi/Filters.php#L340)
 
 ## Public Actions
-
-
-<a id="action-onumia-licensing-license-issued"></a>
-
-### `onumia/licensing/license_issued`
-
-_Category: Licensing · Since 0.1.0_
-
-Fires after a software license has been issued.
-
-The raw key is exposed only through this action and is never persisted by
-Onumia. Handlers that email or display the key should avoid logging it.
-
-**Usage**
-
-```php
-add_action( 'onumia/licensing/license_issued', function ( array $license, string $license_key, array $purchase ): void {
-    // $license — Public license record.
-    // $license_key — Raw license key for immediate delivery.
-    // $purchase — Public purchase record.
-}, 10, 3 );
-```
-
-| Parameter | Type | Description |
-| --- | --- | --- |
-| `$license` | `array<string,mixed>` | Public license record. |
-| `$license_key` | `string` | Raw license key for immediate delivery. |
-| `$purchase` | `array<string,mixed>` | Public purchase record. |
-
-**Source** [`src/PublicApi/Actions.php:90`](../src/PublicApi/Actions.php#L90)
-
-
-<a id="action-onumia-licensing-license-status-changed"></a>
-
-### `onumia/licensing/license_status_changed`
-
-_Category: Licensing · Since 0.1.0_
-
-Fires after a software license changes status.
-
-**Usage**
-
-```php
-add_action( 'onumia/licensing/license_status_changed', function ( array $license, string $previous_status, string $new_status ): void {
-    // $license — Public license record after the change.
-    // $previous_status — Previous license status.
-    // $new_status — New license status.
-}, 10, 3 );
-```
-
-| Parameter | Type | Description |
-| --- | --- | --- |
-| `$license` | `array<string,mixed>` | Public license record after the change. |
-| `$previous_status` | `string` | Previous license status. |
-| `$new_status` | `string` | New license status. |
-
-**Source** [`src/PublicApi/Actions.php:110`](../src/PublicApi/Actions.php#L110)
-
-
-<a id="action-onumia-licensing-purchase-recorded"></a>
-
-### `onumia/licensing/purchase_recorded`
-
-_Category: Licensing · Since 0.1.0_
-
-Fires after a software licensing purchase has been recorded.
-
-Storefronts can use this to send branded purchase emails or sync
-account state without reading Onumia licensing tables directly.
-
-**Usage**
-
-```php
-add_action( 'onumia/licensing/purchase_recorded', function ( array $purchase ): void {
-    // $purchase — Public purchase record.
-}, 10, 1 );
-```
-
-| Parameter | Type | Description |
-| --- | --- | --- |
-| `$purchase` | `array<string,mixed>` | Public purchase record. |
-
-**Source** [`src/PublicApi/Actions.php:72`](../src/PublicApi/Actions.php#L72)
-
-
-<a id="action-onumia-pro-loaded"></a>
-
-### `onumia/pro/loaded`
-
-_Category: Pro · Since 0.1.0_
-
-Fires after the optional Onumia Pro runtime has booted.
-
-This action runs after Pro app discovery, app surface registration, Pro
-REST routes, and administrator capabilities have been registered. Use it
-for Pro-only integrations that need the active plugin runtime.
-
-Callbacks should not assume the free module boot can still be changed at
-this point. Register Pro module roots during pre-boot filters instead.
-
-**Usage**
-
-```php
-add_action( 'onumia/pro/loaded', function ( Plugin $plugin ): void {
-    // $plugin — Active Onumia plugin runtime.
-}, 10, 1 );
-```
-
-| Parameter | Type | Description |
-| --- | --- | --- |
-| `$plugin` | `Plugin` | Active Onumia plugin runtime. |
-
-**Source** [`src/PublicApi/Actions.php:49`](../src/PublicApi/Actions.php#L49)
 
 
 <a id="action-onumia-runtime-loaded"></a>

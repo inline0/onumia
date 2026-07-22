@@ -35,7 +35,6 @@ use Onumia\Lib\PhpParser\ParserFactory;
 use Onumia\Modules\ModuleDefinition;
 use Onumia\Modules\ModuleEntryDefinition;
 use Onumia\Modules\ModuleLoader;
-use Onumia\Modules\SharedStructureFiles;
 use Onumia\Support\JsonFile;
 use SplFileInfo;
 use Throwable;
@@ -127,7 +126,6 @@ final class ModuleScopeLinter {
 		$findings        = array_merge(
 			$findings,
 			$this->lint_module_root( $module_root, new ModuleLoader( component_registry: $registry ) ),
-			$this->lint_module_root( $target_dir . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'Pro' . DIRECTORY_SEPARATOR . 'modules', new ModuleLoader( component_registry: $registry ) ),
 			$this->lint_merged_source_folders( $target_dir, $module_root )
 		);
 
@@ -199,10 +197,6 @@ final class ModuleScopeLinter {
 
 		foreach ( self::REQUIRED_MODULE_FILES as $file ) {
 			$path = $module_key . $file;
-			if ( 'structure.json' === $file && $this->has_shared_structure_file( $directory ) ) {
-				continue;
-			}
-
 			if ( ! is_file( $path ) ) {
 				$complete   = false;
 				$findings[] = new Finding( "Module is missing required {$file}.", 'onumia.check.moduleFileMissing', $path );
@@ -273,10 +267,6 @@ final class ModuleScopeLinter {
 	 * @return Finding[]
 	 */
 	private function lint_action_reachability( ModuleDefinition $module ): array {
-		if ( str_contains( $module->directory(), DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'Pro' . DIRECTORY_SEPARATOR . 'modules' . DIRECTORY_SEPARATOR ) ) {
-			return array();
-		}
-
 		$actions = $module->contract()->actions();
 		if ( array() === $actions ) {
 			return array();
@@ -331,7 +321,7 @@ final class ModuleScopeLinter {
 	}
 
 	private function is_canonical_placeholder_module( ModuleDefinition $module ): bool {
-		if ( $module->dev_only() || str_contains( $module->directory(), DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'Pro' . DIRECTORY_SEPARATOR . 'modules' . DIRECTORY_SEPARATOR ) ) {
+		if ( $module->dev_only() ) {
 			return false;
 		}
 
@@ -380,26 +370,7 @@ final class ModuleScopeLinter {
 	}
 
 	private function structure_file_for_directory( string $directory ): string {
-		$shared = $this->shared_structure_file( $directory );
-		if ( null !== $shared ) {
-			return $shared;
-		}
-
 		return $directory . DIRECTORY_SEPARATOR . 'structure.json';
-	}
-
-	private function shared_structure_file( string $directory ): ?string {
-		try {
-			$meta = JsonFile::read_object( $directory . DIRECTORY_SEPARATOR . 'meta.json', 'Module meta' );
-		} catch ( Throwable ) {
-			return null;
-		}
-
-		if ( ! is_string( $meta['name'] ?? null ) ) {
-			return null;
-		}
-
-		return SharedStructureFiles::for_module( $meta['name'], $directory );
 	}
 
 	/**
@@ -631,20 +602,6 @@ final class ModuleScopeLinter {
 	private function module_path_from_name( string $module_name ): string {
 		$relative = preg_replace( '/^onumia\//', '', $module_name );
 		return str_replace( '/', DIRECTORY_SEPARATOR, is_string( $relative ) ? $relative : $module_name );
-	}
-
-	private function has_shared_structure_file( string $directory ): bool {
-		try {
-			$meta = JsonFile::read_object( $directory . DIRECTORY_SEPARATOR . 'meta.json', 'Module meta' );
-		} catch ( Throwable ) {
-			return false;
-		}
-
-		if ( ! is_string( $meta['name'] ?? null ) ) {
-			return false;
-		}
-
-		return null !== SharedStructureFiles::for_module( $meta['name'], $directory );
 	}
 
 	/**

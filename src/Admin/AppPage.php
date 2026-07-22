@@ -10,7 +10,9 @@ declare(strict_types=1);
 
 namespace Onumia\Admin;
 
+use Onumia\Dev\UiLabAccess;
 use Onumia\PublicApi\Filters;
+use Onumia\Rest\UiStateRoutes;
 
 final class AppPage {
 	private const CAPABILITY              = 'manage_options';
@@ -20,13 +22,10 @@ final class AppPage {
 	private const APP_HANDLE              = 'onumia-app';
 	private const ADMIN_MENU_STYLE_HANDLE = 'onumia-admin-menu';
 	private const RESET_STYLE_HANDLE      = 'onumia-admin-reset';
-	private const SURFACE_STYLE_HANDLE    = 'onumia-app-surface-reset';
+	private const FULLSCREEN_STYLE_HANDLE = 'onumia-app-fullscreen-shell';
 	private const ENTRYPOINT              = 'src/apps/onumia/main.tsx';
 	private const ASSET_DIRECTORY         = 'assets/app';
-	private const BRAND_LOGO              = 'assets/brand/logo-dark.svg';
-	private const BRAND_LOGO_LIGHT        = 'assets/brand/logo-light.svg';
 	private const BRAND_ICON              = 'assets/brand/icon.svg';
-	private const BRAND_ICON_LIGHT        = 'assets/brand/icon-light.svg';
 
 	public static function register(): void {
 		if ( ! \is_admin() ) {
@@ -35,6 +34,9 @@ final class AppPage {
 
 		\add_action( 'admin_menu', array( self::class, 'register_menu_page' ) );
 		\add_action( 'admin_enqueue_scripts', array( self::class, 'enqueue_assets' ) );
+		\add_action( 'admin_enqueue_scripts', array( self::class, 'strip_admin_styles' ), 1000 );
+		\add_action( 'admin_print_styles', array( self::class, 'strip_admin_styles' ), 1000 );
+		\add_filter( 'admin_body_class', array( self::class, 'filter_body_class' ) );
 		\add_filter( 'script_loader_tag', array( self::class, 'filter_script_tag' ), 10, 3 );
 	}
 
@@ -69,59 +71,32 @@ final class AppPage {
 			\wp_die( \esc_html( 'You do not have permission to access Onumia.' ) );
 		}
 
-		self::render_app_root( null, 'onumia-admin-page', 'Loading Onumia' );
+		self::render_app_root();
 	}
 
-	public static function render_surface_app( string $app_name ): void {
-		self::render_app_root( $app_name, 'onumia-admin-page onumia-app-surface-page', 'Loading Onumia app' );
-	}
-
-	public static function enqueue_surface_assets(): void {
-		self::enqueue_admin_menu_icon();
-		self::enqueue_surface_reset();
-
-		$dev_server = self::dev_server_url();
-		if ( null !== $dev_server ) {
-			self::enqueue_dev_assets( $dev_server );
-			return;
-		}
-
-		self::enqueue_build_assets();
-	}
-
-	private static function render_app_root( ?string $surface_app_name, string $class_name, string $loading_label ): void {
+	private static function render_app_root(): void {
 		$dev_server = self::dev_server_url();
 		if ( null !== $dev_server ) {
 			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- The preamble escapes the dev-server URL before generating fixed module script markup.
 			echo self::build_dev_react_preamble( $dev_server );
 		}
 
-		$brand_logo_url = self::asset_url( self::BRAND_LOGO );
-		$brand_icon_url = self::asset_url( self::BRAND_ICON );
-		$surface_attr   = null === $surface_app_name ? '' : sprintf( ' data-surface-app-name="%s"', \esc_attr( $surface_app_name ) );
-		$open_ai_key    = self::can_emit_provider_keys() ? self::open_ai_key() : '';
-		$anthropic_key  = self::can_emit_provider_keys() ? self::anthropic_key() : '';
-		$google_key     = self::can_emit_provider_keys() ? self::google_key() : '';
+		$open_ai_key   = self::can_emit_provider_keys() ? self::open_ai_key() : '';
+		$anthropic_key = self::can_emit_provider_keys() ? self::anthropic_key() : '';
+		$google_key    = self::can_emit_provider_keys() ? self::google_key() : '';
+		$development_mode = UiLabAccess::enabled_for_current_request() ? '1' : '0';
 		printf(
-			'<div class="%1$s"><div class="onumia-app-loader" data-onumia-app-loader role="status" aria-label="%2$s"><img alt="" aria-hidden="true" height="128" src="%3$s" width="128" /></div><div id="onumia-app-root" data-rest-root="%4$s" data-rest-nonce="%5$s" data-version="%6$s" data-brand-logo-url="%7$s" data-brand-logo-light-url="%8$s" data-brand-icon-url="%9$s" data-brand-icon-light-url="%10$s" data-open-ai-key="%11$s" data-anthropic-key="%12$s" data-google-key="%13$s" data-env-role="%14$s" data-current-user-id="%15$d"%16$s></div></div>',
-			\esc_attr( $class_name ),
-			\esc_attr( $loading_label ),
-			\esc_url( $brand_icon_url ),
+			'<div id="onumia-app-root" data-rest-root="%1$s" data-rest-nonce="%2$s" data-version="%3$s" data-open-ai-key="%4$s" data-anthropic-key="%5$s" data-google-key="%6$s" data-env-role="%7$s" data-current-user-id="%8$d" data-development-mode="%9$s"></div>',
 			\esc_url( \rest_url( 'onumia/v1/' ) ),
 			\esc_attr( \wp_create_nonce( 'wp_rest' ) ),
 			\esc_attr( self::version() ),
-			\esc_url( $brand_logo_url ),
-			\esc_url( self::asset_url( self::BRAND_LOGO_LIGHT ) ),
-			\esc_url( $brand_icon_url ),
-			\esc_url( self::asset_url( self::BRAND_ICON_LIGHT ) ),
 			\esc_attr( $open_ai_key ),
 			\esc_attr( $anthropic_key ),
 			\esc_attr( $google_key ),
 			\esc_attr( self::env_role() ),
 			(int) \get_current_user_id(),
-			$surface_attr // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Built from esc_attr above.
+			\esc_attr( $development_mode )
 		);
-		\wp_print_inline_script_tag( self::loader_watch_script(), array( 'id' => 'onumia-app-loader-watch' ) );
 	}
 
 	private static function can_emit_provider_keys(): bool {
@@ -135,7 +110,11 @@ final class AppPage {
 			return;
 		}
 
-		self::enqueue_admin_reset();
+		if ( self::is_fullscreen() ) {
+			self::enqueue_fullscreen_shell();
+		} else {
+			self::enqueue_admin_reset();
+		}
 
 		$dev_server = self::dev_server_url();
 		if ( null !== $dev_server ) {
@@ -164,12 +143,42 @@ final class AppPage {
 		);
 	}
 
+	public static function filter_body_class( string $classes ): string {
+		if ( ! self::is_fullscreen() || ! self::is_current_onumia_screen() ) {
+			return $classes;
+		}
+
+		$theme_mode = UiStateRoutes::current_state()['theme_mode'];
+
+		return \trim( $classes . ' onumia-app-fullscreen onumia-theme-' . $theme_mode );
+	}
+
+	public static function strip_admin_styles( ?string $hook = null ): void {
+		if ( ! self::is_fullscreen() ) {
+			return;
+		}
+
+		if ( null !== $hook ? ! self::is_onumia_hook( $hook ) : ! self::is_current_onumia_screen() ) {
+			return;
+		}
+
+		$wp_styles = $GLOBALS['wp_styles'] ?? null;
+		$queue     = \is_object( $wp_styles ) && \is_array( $wp_styles->queue ?? null ) ? $wp_styles->queue : array();
+		foreach ( $queue as $handle ) {
+			if ( ! \is_string( $handle ) || self::should_keep_fullscreen_style( $handle ) ) {
+				continue;
+			}
+
+			\wp_dequeue_style( $handle );
+		}
+	}
+
 	private static function enqueue_dev_assets( string $dev_server ): void {
 		\wp_register_script( self::VITE_HANDLE, $dev_server . '/@vite/client', array(), null, true );
 		\wp_script_add_data( self::VITE_HANDLE, 'type', 'module' );
 		\wp_enqueue_script( self::VITE_HANDLE );
 
-		\wp_register_script( self::APP_HANDLE, $dev_server . '/' . self::entrypoint(), array(), null, true );
+		\wp_register_script( self::APP_HANDLE, $dev_server . '/' . self::ENTRYPOINT, array(), null, true );
 		\wp_script_add_data( self::APP_HANDLE, 'type', 'module' );
 		\wp_enqueue_script( self::APP_HANDLE );
 	}
@@ -186,10 +195,10 @@ final class AppPage {
 		\wp_add_inline_style( self::RESET_STYLE_HANDLE, self::admin_reset_css() );
 	}
 
-	private static function enqueue_surface_reset(): void {
-		\wp_register_style( self::SURFACE_STYLE_HANDLE, false, array(), self::version() );
-		\wp_enqueue_style( self::SURFACE_STYLE_HANDLE );
-		\wp_add_inline_style( self::SURFACE_STYLE_HANDLE, self::surface_reset_css() );
+	private static function enqueue_fullscreen_shell(): void {
+		\wp_register_style( self::FULLSCREEN_STYLE_HANDLE, false, array(), self::version() );
+		\wp_enqueue_style( self::FULLSCREEN_STYLE_HANDLE );
+		\wp_add_inline_style( self::FULLSCREEN_STYLE_HANDLE, self::fullscreen_shell_css() );
 	}
 
 	private static function admin_menu_icon_css(): string {
@@ -210,92 +219,65 @@ final class AppPage {
 CSS;
 	}
 
-	private static function surface_reset_css(): string {
+	private static function fullscreen_shell_css(): string {
 		return <<<'CSS'
 html {
-	overscroll-behavior: none;
+	padding: 0 !important;
 }
 
-body.onumia-app-surface-active {
-	background: oklch(0.97 0 0);
-	scrollbar-color: oklch(0.21 0 0 / 14%) transparent;
-	scrollbar-width: thin;
+body.onumia-app-fullscreen {
+	--onumia-main-background: oklch(1 0 0);
+	position: fixed;
+	width: 100%;
+	height: 100%;
 }
 
-body.onumia-app-surface-active::-webkit-scrollbar {
-	background: transparent;
-	height: 7px;
-	width: 7px;
+body.onumia-app-fullscreen.onumia-theme-dark {
+	--onumia-main-background: oklch(0.17 0 0);
 }
 
-body.onumia-app-surface-active::-webkit-scrollbar-track {
-	background: transparent;
+@media (prefers-color-scheme: dark) {
+	body.onumia-app-fullscreen.onumia-theme-system {
+		--onumia-main-background: oklch(0.17 0 0);
+	}
 }
 
-body.onumia-app-surface-active::-webkit-scrollbar-thumb {
-	background: oklch(0.21 0 0 / 14%);
-	border-radius: 999px;
+body.onumia-app-fullscreen.dark {
+	--onumia-main-background: oklch(0.17 0 0);
 }
 
-body.onumia-app-surface-active::-webkit-scrollbar-thumb:hover {
-	background: oklch(0.21 0 0 / 22%);
+body.onumia-app-fullscreen.light {
+	--onumia-main-background: oklch(1 0 0);
 }
 
-body.onumia-app-surface-active #wpcontent {
-	padding-left: 0;
+body.onumia-app-fullscreen #wpadminbar,
+body.onumia-app-fullscreen #adminmenumain,
+body.onumia-app-fullscreen #screen-meta,
+body.onumia-app-fullscreen #screen-meta-links,
+body.onumia-app-fullscreen #wpfooter,
+body.onumia-app-fullscreen .notice,
+body.onumia-app-fullscreen .update-nag {
+	display: none !important;
 }
 
-body.onumia-app-surface-active #wpfooter,
-body.onumia-app-surface-active #screen-meta-links,
-body.onumia-app-surface-active #message,
-body.onumia-app-surface-active.index-php .wrap > h1,
-body.onumia-app-surface-active.index-php #welcome-panel,
-body.onumia-app-surface-active.index-php #dashboard-widgets-wrap,
-body.onumia-app-surface-active .notice,
-body.onumia-app-surface-active .updated,
-body.onumia-app-surface-active .error,
-body.onumia-app-surface-active .update-nag {
-	display: none;
+body.onumia-app-fullscreen,
+body.onumia-app-fullscreen #wpwrap,
+body.onumia-app-fullscreen #wpcontent,
+body.onumia-app-fullscreen #wpbody,
+body.onumia-app-fullscreen #wpbody-content {
+	background: var(--onumia-main-background);
+	margin: 0 !important;
+	min-height: 100vh;
+	padding: 0 !important;
 }
 
-body.onumia-app-surface-active .wrap {
-	margin: 0;
+body.onumia-app-fullscreen #wpcontent,
+body.onumia-app-fullscreen #wpbody-content {
+	margin-left: 0 !important;
 }
 
-body.onumia-app-surface-active .onumia-app-surface-page {
-	margin: 0;
-	min-height: calc(100vh - var(--wp-admin--admin-bar--height, 32px));
-	position: relative;
-}
-
-body.onumia-app-surface-active #onumia-app-root {
-	min-height: calc(100vh - var(--wp-admin--admin-bar--height, 32px));
-	position: relative;
-	z-index: 2;
-}
-
-body.onumia-app-surface-active .onumia-app-loader {
-	align-items: center;
-	display: flex;
-	inset: 0;
-	justify-content: center;
-	min-height: calc(100vh - var(--wp-admin--admin-bar--height, 32px));
-	pointer-events: none;
-	position: absolute;
-	z-index: 1;
-}
-
-body.onumia-app-surface-active .onumia-app-loader[hidden] {
-	display: none;
-}
-
-body.onumia-app-surface-active .onumia-app-loader img {
-	animation: onumia-loader-pulse 1.6s ease-in-out infinite;
-	filter: grayscale(1);
-	height: 32px;
-	max-width: min(220px, calc(100vw - 64px));
-	opacity: 0.44;
-	width: auto;
+body.onumia-app-fullscreen #onumia-app-root {
+	min-height: 100vh;
 }
 CSS;
 	}
@@ -421,29 +403,6 @@ body.settings_page_onumia .onumia-app-loader img {
 CSS;
 	}
 
-	private static function loader_watch_script(): string {
-		return <<<'JS'
-(() => {
-	const root = document.getElementById("onumia-app-root");
-	const loader = document.querySelector("[data-onumia-app-loader]");
-
-	if (!root || !loader) {
-		return;
-	}
-
-	const sync = () => {
-		loader.hidden = root.childElementCount > 0;
-	};
-
-	sync();
-
-	if (typeof MutationObserver !== "undefined") {
-		new MutationObserver(sync).observe(root, { childList: true });
-	}
-})();
-JS;
-	}
-
 	private static function build_dev_react_preamble( string $dev_server ): string {
 		$refresh_url = \esc_url( $dev_server . '/@react-refresh' );
 
@@ -461,7 +420,7 @@ HTML;
 
 	private static function enqueue_build_assets(): void {
 		$manifest  = self::read_manifest();
-		$entry     = $manifest[ self::entrypoint() ] ?? null;
+		$entry     = $manifest[ self::ENTRYPOINT ] ?? null;
 		$asset_url = self::asset_base_url();
 
 		if ( ! \is_array( $entry ) || '' === $asset_url ) {
@@ -498,7 +457,7 @@ HTML;
 	}
 
 	private static function build_asset_version( string $file ): ?string {
-		$path  = \dirname( __DIR__, 2 ) . '/' . self::asset_directory() . '/' . \ltrim( $file, '/\\' );
+		$path  = \dirname( __DIR__, 2 ) . '/' . self::ASSET_DIRECTORY . '/' . \ltrim( $file, '/\\' );
 		$mtime = \is_file( $path ) ? \filemtime( $path ) : false;
 
 		if ( \is_int( $mtime ) ) {
@@ -636,6 +595,21 @@ HTML;
 		return \in_array( $hook, self::PAGE_HOOKS, true );
 	}
 
+	private static function is_current_onumia_screen(): bool {
+		$screen = \function_exists( 'get_current_screen' ) ? \get_current_screen() : null;
+		$id     = null !== $screen ? $screen->id : '';
+
+		return self::is_onumia_hook( $id );
+	}
+
+	private static function is_fullscreen(): bool {
+		return Filters::app_fullscreen( true );
+	}
+
+	private static function should_keep_fullscreen_style( string $handle ): bool {
+		return self::FULLSCREEN_STYLE_HANDLE === $handle || \str_starts_with( $handle, self::APP_HANDLE . '-style-' );
+	}
+
 	/**
 	 * @return array{placement:string,position:int}
 	 */
@@ -687,11 +661,11 @@ HTML;
 	}
 
 	private static function manifest_path(): string {
-		return \dirname( __DIR__, 2 ) . '/' . self::asset_directory() . '/manifest.json';
+		return \dirname( __DIR__, 2 ) . '/' . self::ASSET_DIRECTORY . '/manifest.json';
 	}
 
 	private static function asset_base_url(): string {
-		return \trailingslashit( \plugins_url( self::asset_directory(), self::plugin_file() ) );
+		return \trailingslashit( \plugins_url( self::ASSET_DIRECTORY, self::plugin_file() ) );
 	}
 
 	private static function asset_url( string $path ): string {
@@ -702,25 +676,5 @@ HTML;
 		$value = \defined( 'ONUMIA_PLUGIN_FILE' ) ? \constant( 'ONUMIA_PLUGIN_FILE' ) : \dirname( __DIR__, 2 ) . '/onumia.php';
 
 		return \is_string( $value ) ? $value : \dirname( __DIR__, 2 ) . '/onumia.php';
-	}
-
-	private static function entrypoint(): string {
-		$entrypoint = self::ENTRYPOINT;
-		$filtered   = Filters::app_entrypoint( $entrypoint );
-		if ( '' !== \trim( $filtered ) ) {
-			$entrypoint = \trim( $filtered );
-		}
-
-		return $entrypoint;
-	}
-
-	private static function asset_directory(): string {
-		$directory = self::ASSET_DIRECTORY;
-		$filtered  = Filters::app_asset_directory( $directory );
-		if ( '' !== \trim( $filtered ) ) {
-			$directory = \trim( $filtered );
-		}
-
-		return \trim( $directory, '/\\' );
 	}
 }

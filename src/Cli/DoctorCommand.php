@@ -25,7 +25,7 @@ final class DoctorCommand {
 	public function __invoke( array $args, array $assoc_args ): void {
 		unset( $args );
 
-		$report = ( new PreflightDoctor( $this->plugin, $this->plugin->settings_repository() ) )->report();
+		$report = ( new PreflightDoctor( $this->plugin ) )->report();
 		if ( 'text' === ( $assoc_args['format'] ?? '' ) ) {
 			$this->text( $report );
 		} else {

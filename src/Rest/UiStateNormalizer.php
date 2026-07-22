@@ -11,156 +11,225 @@ declare(strict_types=1);
 namespace Onumia\Rest;
 
 final class UiStateNormalizer {
+	public static function default_theme_mode(): string {
+		return 'system';
+	}
 
 	/**
-	 * Default custom module UI state.
-	 *
-	 * @return array{active_chat_id:string|null,sidebar_open:bool,sidebar_tab:string}
+	 * @return array{active_page_id:?string,open_page_ids:list<string>,top_level_page_ids:array<string,string>}
 	 */
-	public static function default_custom_module_state(): array {
+	public static function default_page_tabs_state(): array {
 		return array(
-			'active_chat_id' => null,
-			'sidebar_open'   => true,
-			'sidebar_tab'    => 'chat',
+			'active_page_id'     => null,
+			'open_page_ids'      => array(),
+			'top_level_page_ids' => array(),
 		);
 	}
 
 	/**
-	 * Default module archive UI filters.
-	 *
-	 * @return array{category:string,settings:string,view:string}
+	 * @return array{expanded_page_ids:list<string>,mobile_sidebar_open:bool,navigation_groups:list<array{emoji:string|null,id:string,item_ids:list<string>,label:string,open:bool}>,module_group_open:bool,sidebar_open:bool}
 	 */
-	public static function default_module_archive_state(): array {
+	public static function default_page_sidebar_state(): array {
 		return array(
-			'category' => '__all__',
-			'settings' => 'all',
-			'view'     => 'cards',
+			'expanded_page_ids'   => array(),
+			'mobile_sidebar_open' => false,
+			'navigation_groups'   => array(
+				array(
+					'emoji'    => null,
+					'id'       => 'general',
+					'item_ids' => array(),
+					'label'    => 'General',
+					'open'     => true,
+				),
+			),
+			'module_group_open'      => true,
+			'sidebar_open'        => true,
 		);
 	}
 
 	/**
-	 * Default module detail UI state.
-	 *
-	 * @return array{list_sidebar_open:bool,full_width:bool}
-	 */
-	public static function default_module_detail_state(): array {
-		return array(
-			'list_sidebar_open' => false,
-			'full_width'        => false,
-		);
-	}
-
-	/**
-	 * Normalize raw UI state.
-	 *
 	 * @param  array<string,mixed> $state Raw UI state.
-	 * @return array{custom_modules:array<string,array{active_chat_id:string|null,sidebar_open:bool,sidebar_tab:string}>,module_archive:array{category:string,settings:string,view:string},module_detail:array{list_sidebar_open:bool,full_width:bool}}
+	 * @return array{theme_mode:string,page_sidebar:array{expanded_page_ids:list<string>,mobile_sidebar_open:bool,navigation_groups:list<array{emoji:string|null,id:string,item_ids:list<string>,label:string,open:bool}>,module_group_open:bool,sidebar_open:bool},page_tabs:array{active_page_id:?string,open_page_ids:list<string>,top_level_page_ids:array<string,string>}}
 	 */
 	public static function normalize_state( array $state ): array {
 		return array(
-			'custom_modules' => self::normalize_custom_modules( $state['custom_modules'] ?? array() ),
-			'module_archive' => self::normalize_module_archive( $state['module_archive'] ?? array() ),
-			'module_detail'  => self::normalize_module_detail( $state['module_detail'] ?? array() ),
+			'theme_mode'   => self::normalize_theme_mode( $state['theme_mode'] ?? null ),
+			'page_sidebar' => self::normalize_page_sidebar( $state['page_sidebar'] ?? null ),
+			'page_tabs'    => self::normalize_page_tabs( $state['page_tabs'] ?? null ),
 		);
 	}
 
 	/**
-	 * Prepare UI state for REST output.
-	 *
-	 * @param  array{custom_modules:array<string,array{active_chat_id:string|null,sidebar_open:bool,sidebar_tab:string}>,module_archive:array{category:string,settings:string,view:string},module_detail?:array{list_sidebar_open:bool,full_width:bool}} $state Normalized UI state.
-	 * @return array{custom_modules:array<string,array{active_chat_id:string|null,sidebar_open:bool,sidebar_tab:string}>,module_archive:array{category:string,settings:string,view:string},module_detail:array{list_sidebar_open:bool,full_width:bool}}
+	 * @param  array<string,mixed> $state UI state.
+	 * @return array{theme_mode:string,page_sidebar:array{expanded_page_ids:list<string>,mobile_sidebar_open:bool,navigation_groups:list<array{emoji:string|null,id:string,item_ids:list<string>,label:string,open:bool}>,module_group_open:bool,sidebar_open:bool},page_tabs:array{active_page_id:?string,open_page_ids:list<string>,top_level_page_ids:array<string,string>}}
 	 */
 	public static function prepare_state_for_response( array $state ): array {
-		return array(
-			'custom_modules' => $state['custom_modules'],
-			'module_archive' => $state['module_archive'],
-			'module_detail'  => $state['module_detail'] ?? self::default_module_detail_state(),
-		);
+		return self::normalize_state( $state );
+	}
+
+	private static function normalize_theme_mode( mixed $value ): string {
+		return is_string( $value ) && in_array( $value, array( 'system', 'light', 'dark' ), true )
+			? $value
+			: self::default_theme_mode();
 	}
 
 	/**
-	 * Normalize custom module state map.
-	 *
-	 * @param  mixed $value Raw custom module state map.
-	 * @return array<string,array{active_chat_id:string|null,sidebar_open:bool,sidebar_tab:string}>
+	 * @return array{active_page_id:?string,open_page_ids:list<string>,top_level_page_ids:array<string,string>}
 	 */
-	private static function normalize_custom_modules( mixed $value ): array {
+	private static function normalize_page_tabs( mixed $value ): array {
+		$defaults = self::default_page_tabs_state();
 		if ( ! is_array( $value ) ) {
-			return array();
+			return $defaults;
 		}
 
-		$custom_modules = array();
+		$open_page_ids = $value['open_page_ids'] ?? array();
+		if ( ! is_array( $open_page_ids ) ) {
+			$open_page_ids = array();
+		}
 
-		foreach ( $value as $module_name => $module_state ) {
-			if ( ! is_string( $module_name ) || ! is_array( $module_state ) ) {
+		$normalized_open_page_ids = array();
+		foreach ( $open_page_ids as $page_id ) {
+			if ( ! is_string( $page_id ) || ! self::is_valid_page_id( $page_id ) || in_array( $page_id, $normalized_open_page_ids, true ) ) {
 				continue;
 			}
 
-			$custom_modules[ $module_name ] = self::normalize_custom_module_state( $module_state );
+			$normalized_open_page_ids[] = $page_id;
+		}
+		$open_page_ids  = $normalized_open_page_ids;
+		$active_page_id = $value['active_page_id'] ?? null;
+		if ( ! is_string( $active_page_id ) || ! self::is_valid_page_id( $active_page_id ) || ! in_array( $active_page_id, $open_page_ids, true ) ) {
+			$active_page_id = null;
+		}
+		$top_level_page_ids = $value['top_level_page_ids'] ?? array();
+		if ( ! is_array( $top_level_page_ids ) ) {
+			$top_level_page_ids = array();
 		}
 
-		return $custom_modules;
+		$normalized_top_level_page_ids = array();
+		foreach ( $top_level_page_ids as $tab_page_id => $top_level_page_id ) {
+			if ( ! is_string( $tab_page_id ) || ! is_string( $top_level_page_id ) || ! self::is_valid_page_id( $tab_page_id ) || ! self::is_valid_page_id( $top_level_page_id ) || ! in_array( $tab_page_id, $open_page_ids, true ) ) {
+				continue;
+			}
+
+			$normalized_top_level_page_ids[ $tab_page_id ] = $top_level_page_id;
+		}
+
+		return array(
+			'active_page_id'     => $active_page_id,
+			'open_page_ids'      => $open_page_ids,
+			'top_level_page_ids' => $normalized_top_level_page_ids,
+		);
 	}
 
 	/**
-	 * Normalize module archive filter state.
-	 *
-	 * @param  mixed $value Raw module archive filter state.
-	 * @return array{category:string,settings:string,view:string}
+	 * @return array{expanded_page_ids:list<string>,mobile_sidebar_open:bool,navigation_groups:list<array{emoji:string|null,id:string,item_ids:list<string>,label:string,open:bool}>,module_group_open:bool,sidebar_open:bool}
 	 */
-	private static function normalize_module_archive( mixed $value ): array {
+	private static function normalize_page_sidebar( mixed $value ): array {
+		$defaults = self::default_page_sidebar_state();
 		if ( ! is_array( $value ) ) {
-			return self::default_module_archive_state();
+			return $defaults;
 		}
 
-		$category = $value['category'] ?? self::default_module_archive_state()['category'];
-		$settings = $value['settings'] ?? self::default_module_archive_state()['settings'];
-		$view     = $value['view'] ?? self::default_module_archive_state()['view'];
+		$expanded_page_ids = $value['expanded_page_ids'] ?? array();
+		if ( ! is_array( $expanded_page_ids ) ) {
+			$expanded_page_ids = array();
+		}
 
-		$category = is_string( $category ) && '' !== trim( $category ) ? trim( $category ) : self::default_module_archive_state()['category'];
-		$settings = is_string( $settings ) && in_array( $settings, array( 'all', 'edited', 'default' ), true ) ? $settings : self::default_module_archive_state()['settings'];
-		$view     = is_string( $view ) && in_array( $view, array( 'cards', 'list' ), true ) ? $view : self::default_module_archive_state()['view'];
+		$normalized_expanded_page_ids = array();
+		foreach ( $expanded_page_ids as $page_id ) {
+			if ( ! is_string( $page_id ) || ! self::is_valid_page_id( $page_id ) || in_array( $page_id, $normalized_expanded_page_ids, true ) ) {
+				continue;
+			}
+
+			$normalized_expanded_page_ids[] = $page_id;
+		}
+		$expanded_page_ids = $normalized_expanded_page_ids;
 
 		return array(
-			'category' => $category,
-			'settings' => $settings,
-			'view'     => $view,
+			'expanded_page_ids'   => $expanded_page_ids,
+			'mobile_sidebar_open' => (bool) ( $value['mobile_sidebar_open'] ?? $defaults['mobile_sidebar_open'] ),
+			'navigation_groups'   => self::normalize_navigation_groups( $value['navigation_groups'] ?? null ),
+			'module_group_open'      => (bool) ( $value['module_group_open'] ?? $defaults['module_group_open'] ),
+			'sidebar_open'        => (bool) ( $value['sidebar_open'] ?? $defaults['sidebar_open'] ),
 		);
 	}
 
 	/**
-	 * Normalize module detail UI state.
-	 *
-	 * @param  mixed $value Raw module detail UI state.
-	 * @return array{list_sidebar_open:bool,full_width:bool}
+	 * @return list<array{emoji:string|null,id:string,item_ids:list<string>,label:string,open:bool}>
 	 */
-	private static function normalize_module_detail( mixed $value ): array {
-		if ( ! is_array( $value ) ) {
-			return self::default_module_detail_state();
+	private static function normalize_navigation_groups( mixed $value ): array {
+		$groups           = array();
+		$group_ids        = array();
+		$claimed_page_ids = array();
+
+		if ( is_array( $value ) ) {
+			foreach ( $value as $raw_group ) {
+				if ( ! is_array( $raw_group ) ) {
+					continue;
+				}
+
+				$id    = is_string( $raw_group['id'] ?? null ) ? trim( $raw_group['id'] ) : '';
+				$label = is_string( $raw_group['label'] ?? null ) ? trim( $raw_group['label'] ) : '';
+				if ( '' === $id || isset( $group_ids[ $id ] ) || strlen( $id ) > 80 ) {
+					continue;
+				}
+				if ( 'general' === $id ) {
+					$label = 'General';
+				}
+				if ( '' === $label || strlen( $label ) > 80 ) {
+					continue;
+				}
+
+				$item_ids     = array();
+				$raw_item_ids = $raw_group['item_ids'] ?? array();
+				if ( is_array( $raw_item_ids ) ) {
+					foreach ( $raw_item_ids as $page_id ) {
+						if ( ! is_string( $page_id ) || ! self::is_valid_page_id( $page_id ) || isset( $claimed_page_ids[ $page_id ] ) ) {
+							continue;
+						}
+
+						$claimed_page_ids[ $page_id ] = true;
+						$item_ids[]                   = $page_id;
+					}
+				}
+
+				$group_ids[ $id ] = true;
+				$groups[]         = array(
+					'emoji'    => self::normalize_navigation_group_emoji( $raw_group['emoji'] ?? null ),
+					'id'       => $id,
+					'item_ids' => $item_ids,
+					'label'    => $label,
+					'open'     => (bool) ( $raw_group['open'] ?? true ),
+				);
+			}
 		}
 
-		return array(
-			'list_sidebar_open' => (bool) ( $value['list_sidebar_open'] ?? self::default_module_detail_state()['list_sidebar_open'] ),
-			'full_width'        => (bool) ( $value['full_width'] ?? self::default_module_detail_state()['full_width'] ),
-		);
+		if ( ! isset( $group_ids['general'] ) ) {
+			array_unshift(
+				$groups,
+				array(
+					'emoji'    => null,
+					'id'       => 'general',
+					'item_ids' => array(),
+					'label'    => 'General',
+					'open'     => true,
+				)
+			);
+		}
+
+		return $groups;
 	}
 
-	/**
-	 * Normalize one custom module state object.
-	 *
-	 * @param  array<mixed,mixed> $state Raw custom module state.
-	 * @return array{active_chat_id:string|null,sidebar_open:bool,sidebar_tab:string}
-	 */
-	private static function normalize_custom_module_state( array $state ): array {
-		$tab = $state['sidebar_tab'] ?? self::default_custom_module_state()['sidebar_tab'];
-		$tab = is_string( $tab ) && in_array( $tab, array( 'chat', 'chats', 'history' ), true ) ? $tab : 'chat';
+	private static function normalize_navigation_group_emoji( mixed $value ): ?string {
+		if ( ! is_string( $value ) ) {
+			return null;
+		}
 
-		$active_chat_id = $state['active_chat_id'] ?? null;
+		$value = trim( $value );
+		return '' !== $value && strlen( $value ) <= 128 ? $value : null;
+	}
 
-		return array(
-			'active_chat_id' => is_string( $active_chat_id ) && '' !== trim( $active_chat_id ) ? trim( $active_chat_id ) : null,
-			'sidebar_open'   => (bool) ( $state['sidebar_open'] ?? self::default_custom_module_state()['sidebar_open'] ),
-			'sidebar_tab'    => $tab,
-		);
+	private static function is_valid_page_id( string $page_id ): bool {
+		return 1 === preg_match( '/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i', $page_id );
 	}
 }

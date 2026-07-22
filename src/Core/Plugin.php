@@ -21,34 +21,32 @@ use Onumia\Data\ModuleTablePrivacy;
 use Onumia\Data\ModuleTableUninstaller;
 use Onumia\Data\SqliteSupport;
 use Onumia\Dev\SeedContentTypes;
+use Onumia\Dev\UiLabAccess;
 use Onumia\Modules\ModuleActionDispatcher;
 use Onumia\Modules\ModuleBooter;
 use Onumia\Modules\ModuleDataSourceDispatcher;
-use Onumia\Modules\ModuleHistoryRepository;
 use Onumia\Modules\ModuleJobRegistrar;
 use Onumia\Modules\ModuleLoader;
 use Onumia\Modules\ModuleRegistry;
-use Onumia\Modules\ModuleRemixer;
 use Onumia\Modules\ModuleSettingsRepository;
+use Onumia\Pages\PagePostType;
 use Onumia\PublicApi\Actions;
 use Onumia\PublicApi\Filters;
-use Onumia\Rest\AgentContextRoutes;
 use Onumia\Rest\ChatRoutes;
 use Onumia\Rest\DevTestSupportRoutes;
 use Onumia\Rest\ModulePublicRoutes;
 use Onumia\Rest\ModuleRoutes;
 use Onumia\Rest\ModuleTableRoutes;
+use Onumia\Rest\PageRoutes;
 use Onumia\Rest\UiStateRoutes;
 use Onumia\Updates\GitHubReleaseUpdater;
-use Onumia\Pro\Updates\LicensedPluginUpdater;
 
 final class Plugin {
 
-	private const MODULE_ROOT_DIRECTORY    = 'modules';
 	private const COMPONENT_ROOT_DIRECTORY = 'components';
+	private const UI_LAB_DIRECTORY         = 'modules/development/ui-lab';
 	private const MODULE_JOB_HOOK_PREFIX   = 'onumia_module_job_';
 	private const UI_STATE_META_KEY        = 'onumia_ui_state';
-	private const PRO_ADMIN_CAPABILITY     = 'manage_onumia_licenses';
 	private const UNINSTALL_OPTIONS        = array(
 		'onumia_module_secrets',
 		'onumia_module_site_settings',
@@ -128,6 +126,7 @@ final class Plugin {
 
 		$this->booted = true;
 		self::$current = $this;
+		PagePostType::register();
 		SeedContentTypes::register();
 		$this->sqlite_support->register_debug_information();
 		$this->maybe_enable_module_definition_cache();
@@ -146,9 +145,6 @@ final class Plugin {
 
 		AppPage::register();
 		( new GitHubReleaseUpdater( $this->file, $this->version ) )->register();
-		if ( class_exists( LicensedPluginUpdater::class ) ) {
-			( new LicensedPluginUpdater( $this->file, $this->version ) )->register();
-		}
 		( new ModuleTableCleanup() )->register( $this->registry, $this->version );
 		( new ModuleTablePrivacy( $this->registry ) )->register();
 		( new ModuleJobRegistrar( $this->booter ) )->register( $this->registry );
@@ -156,12 +152,12 @@ final class Plugin {
 		\add_action(
 			'rest_api_init',
 			function (): void {
-				AgentContextRoutes::register();
 				ChatRoutes::register( new ChatRepository() );
 				DevTestSupportRoutes::register_if_enabled();
-				ModuleRoutes::register( $this->registry, $this->settings_repository, $this->data_source_dispatcher, action_dispatcher: $this->action_dispatcher, remixer: new ModuleRemixer( $this->loader ), history_repository: new ModuleHistoryRepository( $this->loader ), component_registry: $this->component_registry );
+				ModuleRoutes::register( $this->registry, $this->settings_repository, $this->data_source_dispatcher, action_dispatcher: $this->action_dispatcher, component_registry: $this->component_registry );
 				ModuleTableRoutes::register( $this->registry );
 				( new ModulePublicRoutes( $this->registry, $this->booter, settings_repository: $this->settings_repository ) )->register();
+				PageRoutes::register();
 				UiStateRoutes::register();
 			}
 		);
@@ -186,6 +182,7 @@ final class Plugin {
 	}
 
 	public function activate(): void {
+		PagePostType::register_post_type();
 		SeedContentTypes::register();
 		$registry = new ModuleRegistry( $this->loader->load_roots( $this->module_roots() ) );
 		( new ModuleTableCleanup() )->register( $registry, $this->version );
@@ -196,7 +193,6 @@ final class Plugin {
 		self::delete_uninstall_options();
 		self::delete_ui_state_meta();
 		self::clear_scheduled_events();
-		self::remove_pro_capability();
 	}
 
 	public function version(): string {
@@ -348,19 +344,6 @@ final class Plugin {
 		return $events;
 	}
 
-	private static function remove_pro_capability(): void {
-		if ( ! function_exists( 'get_role' ) ) {
-			// @codeCoverageIgnoreStart
-			return;
-			// @codeCoverageIgnoreEnd
-		}
-
-		$administrator = \get_role( 'administrator' );
-		if ( is_object( $administrator ) && is_callable( array( $administrator, 'remove_cap' ) ) ) {
-			$administrator->remove_cap( self::PRO_ADMIN_CAPABILITY );
-		}
-	}
-
 	public function settings_repository(): ModuleSettingsRepository {
 		return $this->settings_repository;
 	}
@@ -390,11 +373,10 @@ final class Plugin {
 			return $this->module_roots;
 		}
 
-		$roots = array( $this->directory() . self::MODULE_ROOT_DIRECTORY );
-		foreach ( $this->theme_directories() as $theme_directory ) {
-			$roots[] = $theme_directory . DIRECTORY_SEPARATOR . 'onumia' . DIRECTORY_SEPARATOR . self::MODULE_ROOT_DIRECTORY;
+		$roots = array();
+		if ( UiLabAccess::requested_for_current_request() ) {
+			$roots[] = $this->directory() . self::UI_LAB_DIRECTORY;
 		}
-
 		$roots = array_values( array_filter( Filters::module_roots( $roots ), 'is_string' ) );
 
 		return array_values( array_unique( array_map( static fn( string $root ): string => rtrim( $root, '/\\' ), $roots ) ) );

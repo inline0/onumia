@@ -1,9 +1,0 @@
-{
-  "$schema": "../../schemas/meta.json",
-  "name": "onumia/unused-media",
-  "category": "media",
-  "tags": ["media", "attachments", "cleanup"],
-  "label": "Unused Media",
-  "description": "Scans the Media Library for attachments not referenced by posts, widgets, theme mods, or core options, then queues safe deletions.",
-  "version": "0.1.0"
-}

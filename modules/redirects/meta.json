@@ -1,9 +1,0 @@
-{
-  "$schema": "../../schemas/module-meta.json",
-  "name": "onumia/redirects",
-  "label": "Redirects",
-  "description": "Manage 301, 302, and 307 redirects with hit counts.",
-  "category": "routing",
-  "version": "1.0.0",
-  "devOnly": false
-}
